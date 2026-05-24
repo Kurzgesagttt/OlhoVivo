@@ -1,0 +1,21 @@
+# Dependências e builds
+node_modules/
+target/
+build/
+dist/
+
+# Variáveis de ambiente com valores reais
+.env.local
+.env.production
+
+# IDEs
+.idea/
+*.iml
+.vscode/settings.json
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db

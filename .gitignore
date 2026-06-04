@@ -4,9 +4,12 @@ target/
 build/
 dist/
 
-# Variáveis de ambiente com valores reais
+# Variáveis de ambiente com valores reais — NUNCA commitar
+.env
 .env.local
 .env.production
+.env.*.local
+docker/.env
 
 # IDEs
 .idea/

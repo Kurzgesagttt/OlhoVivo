@@ -1,7 +1,9 @@
 package br.com.olhodobairro.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import java.sql.Types;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -22,7 +24,8 @@ public class Bairro {
     @Column(nullable = false, length = 100)
     private String cidade;
 
-    @Column(nullable = false, length = 2)
+    @Column(nullable = false, columnDefinition = "char(2)")
+    @JdbcTypeCode(Types.CHAR)
     private String estado;
 
     @Column(precision = 9, scale = 6)

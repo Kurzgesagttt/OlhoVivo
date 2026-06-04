@@ -47,7 +47,7 @@ public class OcorrenciaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PREFEITURA')")
     public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         ocorrenciaService.deletar(id);
         return ResponseEntity.noContent().build();

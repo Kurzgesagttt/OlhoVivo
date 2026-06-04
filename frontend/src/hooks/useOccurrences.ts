@@ -24,3 +24,11 @@ export function useCreateOccurrence() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })
 }
+
+export function useDeleteOccurrence() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => occurrenceService.deletar(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
+  })
+}

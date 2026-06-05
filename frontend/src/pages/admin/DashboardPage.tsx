@@ -37,16 +37,31 @@ export default function DashboardPage() {
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <AdminLink to="/admin/moderacao" title="Moderacao" description="Gerenciar e resolver ocorrencias" />
-          <AdminLink to="/admin/usuarios" title="Usuarios" description="Visualizar e gerenciar usuarios" />
+          <AdminLink
+            title="Usuarios"
+            description="Endpoint de usuarios ainda nao existe no backend"
+            disabled
+          />
         </section>
       </PageContainer>
     </PageShell>
   )
 }
 
-function AdminLink({ to, title, description }: { to: string; title: string; description: string }) {
+function AdminLink({ to, title, description, disabled }: { to?: string; title: string; description: string; disabled?: boolean }) {
+  if (disabled) {
+    return (
+      <div title="Feature desabilitada: endpoint backend ainda nao implementado">
+        <Card className="cursor-not-allowed opacity-60">
+          <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
+        </Card>
+      </div>
+    )
+  }
+
   return (
-    <Link to={to}>
+    <Link to={to ?? '#'}>
       <Card className="transition hover:border-emerald-300 dark:hover:border-emerald-800">
         <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>

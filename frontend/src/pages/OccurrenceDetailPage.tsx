@@ -96,7 +96,7 @@ export default function OccurrenceDetailPage() {
     }
 
     await deleteOccurrence.mutateAsync(id!)
-    navigate('/')
+    navigate('/home')
   }
 
   async function enviarComentario(event: FormEvent) {
@@ -146,14 +146,14 @@ export default function OccurrenceDetailPage() {
     <PageShell>
       <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <Link to="/" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
+          <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">OB</span>
             <span className="hidden sm:inline">Olho do Bairro</span>
           </Link>
 
           <div className="hidden min-w-0 items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 sm:flex">
             <span>/</span>
-            <Link to="/" className="text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">Feed</Link>
+            <Link to="/home" className="text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">Feed</Link>
             {ocorrencia.bairro && (
               <>
                 <span>/</span>
@@ -286,8 +286,8 @@ function PostCard({
           <span className="px-2 text-sm font-semibold">{ocorrencia.votosCount}</span>
           <button type="button" onClick={onRemoveVote} className="px-1 text-lg leading-none text-zinc-400 hover:text-red-600">v</button>
         </div>
-        <button type="button" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">Compartilhar</button>
-        <button type="button" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">Salvar</button>
+        <button type="button" disabled title="Compartilhamento ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Compartilhar</button>
+        <button type="button" disabled title="Salvar ocorrencia ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Salvar</button>
         <button type="button" onClick={onVote} className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">Confirmar ocorrencia</button>
 
         {podeAdministrar && (
@@ -463,8 +463,8 @@ function CommentItem({ comentario, official }: { comentario: Comentario; officia
       </div>
       <p className="text-sm leading-6 text-zinc-600 whitespace-pre-wrap dark:text-zinc-300">{comentario.conteudo}</p>
       <div className="mt-2 flex gap-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-        <button type="button" className="hover:text-emerald-700 dark:hover:text-emerald-400">^ Apoiar</button>
-        <button type="button" className="hover:text-zinc-900 dark:hover:text-zinc-100">Responder</button>
+        <button type="button" disabled title="Apoio em comentarios ainda nao implementado" className="opacity-50">^ Apoiar</button>
+        <button type="button" disabled title="Respostas ainda nao implementadas" className="opacity-50">Responder</button>
       </div>
     </div>
   )

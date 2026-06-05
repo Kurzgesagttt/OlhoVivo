@@ -239,3 +239,58 @@ Arquivo: `frontend/src/components/ui.tsx`
 - Botoes corrigidos/removidos nesta fase: 0; auditoria detalhada fica para Fase 3.
 - Arquivos/funcoes removidos como codigo morto nesta fase: 0; remocao fica para Fase 4.
 - Itens BROKEN novos encontrados nesta fase: 0.
+
+## Fase 3 - Auditoria de botoes e interacoes
+
+Data: 2026-06-05
+
+### Escopo executado
+
+- Varredura de botoes, links, formularios, handlers e chamadas de API no frontend.
+- Comparacao das chamadas de services com endpoints existentes no backend.
+- Correcao de links obvios que redirecionavam para fluxo incorreto.
+- Marcacao de endpoint inexistente com `// BROKEN`.
+- Desabilitacao visual de features ainda nao implementadas.
+- Validacao do build Docker do frontend.
+
+### Correcoes aplicadas
+
+| Arquivo | Elemento | Problema | Acao |
+| --- | --- | --- | --- |
+| `frontend/src/pages/HomePage.tsx` | Logo do header | Link apontava para `/`, que redireciona para `/login` mesmo com usuario logado | Alterado para `/home` |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Logo do header | Link apontava para `/`, causando retorno para login | Alterado para `/home` |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Breadcrumb `Feed` | Link apontava para `/`, causando retorno para login | Alterado para `/home` |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Redirect apos deletar ocorrencia | `navigate('/')` podia cair no login | Alterado para `navigate('/home')` |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Botao `Compartilhar` | Feature ainda nao implementada | Desabilitado com tooltip explicativo |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Botao `Salvar` | Feature ainda nao implementada | Desabilitado com tooltip explicativo |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Botao `Apoiar` em comentario | Feature ainda nao implementada | Desabilitado com tooltip explicativo |
+| `frontend/src/pages/OccurrenceDetailPage.tsx` | Botao `Responder` em comentario | Feature ainda nao implementada | Desabilitado com tooltip explicativo |
+| `frontend/src/pages/admin/UsersPage.tsx` | Chamada `api.get('/admin/usuarios')` | Endpoint backend inexistente | Marcado com `// BROKEN` |
+| `frontend/src/pages/admin/DashboardPage.tsx` | Atalho `Usuarios` | Levava para tela com endpoint inexistente | Desabilitado visualmente com tooltip |
+
+### Endpoints verificados
+
+Todos os endpoints chamados por services existentes continuam correspondendo ao backend, exceto o item ja identificado:
+
+- `GET /api/v1/admin/usuarios` continua inexistente no backend e permanece listado como BROKEN.
+
+### Features desabilitadas por ainda nao existirem
+
+- Compartilhar ocorrencia.
+- Salvar ocorrencia.
+- Apoiar comentario.
+- Responder comentario.
+- Atalho para administracao de usuarios.
+
+### Validacao da Fase 3
+
+- Comando executado: `docker compose -f docker/docker-compose.prod.yml build frontend`
+- Resultado: build do frontend concluido com sucesso.
+
+### Resumo final da Fase 3
+
+- Links corrigidos: 4.
+- Botoes/features desabilitados: 5.
+- Chamadas BROKEN marcadas em codigo: 1.
+- Endpoints inexistentes novos encontrados: 0.
+- Itens BROKEN pendentes: `GET /api/v1/admin/usuarios`.

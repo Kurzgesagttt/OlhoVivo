@@ -29,6 +29,7 @@ export default function UsersPage() {
   useEffect(() => {
     setIsLoading(true)
     setErro('')
+    // BROKEN: endpoint GET /api/v1/admin/usuarios ainda nao existe no backend.
     api.get<PageResponse<Usuario>>('/admin/usuarios', { params: { page, size: 20 } })
       .then(response => {
         setUsuarios(response.data.content)

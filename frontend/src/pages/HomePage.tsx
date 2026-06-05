@@ -145,6 +145,7 @@ export default function HomePage() {
   const totalPendentes = ocorrencias.filter(ocorrencia => ocorrencia.status === 'PENDENTE').length
   const totalResolvidas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'RESOLVIDA').length
   const totalVotos = ocorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
+  const novaOcorrenciaPath = usuario ? '/ocorrencias/nova' : '/login'
 
   return (
     <PageShell>
@@ -215,7 +216,7 @@ export default function HomePage() {
               </>
             )}
             <Link
-              to="/ocorrencias/nova"
+              to={novaOcorrenciaPath}
               className="flex min-h-11 items-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700"
             >
               Criar
@@ -305,7 +306,7 @@ export default function HomePage() {
 
           <Panel title="Mapa do bairro">
             <Link
-              to="/ocorrencias/nova"
+              to={novaOcorrenciaPath}
               className="flex h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 text-center text-sm text-zinc-600 hover:border-emerald-500 hover:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
             >
               <span className="text-2xl text-emerald-700 dark:text-emerald-400" aria-hidden="true">+</span>
@@ -360,7 +361,7 @@ export default function HomePage() {
                 </button>
               ))}
               <Link
-                to="/ocorrencias/nova"
+                to={novaOcorrenciaPath}
                 className="ml-auto hidden min-h-10 items-center rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 sm:flex"
               >
                 Nova ocorrencia

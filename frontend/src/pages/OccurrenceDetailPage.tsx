@@ -141,6 +141,7 @@ export default function OccurrenceDetailPage() {
 
   const comentarios = comentariosPage?.content ?? []
   const autorNome = comentarios.find(comentario => comentario.usuarioId === ocorrencia.usuarioId)?.nomeUsuario ?? 'Morador'
+  const novaOcorrenciaPath = usuario ? '/ocorrencias/nova' : '/login'
 
   return (
     <PageShell>
@@ -173,7 +174,7 @@ export default function OccurrenceDetailPage() {
               Voltar
             </button>
             <Link
-              to="/ocorrencias/nova"
+              to={novaOcorrenciaPath}
               className="hidden min-h-10 items-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 sm:flex"
             >
               Criar

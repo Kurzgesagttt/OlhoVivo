@@ -15,8 +15,4 @@ export const commentService = {
     const response = await api.post<Comentario>(`/ocorrencias/${ocorrenciaId}/comentarios`, data)
     return response.data
   },
-
-  async deletar(ocorrenciaId: string, comentarioId: string): Promise<void> {
-    await api.delete(`/ocorrencias/${ocorrenciaId}/comentarios/${comentarioId}`)
-  },
 }

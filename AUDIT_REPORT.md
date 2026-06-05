@@ -294,3 +294,61 @@ Todos os endpoints chamados por services existentes continuam correspondendo ao 
 - Chamadas BROKEN marcadas em codigo: 1.
 - Endpoints inexistentes novos encontrados: 0.
 - Itens BROKEN pendentes: `GET /api/v1/admin/usuarios`.
+
+## Fase 4 - Remocao de codigo morto
+
+Data: 2026-06-05
+
+### Escopo executado
+
+- Busca global por hooks, services, tipos e metodos declarados sem consumidores.
+- Remocao apenas de codigo com ausencia de uso confirmada por busca global.
+- Preservacao de endpoints backend que nao sao chamados pelo frontend, mas fazem parte de superficie publica/PRD ou podem ser usados por clientes externos.
+- Inclusao da regra solicitada: usuario precisa estar logado para registrar ocorrencia.
+
+### Codigo morto removido
+
+| Item | Tipo | Confirmacao de ausencia de uso | Acao |
+| --- | --- | --- | --- |
+| `frontend/src/hooks/useNotifications.ts` | Arquivo/hook frontend | `rg useNotifications/useMarkAsRead` retornou apenas o proprio arquivo | Removido |
+| `frontend/src/services/notification.service.ts` | Arquivo/service frontend | `rg notificationService` retornou apenas hook nao utilizado | Removido |
+| `frontend/src/types/notification.ts` | Arquivo/tipo frontend | `rg Notificacao/types/notification` retornou apenas service removido | Removido |
+| `commentService.deletar` | Metodo frontend | `rg commentService.deletar` e busca por delecao de comentario nao encontrou chamada em paginas/hooks | Removido do service |
+
+### Codigo analisado e mantido
+
+| Item | Motivo para manter |
+| --- | --- |
+| `NotificacaoController` e `NotificacaoService` no backend | Endpoint backend ativo e protegido; apesar de o frontend nao consumir mais nesta fase, pode ser usado por integracoes futuras. Remocao alteraria superficie da API. |
+| `GET /api/v1/me/data` e `DELETE /api/v1/me` | Fazem parte das regras/PRD de privacidade/LGPD. Mantidos mesmo sem consumo direto no frontend atual. |
+| `POST /api/v1/categorias` | Endpoint administrativo ativo. Mantido por ser superficie backend e nao codigo morto comprovado. |
+| `PATCH /api/v1/ocorrencias/{id}/status` | Consumido por `ModerationPage`; mantido. |
+
+### Login obrigatorio para registrar ocorrencia
+
+Arquivos alterados:
+
+- `frontend/src/pages/CreateOccurrencePage.tsx`
+- `frontend/src/pages/HomePage.tsx`
+- `frontend/src/pages/OccurrenceDetailPage.tsx`
+
+Comportamento aplicado:
+
+- `CreateOccurrencePage` agora consulta `useAuth`.
+- Enquanto a sessao e verificada, a tela mostra estado de carregamento.
+- Se nao houver usuario autenticado, o formulario de criacao nao e exibido e a pagina mostra um aviso com botao para `/login`.
+- Links de criar/nova ocorrencia em `HomePage` e `OccurrenceDetailPage` agora apontam para `/login` quando nao ha usuario autenticado.
+- O backend ja exigia autenticacao/perfil autorizado em `POST /api/v1/ocorrencias`; esta fase alinhou o frontend com essa regra.
+
+### Validacao da Fase 4
+
+- Comando executado: `docker compose -f docker/docker-compose.prod.yml build frontend`
+- Resultado: build do frontend concluido com sucesso.
+
+### Resumo final da Fase 4
+
+- Arquivos de codigo morto removidos: 3.
+- Funcoes/metodos removidos: 1.
+- Endpoints backend removidos: 0.
+- Itens mantidos por cautela/PRD: 4.
+- Regra de login para criar ocorrencia: implementada no frontend e ja existente no backend.

@@ -5,9 +5,11 @@ import { AppHeader, Button, Card, Field, Notice, PageContainer, PageShell, Selec
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useCreateOccurrence } from '../hooks/useOccurrences'
+import { useAuth } from '../hooks/useAuth'
 
 export default function CreateOccurrencePage() {
   const navigate = useNavigate()
+  const { usuario, isLoading: isLoadingAuth } = useAuth()
   const createOccurrence = useCreateOccurrence()
   const { data: categorias = [], isLoading: isLoadingCategorias, isError: isErroCategorias } = useCategories()
   const { data: bairros = [], isLoading: isLoadingBairros, isError: isErroBairros } = useNeighborhoods()
@@ -53,6 +55,27 @@ export default function CreateOccurrencePage() {
     <PageShell>
       <AppHeader title="Nova ocorrencia" subtitle="Registre um problema do bairro" backTo="back" />
       <PageContainer className="max-w-2xl">
+        {isLoadingAuth && (
+          <Card>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">Verificando sua sessao...</p>
+          </Card>
+        )}
+
+        {!isLoadingAuth && !usuario && (
+          <Card className="space-y-4">
+            <div>
+              <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">Entre para registrar uma ocorrencia</h1>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                Apenas usuarios logados podem publicar novas ocorrencias no bairro.
+              </p>
+            </div>
+            <Button type="button" variant="primary" onClick={() => navigate('/login')}>
+              Entrar
+            </Button>
+          </Card>
+        )}
+
+        {!isLoadingAuth && usuario && (
         <Card>
           <form onSubmit={handleSubmit} className="space-y-5">
             <Field label="Titulo" hint={`${form.titulo.length}/100 (min. 5)`}>
@@ -114,6 +137,7 @@ export default function CreateOccurrencePage() {
             </Button>
           </form>
         </Card>
+        )}
       </PageContainer>
     </PageShell>
   )

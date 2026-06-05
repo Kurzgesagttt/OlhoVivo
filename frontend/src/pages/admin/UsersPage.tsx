@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { AppHeader, Button, Card, Notice, PageContainer, PageShell } from '../../components/ui'
 import api from '../../services/api'
-import type { Usuario } from '../../types/auth'
 import type { PageResponse } from '../../types/api'
+import type { Usuario } from '../../types/auth'
 
 const ROLE_LABEL: Record<string, string> = {
   MORADOR: 'Morador',
@@ -12,10 +12,10 @@ const ROLE_LABEL: Record<string, string> = {
 }
 
 const ROLE_COLOR: Record<string, string> = {
-  MORADOR: 'bg-gray-100 text-gray-700',
-  MODERADOR: 'bg-blue-100 text-blue-700',
-  ADMIN: 'bg-purple-100 text-purple-700',
-  PREFEITURA: 'bg-orange-100 text-orange-700',
+  MORADOR: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200',
+  MODERADOR: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-200',
+  ADMIN: 'bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-200',
+  PREFEITURA: 'bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-200',
 }
 
 export default function UsersPage() {
@@ -28,51 +28,51 @@ export default function UsersPage() {
 
   useEffect(() => {
     setIsLoading(true)
+    setErro('')
     api.get<PageResponse<Usuario>>('/admin/usuarios', { params: { page, size: 20 } })
-      .then(r => { setUsuarios(r.data.content); setTotal(r.data.totalElements); setTotalPages(r.data.totalPages) })
-      .catch(() => setErro('Não foi possível carregar os usuários.'))
+      .then(response => {
+        setUsuarios(response.data.content)
+        setTotal(response.data.totalElements)
+        setTotalPages(response.data.totalPages)
+      })
+      .catch(() => setErro('Nao foi possivel carregar os usuarios.'))
       .finally(() => setIsLoading(false))
   }, [page])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/admin/dashboard" className="text-gray-500 hover:text-gray-800 text-sm">← Dashboard</Link>
-          <h1 className="text-xl font-bold text-blue-700">Usuários</h1>
-        </div>
-        <span className="text-sm text-gray-500">{total} usuários</span>
-      </header>
+    <PageShell>
+      <AppHeader title="Usuarios" subtitle={`${total} usuarios cadastrados`} backTo="/admin/dashboard" />
+      <PageContainer className="space-y-4">
+        {isLoading && <p className="text-sm text-zinc-500 dark:text-zinc-400">Carregando...</p>}
+        {erro && <Notice tone="danger">{erro}</Notice>}
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
-        {erro && <p className="text-red-500 text-sm">{erro}</p>}
         <div className="space-y-3">
-          {usuarios.map(u => (
-            <div key={u.id} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                  {u.nome.charAt(0).toUpperCase()}
+          {usuarios.map(usuario => (
+            <Card key={usuario.id} className="flex items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 font-bold text-white">
+                  {usuario.nome.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-800 text-sm">{u.nome}</p>
-                  <p className="text-xs text-gray-400">Desde {new Date(u.criadoEm).toLocaleDateString('pt-BR')}</p>
+                <div className="min-w-0">
+                  <h2 className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">{usuario.nome}</h2>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">Desde {new Date(usuario.criadoEm).toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
-              <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ROLE_COLOR[u.role] ?? 'bg-gray-100 text-gray-700'}`}>
-                {ROLE_LABEL[u.role] ?? u.role}
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${ROLE_COLOR[usuario.role] ?? ROLE_COLOR.MORADOR}`}>
+                {ROLE_LABEL[usuario.role] ?? usuario.role}
               </span>
-            </div>
+            </Card>
           ))}
         </div>
+
         {totalPages > 1 && (
-          <div className="flex justify-center gap-3 mt-8">
-            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="px-4 py-2 text-sm rounded-lg border border-gray-300 disabled:opacity-40 hover:bg-gray-100">← Anterior</button>
-            <span className="px-4 py-2 text-sm text-gray-600">{page + 1} / {totalPages}</span>
-            <button disabled={page === totalPages - 1} onClick={() => setPage(p => p + 1)} className="px-4 py-2 text-sm rounded-lg border border-gray-300 disabled:opacity-40 hover:bg-gray-100">Próxima →</button>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button type="button" disabled={page === 0} onClick={() => setPage(current => current - 1)}>Anterior</Button>
+            <span className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400">{page + 1} / {totalPages}</span>
+            <Button type="button" disabled={page === totalPages - 1} onClick={() => setPage(current => current + 1)}>Proxima</Button>
           </div>
         )}
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   )
 }

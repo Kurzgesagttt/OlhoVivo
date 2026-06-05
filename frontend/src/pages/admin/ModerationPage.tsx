@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { AppHeader, Button, Card, PageContainer, PageShell } from '../../components/ui'
 import { useOccurrences } from '../../hooks/useOccurrences'
 import { occurrenceService } from '../../services/occurrence.service'
-import { useQueryClient } from '@tanstack/react-query'
 
 const STATUS_COLOR: Record<string, string> = {
-  PENDENTE: 'bg-yellow-100 text-yellow-800',
-  RESOLVIDA: 'bg-green-100 text-green-800',
+  PENDENTE: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-200',
+  RESOLVIDA: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
 }
 
 export default function ModerationPage() {
@@ -20,42 +21,42 @@ export default function ModerationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/admin/dashboard" className="text-gray-500 hover:text-gray-800 text-sm">← Dashboard</Link>
-          <h1 className="text-xl font-bold text-blue-700">Moderação</h1>
-        </div>
-      </header>
+    <PageShell>
+      <AppHeader title="Moderacao" subtitle="Gerencie status de ocorrencias" backTo="/admin/dashboard" />
+      <PageContainer className="space-y-4">
+        {isLoading && <p className="text-sm text-zinc-500 dark:text-zinc-400">Carregando...</p>}
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {isLoading && <p className="text-gray-500 text-sm">Carregando...</p>}
         <div className="space-y-3">
-          {data?.content.map(o => (
-            <div key={o.id} className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <Link to={`/ocorrencias/${o.id}`} className="font-medium text-gray-800 hover:text-blue-600 truncate block">{o.titulo}</Link>
-                <p className="text-sm text-gray-500 mt-0.5">{o.categoria.nome} · {new Date(o.criadoEm).toLocaleDateString('pt-BR')}</p>
+          {data?.content.map(ocorrencia => (
+            <Card key={ocorrencia.id} className="flex items-center justify-between gap-4">
+              <div className="min-w-0 flex-1">
+                <Link to={`/ocorrencias/${ocorrencia.id}`} className="block truncate font-medium text-zinc-900 hover:text-emerald-700 dark:text-zinc-100 dark:hover:text-emerald-400">
+                  {ocorrencia.titulo}
+                </Link>
+                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{ocorrencia.categoria.nome} - {new Date(ocorrencia.criadoEm).toLocaleDateString('pt-BR')}</p>
               </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLOR[o.status]}`}>
-                  {o.status === 'PENDENTE' ? 'Pendente' : 'Resolvida'}
+              <div className="flex shrink-0 items-center gap-3">
+                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_COLOR[ocorrencia.status]}`}>
+                  {ocorrencia.status === 'PENDENTE' ? 'Pendente' : 'Resolvida'}
                 </span>
-                {o.status === 'PENDENTE'
-                  ? <button onClick={() => alterarStatus(o.id, 'RESOLVIDA')} className="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg transition-colors">Resolver</button>
-                  : <button onClick={() => alterarStatus(o.id, 'PENDENTE')} className="text-xs bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg transition-colors">Reabrir</button>}
+                {ocorrencia.status === 'PENDENTE' ? (
+                  <Button type="button" variant="primary" onClick={() => alterarStatus(ocorrencia.id, 'RESOLVIDA')} className="min-h-9 px-3 text-xs">Resolver</Button>
+                ) : (
+                  <Button type="button" variant="secondary" onClick={() => alterarStatus(ocorrencia.id, 'PENDENTE')} className="min-h-9 px-3 text-xs">Reabrir</Button>
+                )}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
+
         {data && data.totalPages > 1 && (
-          <div className="flex justify-center gap-3 mt-8">
-            <button disabled={data.first} onClick={() => setPage(p => p - 1)} className="px-4 py-2 text-sm rounded-lg border border-gray-300 disabled:opacity-40 hover:bg-gray-100">← Anterior</button>
-            <span className="px-4 py-2 text-sm text-gray-600">{page + 1} / {data.totalPages}</span>
-            <button disabled={data.last} onClick={() => setPage(p => p + 1)} className="px-4 py-2 text-sm rounded-lg border border-gray-300 disabled:opacity-40 hover:bg-gray-100">Próxima →</button>
+          <div className="flex justify-center gap-3 pt-4">
+            <Button type="button" disabled={data.first} onClick={() => setPage(current => current - 1)}>Anterior</Button>
+            <span className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400">{page + 1} / {data.totalPages}</span>
+            <Button type="button" disabled={data.last} onClick={() => setPage(current => current + 1)}>Proxima</Button>
           </div>
         )}
-      </main>
-    </div>
+      </PageContainer>
+    </PageShell>
   )
 }

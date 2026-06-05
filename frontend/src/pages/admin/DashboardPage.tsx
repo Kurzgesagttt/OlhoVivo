@@ -1,45 +1,56 @@
 import { Link } from 'react-router-dom'
+import { AppHeader, Card, PageContainer, PageShell } from '../../components/ui'
 import { useOccurrences } from '../../hooks/useOccurrences'
+
+const metricStyle = {
+  total: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-200',
+  pending: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-200',
+  done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
+}
 
 export default function DashboardPage() {
   const { data } = useOccurrences(0)
 
   const total = data?.totalElements ?? 0
-  const resolvidas = data?.content.filter(o => o.status === 'RESOLVIDA').length ?? 0
-  const pendentes = data?.content.filter(o => o.status === 'PENDENTE').length ?? 0
+  const resolvidas = data?.content.filter(ocorrencia => ocorrencia.status === 'RESOLVIDA').length ?? 0
+  const pendentes = data?.content.filter(ocorrencia => ocorrencia.status === 'PENDENTE').length ?? 0
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-blue-700">Painel Admin</h1>
-        <Link to="/home" className="text-sm text-gray-500 hover:text-gray-800">← Voltar ao site</Link>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <h2 className="text-lg font-semibold text-gray-700 mb-6">Visão geral</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {[{ label: 'Total de ocorrências', value: total, color: 'text-blue-700 bg-blue-50' },
-            { label: 'Pendentes', value: pendentes, color: 'text-yellow-700 bg-yellow-50' },
-            { label: 'Resolvidas', value: resolvidas, color: 'text-green-700 bg-green-50' }]
-            .map(card => (
-              <div key={card.label} className={`rounded-xl p-5 ${card.color} border border-opacity-20`}>
+    <PageShell>
+      <AppHeader title="Painel Admin" subtitle="Visao geral do sistema" actions={<Link to="/home" className="text-sm font-medium text-zinc-600 hover:text-emerald-700 dark:text-zinc-300 dark:hover:text-emerald-400">Voltar ao site</Link>} />
+      <PageContainer className="space-y-6">
+        <section>
+          <h1 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-100">Visao geral</h1>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              { label: 'Total de ocorrencias', value: total, className: metricStyle.total },
+              { label: 'Pendentes', value: pendentes, className: metricStyle.pending },
+              { label: 'Resolvidas', value: resolvidas, className: metricStyle.done },
+            ].map(card => (
+              <Card key={card.label} className={card.className}>
                 <p className="text-3xl font-bold">{card.value}</p>
-                <p className="text-sm mt-1 opacity-80">{card.label}</p>
-              </div>
+                <p className="mt-1 text-sm opacity-80">{card.label}</p>
+              </Card>
             ))}
-        </div>
+          </div>
+        </section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link to="/admin/moderacao" className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
-            <p className="font-semibold text-gray-800">Moderação</p>
-            <p className="text-sm text-gray-500 mt-1">Gerenciar e resolver ocorrências</p>
-          </Link>
-          <Link to="/admin/usuarios" className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow">
-            <p className="font-semibold text-gray-800">Usuários</p>
-            <p className="text-sm text-gray-500 mt-1">Visualizar e gerenciar usuários</p>
-          </Link>
-        </div>
-      </main>
-    </div>
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <AdminLink to="/admin/moderacao" title="Moderacao" description="Gerenciar e resolver ocorrencias" />
+          <AdminLink to="/admin/usuarios" title="Usuarios" description="Visualizar e gerenciar usuarios" />
+        </section>
+      </PageContainer>
+    </PageShell>
+  )
+}
+
+function AdminLink({ to, title, description }: { to: string; title: string; description: string }) {
+  return (
+    <Link to={to}>
+      <Card className="transition hover:border-emerald-300 dark:hover:border-emerald-800">
+        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
+      </Card>
+    </Link>
   )
 }

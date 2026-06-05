@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import { authService } from '../services/auth.service'
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { AuthShell, Button, Field, Notice, TextInput } from '../components/ui'
+import { authService } from '../services/auth.service'
 
 type Campos = 'nome' | 'email' | 'cpf' | 'senha'
 
@@ -26,38 +27,40 @@ export default function RegisterPage() {
     }
   }
 
-  function validar(): boolean {
+  function validar() {
     const erros: Partial<Record<Campos, string>> = {}
     if (!form.nome.trim() || form.nome.trim().length < 2) erros.nome = 'Nome deve ter pelo menos 2 caracteres.'
-    if (!form.email.trim() || !form.email.includes('@')) erros.email = 'Informe um e-mail válido.'
-    const cpfSoNumeros = form.cpf.replace(/\D/g, '')
-    if (cpfSoNumeros.length !== 11) erros.cpf = 'CPF deve conter 11 dígitos numéricos.'
+    if (!form.email.trim() || !form.email.includes('@')) erros.email = 'Informe um e-mail valido.'
+    if (form.cpf.replace(/\D/g, '').length !== 11) erros.cpf = 'CPF deve conter 11 digitos numericos.'
     if (!form.senha || form.senha.length < 8) erros.senha = 'Senha deve ter pelo menos 8 caracteres.'
     setCamposErro(erros)
     return Object.keys(erros).length === 0
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!form.aceitouPolitica) { setErro('Você deve aceitar a política de privacidade.'); return }
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+
+    if (!form.aceitouPolitica) {
+      setErro('Voce deve aceitar a politica de privacidade.')
+      return
+    }
+
     if (!validar()) return
+
     setErro('')
     setCarregando(true)
+
     try {
       await authService.cadastrar({ ...form, cpf: form.cpf.replace(/\D/g, '') })
       navigate('/login')
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         const msg: string = err.response.data.message
-        // Tenta mapear o erro ao campo específico
         const campoMapeado = (Object.keys(CAMPO_LABEL) as Campos[]).find(c =>
           msg.toLowerCase().includes(CAMPO_LABEL[c].toLowerCase()) || msg.toLowerCase().includes(c)
         )
-        if (campoMapeado) {
-          setCamposErro({ [campoMapeado]: msg })
-        } else {
-          setErro(msg)
-        }
+        if (campoMapeado) setCamposErro({ [campoMapeado]: msg })
+        else setErro(msg)
       } else {
         setErro('Erro ao cadastrar. Verifique os dados e tente novamente.')
       }
@@ -66,76 +69,48 @@ export default function RegisterPage() {
     }
   }
 
-  const inputClass = (campo: Campos) =>
-    `w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition-colors ${
-      camposErro[campo]
-        ? 'border-red-400 focus:ring-red-400 bg-red-50'
-        : 'border-gray-300 focus:ring-blue-500'
-    }`
-
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8">
-        <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">Criar conta</h1>
-        <p className="text-sm text-gray-500 text-center mb-8">Junte-se à comunidade Olho do Bairro</p>
+    <AuthShell title="Criar conta" subtitle="Junte-se a comunidade Olho do Bairro">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field label="Nome completo" error={camposErro.nome}>
+          <TextInput required value={form.nome} onChange={event => set('nome', event.target.value)} placeholder="Seu nome" maxLength={100} />
+        </Field>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
-            <input type="text" required value={form.nome} onChange={e => set('nome', e.target.value)}
-              className={inputClass('nome')} placeholder="Seu nome" maxLength={100} />
-            {camposErro.nome && <p className="text-xs text-red-500 mt-1">{camposErro.nome}</p>}
-          </div>
+        <Field label="E-mail" error={camposErro.email}>
+          <TextInput required type="email" value={form.email} onChange={event => set('email', event.target.value)} placeholder="seu@email.com" maxLength={254} />
+        </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-            <input type="email" required value={form.email} onChange={e => set('email', e.target.value)}
-              className={inputClass('email')} placeholder="seu@email.com" maxLength={254} />
-            {camposErro.email && <p className="text-xs text-red-500 mt-1">{camposErro.email}</p>}
-          </div>
+        <Field label="CPF" hint="Apenas numeros" error={camposErro.cpf}>
+          <TextInput required value={form.cpf} onChange={event => set('cpf', event.target.value)} placeholder="000.000.000-00" maxLength={14} />
+        </Field>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-            <input type="text" required value={form.cpf} onChange={e => set('cpf', e.target.value)}
-              className={inputClass('cpf')} placeholder="000.000.000-00" maxLength={14} />
-            {camposErro.cpf
-              ? <p className="text-xs text-red-500 mt-1">{camposErro.cpf}</p>
-              : <p className="text-xs text-gray-400 mt-1">Apenas os 11 dígitos, com ou sem formatação.</p>}
-          </div>
+        <Field label="Senha" hint={`${form.senha.length}/72 (min. 8)`} error={camposErro.senha}>
+          <TextInput required type="password" value={form.senha} onChange={event => set('senha', event.target.value)} placeholder="Minimo 8 caracteres" minLength={8} maxLength={72} />
+        </Field>
 
-          <div>
-            <div className="flex justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">Senha</label>
-              <span className={`text-xs ${form.senha.length > 0 && form.senha.length < 8 ? 'text-red-400' : 'text-gray-400'}`}>
-                {form.senha.length}/72 (mín. 8)
-              </span>
-            </div>
-            <input type="password" required value={form.senha} onChange={e => set('senha', e.target.value)}
-              className={inputClass('senha')} placeholder="Mínimo 8 caracteres" minLength={8} maxLength={72} />
-            {camposErro.senha && <p className="text-xs text-red-500 mt-1">{camposErro.senha}</p>}
-          </div>
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={form.aceitouPolitica}
+            onChange={event => set('aceitouPolitica', event.target.checked)}
+            className="mt-1 h-4 w-4 accent-emerald-600"
+          />
+          <span className="text-sm text-zinc-600 dark:text-zinc-300">Li e aceito a <span className="text-emerald-700 underline dark:text-emerald-400">Politica de Privacidade</span></span>
+        </label>
 
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.aceitouPolitica} onChange={e => set('aceitouPolitica', e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-blue-600" />
-            <span className="text-sm text-gray-600">Li e aceito a <span className="text-blue-600 underline">Política de Privacidade</span></span>
-          </label>
+        {erro && <Notice tone="danger">{erro}</Notice>}
 
-          {erro && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{erro}</p>
-          )}
+        <Button type="submit" variant="primary" disabled={carregando} className="w-full">
+          {carregando ? 'Cadastrando...' : 'Criar conta'}
+        </Button>
+      </form>
 
-          <button type="submit" disabled={carregando}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg text-sm transition-colors">
-            {carregando ? 'Cadastrando...' : 'Criar conta'}
-          </button>
-        </form>
-
-        <p className="text-sm text-center text-gray-500 mt-6">
-          Já tem conta?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">Entrar</Link>
-        </p>
-      </div>
-    </div>
+      <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        Ja tem conta?{' '}
+        <Link to="/login" className="font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">
+          Entrar
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

@@ -1,14 +1,19 @@
 import { Link } from 'react-router-dom'
+import { Card, PageShell } from '../components/ui'
 
 export default function NotFoundPage() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 text-center">
-      <p className="text-7xl font-bold text-blue-200 mb-4">404</p>
-      <h1 className="text-2xl font-bold text-gray-800 mb-2">Página não encontrada</h1>
-      <p className="text-gray-500 text-sm mb-8">O endereço que você acessou não existe.</p>
-      <Link to="/home" className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2.5 rounded-lg transition-colors">
-        Voltar para o início
-      </Link>
-    </div>
+    <PageShell>
+      <div className="flex min-h-screen items-center justify-center px-4 text-center">
+        <Card className="w-full max-w-md p-8">
+          <p className="mb-4 text-7xl font-bold text-emerald-100 dark:text-emerald-950">404</p>
+          <h1 className="mb-2 text-2xl font-semibold text-zinc-950 dark:text-zinc-100">Pagina nao encontrada</h1>
+          <p className="mb-8 text-sm text-zinc-500 dark:text-zinc-400">O endereco que voce acessou nao existe.</p>
+          <Link to="/home" className="inline-flex min-h-10 items-center justify-center rounded-full bg-emerald-600 px-6 text-sm font-semibold text-white hover:bg-emerald-700">
+            Voltar para o inicio
+          </Link>
+        </Card>
+      </div>
+    </PageShell>
   )
 }

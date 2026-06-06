@@ -560,7 +560,6 @@ function OccurrencePostCard({
 
         <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
           <span className="rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">Comentarios</span>
-          <span className="rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">Compartilhar</span>
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">{ocorrencia.endereco}</span>}
         </div>
       </Link>

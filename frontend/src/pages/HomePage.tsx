@@ -4,6 +4,7 @@ import { useOccurrences } from '../hooks/useOccurrences'
 import { useAuth } from '../hooks/useAuth'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
+import { useVote } from '../hooks/useVote'
 import { PageShell } from '../components/ui'
 import type { Ocorrencia } from '../types/occurrence'
 
@@ -408,7 +409,12 @@ export default function HomePage() {
 
           <div className="space-y-3">
             {ocorrenciasFiltradas.map((ocorrencia, index) => (
-              <OccurrencePostCard key={ocorrencia.id} ocorrencia={ocorrencia} categoryIndex={index} />
+              <OccurrencePostCard
+                key={ocorrencia.id}
+                ocorrencia={ocorrencia}
+                categoryIndex={index}
+                usuarioLogado={!!usuario}
+              />
             ))}
           </div>
 
@@ -444,19 +450,68 @@ export default function HomePage() {
   )
 }
 
-function OccurrencePostCard({ ocorrencia, categoryIndex }: { ocorrencia: Ocorrencia; categoryIndex: number }) {
+function OccurrencePostCard({
+  ocorrencia,
+  categoryIndex,
+  usuarioLogado,
+}: {
+  ocorrencia: Ocorrencia
+  categoryIndex: number
+  usuarioLogado: boolean
+}) {
+  const navigate = useNavigate()
+  const { votar, removerVoto, isVoting } = useVote(ocorrencia.id)
+  const [voteMessage, setVoteMessage] = useState('')
+
+  async function handleVote(action: 'add' | 'remove') {
+    setVoteMessage('')
+
+    if (!usuarioLogado) {
+      navigate('/login')
+      return
+    }
+
+    try {
+      if (action === 'add') {
+        await votar()
+      } else {
+        await removerVoto()
+      }
+    } catch {
+      setVoteMessage(action === 'add' ? 'Voce ja confirmou esta ocorrencia.' : 'Voce ainda nao confirmou esta ocorrencia.')
+    }
+  }
+
   return (
-    <Link
-      to={`/ocorrencias/${ocorrencia.id}`}
+    <article
       className="group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 sm:grid-cols-[44px_minmax(0,1fr)_104px]"
     >
       <div className="flex flex-col items-center gap-1 bg-zinc-50 px-2 py-3 dark:bg-zinc-950">
-        <span aria-hidden="true" className="text-lg leading-none text-zinc-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">^</span>
+        <button
+          type="button"
+          onClick={() => void handleVote('add')}
+          disabled={isVoting}
+          aria-label="Confirmar ocorrencia"
+          title="Confirmar ocorrencia"
+          className="text-lg leading-none text-zinc-400 hover:text-emerald-700 disabled:opacity-50 dark:hover:text-emerald-400"
+        >
+          ^
+        </button>
         <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{ocorrencia.votosCount}</span>
-        <span aria-hidden="true" className="text-lg leading-none text-zinc-300 dark:text-zinc-600">v</span>
+        <button
+          type="button"
+          onClick={() => void handleVote('remove')}
+          disabled={isVoting}
+          aria-label="Remover confirmacao"
+          title="Remover confirmacao"
+          className="text-lg leading-none text-zinc-300 hover:text-red-600 disabled:opacity-50 dark:text-zinc-600"
+        >
+          v
+        </button>
+        {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
       </div>
 
-      <article className="min-w-0 p-4">
+      <Link to={`/ocorrencias/${ocorrencia.id}`} className="min-w-0 p-4">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getCategoryStyle(categoryIndex)}`}>
             {ocorrencia.categoria.nome}
@@ -480,9 +535,9 @@ function OccurrencePostCard({ ocorrencia, categoryIndex }: { ocorrencia: Ocorren
           <span className="rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">Compartilhar</span>
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">{ocorrencia.endereco}</span>}
         </div>
-      </article>
+      </Link>
 
-      <div className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-950 sm:flex">
+      <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-950 sm:flex">
         {ocorrencia.imagensUrl.length > 0 ? (
           <img
             src={ocorrencia.imagensUrl[0]}
@@ -492,8 +547,8 @@ function OccurrencePostCard({ ocorrencia, categoryIndex }: { ocorrencia: Ocorren
         ) : (
           <span className="text-3xl text-zinc-300 dark:text-zinc-700" aria-hidden="true">o</span>
         )}
-      </div>
-    </Link>
+      </Link>
+    </article>
   )
 }
 

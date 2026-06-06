@@ -68,11 +68,12 @@ export default function OccurrenceDetailPage() {
   const { data: ocorrencia, isLoading, isError } = useOccurrence(id!)
   const { data: comentariosPage } = useComments(id!)
   const { data: ocorrenciasPage } = useOccurrences(0)
-  const { votar, removerVoto } = useVote(id!)
+  const { votar, removerVoto, isVoting } = useVote(id!)
   const createComment = useCreateComment(id!)
   const deleteOccurrence = useDeleteOccurrence()
   const [novoComentario, setNovoComentario] = useState('')
   const [erroComentario, setErroComentario] = useState('')
+  const [erroVoto, setErroVoto] = useState('')
   const [confirmandoDeletar, setConfirmandoDeletar] = useState(false)
 
   const podeAdministrar = usuario?.role === 'ADMIN' || usuario?.role === 'PREFEITURA'
@@ -97,6 +98,29 @@ export default function OccurrenceDetailPage() {
 
     await deleteOccurrence.mutateAsync(id!)
     navigate('/home')
+  }
+
+  async function handleVote(action: 'add' | 'remove') {
+    setErroVoto('')
+
+    if (!usuario) {
+      navigate('/login')
+      return
+    }
+
+    try {
+      if (action === 'add') {
+        await votar()
+      } else {
+        await removerVoto()
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setErroVoto(err.response.data.message)
+      } else {
+        setErroVoto(action === 'add' ? 'Voce ja confirmou esta ocorrencia.' : 'Voce ainda nao confirmou esta ocorrencia.')
+      }
+    }
   }
 
   async function enviarComentario(event: FormEvent) {
@@ -188,8 +212,10 @@ export default function OccurrenceDetailPage() {
           <PostCard
             ocorrencia={ocorrencia}
             autorNome={autorNome}
-            onVote={votar}
-            onRemoveVote={removerVoto}
+            onVote={() => handleVote('add')}
+            onRemoveVote={() => handleVote('remove')}
+            isVoting={isVoting}
+            erroVoto={erroVoto}
             podeAdministrar={podeAdministrar}
             confirmandoDeletar={confirmandoDeletar}
             deleting={deleteOccurrence.isPending}
@@ -225,6 +251,8 @@ function PostCard({
   autorNome,
   onVote,
   onRemoveVote,
+  isVoting,
+  erroVoto,
   podeAdministrar,
   confirmandoDeletar,
   deleting,
@@ -233,8 +261,10 @@ function PostCard({
 }: {
   ocorrencia: Ocorrencia
   autorNome: string
-  onVote: () => void
-  onRemoveVote: () => void
+  onVote: () => void | Promise<void>
+  onRemoveVote: () => void | Promise<void>
+  isVoting: boolean
+  erroVoto: string
   podeAdministrar: boolean
   confirmandoDeletar: boolean
   deleting: boolean
@@ -283,13 +313,34 @@ function PostCard({
 
       <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 p-4 dark:border-zinc-800">
         <div className="flex items-center gap-1 rounded-full border border-zinc-200 px-2 py-1 dark:border-zinc-700">
-          <button type="button" onClick={onVote} className="px-1 text-lg leading-none text-zinc-500 hover:text-emerald-700 dark:hover:text-emerald-400">^</button>
+          <button
+            type="button"
+            onClick={() => void onVote()}
+            disabled={isVoting}
+            className="px-1 text-lg leading-none text-zinc-500 hover:text-emerald-700 disabled:opacity-50 dark:hover:text-emerald-400"
+          >
+            ^
+          </button>
           <span className="px-2 text-sm font-semibold">{ocorrencia.votosCount}</span>
-          <button type="button" onClick={onRemoveVote} className="px-1 text-lg leading-none text-zinc-400 hover:text-red-600">v</button>
+          <button
+            type="button"
+            onClick={() => void onRemoveVote()}
+            disabled={isVoting}
+            className="px-1 text-lg leading-none text-zinc-400 hover:text-red-600 disabled:opacity-50"
+          >
+            v
+          </button>
         </div>
         <button type="button" disabled title="Compartilhamento ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Compartilhar</button>
         <button type="button" disabled title="Salvar ocorrencia ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Salvar</button>
-        <button type="button" onClick={onVote} className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800">Confirmar ocorrencia</button>
+        <button
+          type="button"
+          onClick={() => void onVote()}
+          disabled={isVoting}
+          className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          {isVoting ? 'Confirmando...' : 'Confirmar ocorrencia'}
+        </button>
 
         {podeAdministrar && (
           <button
@@ -310,6 +361,7 @@ function PostCard({
             Cancelar
           </button>
         )}
+        {erroVoto && <p className="basis-full text-xs text-red-600 dark:text-red-300">{erroVoto}</p>}
       </div>
     </article>
   )

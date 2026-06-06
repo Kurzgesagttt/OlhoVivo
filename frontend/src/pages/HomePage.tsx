@@ -184,12 +184,16 @@ export default function HomePage() {
 
             {usuario ? (
               <>
-                <div className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 dark:border-zinc-800 dark:bg-zinc-900 sm:flex">
+                <Link
+                  to="/perfil"
+                  title="Abrir perfil"
+                  className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 sm:flex"
+                >
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">
                     {getInitials(usuario.nome)}
                   </span>
                   <span className="max-w-28 truncate text-sm text-zinc-700 dark:text-zinc-200">{usuario.nome}</span>
-                </div>
+                </Link>
                 <button
                   onClick={() => {
                     logout()

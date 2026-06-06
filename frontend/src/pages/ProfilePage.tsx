@@ -15,6 +15,8 @@ const ROLE_LABEL: Record<string, string> = {
   PREFEITURA: 'Prefeitura',
 }
 
+const SUPERVISION_ROLES = ['ADMIN', 'MODERADOR', 'PREFEITURA']
+
 function getInitials(name: string) {
   return name
     .split(' ')
@@ -73,6 +75,7 @@ export default function ProfilePage() {
   const totalVotos = minhasOcorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const resolvidas = minhasOcorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
   const bairroPrincipal = minhasOcorrencias.find(ocorrencia => ocorrencia.bairro)?.bairro?.nome ?? 'Lins'
+  const podeAcessarSupervisao = SUPERVISION_ROLES.includes(usuario.role)
 
   async function handleSaveBio(event: FormEvent) {
     event.preventDefault()
@@ -249,6 +252,14 @@ export default function ProfilePage() {
 
             <Card className="space-y-3">
               <SectionTitle title="Conta" />
+              {podeAcessarSupervisao && (
+                <Link
+                  to="/admin/dashboard"
+                  className="flex min-h-10 w-full items-center justify-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Acessar painel de supervisao
+                </Link>
+              )}
               <Button
                 type="button"
                 variant="danger"

@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface ImagemOcorrenciaRepository extends JpaRepository<ImagemOcorrencia, UUID> {
     List<ImagemOcorrencia> findByOcorrenciaId(UUID ocorrenciaId);
+    List<ImagemOcorrencia> findByOcorrenciaIdOrderByCriadoEmAsc(UUID ocorrenciaId);
 }

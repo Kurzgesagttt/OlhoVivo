@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { AppHeader, Button, Card, Notice, PageContainer, PageShell } from '../components/ui'
@@ -6,9 +6,14 @@ import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useCreateOccurrence } from '../hooks/useOccurrences'
 import { useAuth } from '../hooks/useAuth'
+import { occurrenceService } from '../services/occurrence.service'
 import type { Categoria } from '../types/occurrence'
 
 type Severity = 'Baixa' | 'Media' | 'Alta' | 'Critica'
+type SelectedImage = {
+  file: File
+  previewUrl: string
+}
 
 const TAGS = ['infraestrutura', 'eletrica', 'urgente', 'prefeitura', 'transito', 'seguranca']
 
@@ -45,7 +50,10 @@ export default function CreateOccurrencePage() {
   const [severity, setSeverity] = useState<Severity>('Media')
   const [anonymous, setAnonymous] = useState(false)
   const [tags, setTags] = useState<string[]>(['infraestrutura'])
+  const [images, setImages] = useState<SelectedImage[]>([])
   const [erro, setErro] = useState('')
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const imagesRef = useRef<SelectedImage[]>([])
 
   const categoriaSelecionada = useMemo(
     () => categorias.find(categoria => categoria.id === form.categoriaId),
@@ -66,6 +74,14 @@ export default function CreateOccurrencePage() {
     return Math.round((checks.filter(Boolean).length / checks.length) * 100)
   }, [form])
 
+  useEffect(() => {
+    imagesRef.current = images
+  }, [images])
+
+  useEffect(() => () => {
+    imagesRef.current.forEach(image => URL.revokeObjectURL(image.previewUrl))
+  }, [])
+
   function set(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
   }
@@ -76,6 +92,49 @@ export default function CreateOccurrencePage() {
         ? current.filter(item => item !== tag)
         : [...current, tag]
     ))
+  }
+
+  function handleImagesChange(event: ChangeEvent<HTMLInputElement>) {
+    setErro('')
+    const files = Array.from(event.target.files ?? [])
+    event.target.value = ''
+
+    if (files.length === 0) return
+
+    const validFiles: SelectedImage[] = []
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setErro('Apenas arquivos de imagem sao aceitos.')
+        continue
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setErro('Cada imagem deve ter no maximo 5MB.')
+        continue
+      }
+
+      validFiles.push({ file, previewUrl: URL.createObjectURL(file) })
+    }
+
+    setImages(current => {
+      const availableSlots = Math.max(0, 5 - current.length)
+      const nextImages = [...current, ...validFiles.slice(0, availableSlots)]
+
+      validFiles.slice(availableSlots).forEach(image => URL.revokeObjectURL(image.previewUrl))
+      if (validFiles.length > availableSlots) {
+        setErro('Voce pode adicionar no maximo 5 imagens.')
+      }
+
+      return nextImages
+    })
+  }
+
+  function removeImage(index: number) {
+    setImages(current => {
+      const image = current[index]
+      if (image) URL.revokeObjectURL(image.previewUrl)
+      return current.filter((_, currentIndex) => currentIndex !== index)
+    })
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -107,6 +166,11 @@ export default function CreateOccurrencePage() {
         ...(form.bairroId ? { bairroId: form.bairroId } : {}),
         ...(form.endereco.trim() ? { endereco: form.endereco.trim() } : {}),
       })
+
+      if (images.length > 0) {
+        await occurrenceService.adicionarImagens(ocorrencia.id, images.map(image => image.file))
+      }
+
       navigate(`/ocorrencias/${ocorrencia.id}`)
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
@@ -238,16 +302,43 @@ export default function CreateOccurrencePage() {
 
               <Card className="space-y-3">
                 <SectionTitle icon="+" title="Fotos e videos" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImagesChange}
+                  className="hidden"
+                />
                 <button
                   type="button"
-                  disabled
-                  title="Upload de anexos ainda nao implementado"
-                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center opacity-70 dark:border-zinc-700 dark:bg-zinc-950"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={images.length >= 5}
+                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
                 >
                   <span className="text-3xl text-zinc-400">+</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Adicionar fotos</span>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-500">JPG, PNG ou MP4</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    {images.length >= 5 ? 'Limite de imagens atingido' : 'Adicionar fotos'}
+                  </span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-500">JPG, PNG, WEBP ou GIF - max. 5MB cada</span>
                 </button>
+                {images.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                    {images.map((image, index) => (
+                      <div key={image.previewUrl} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950">
+                        <img src={image.previewUrl} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          aria-label="Remover imagem"
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950/80 text-xs font-bold text-white opacity-90 transition hover:bg-red-700"
+                        >
+                          x
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </Card>
 
               <Card className="space-y-3">
@@ -332,6 +423,7 @@ export default function CreateOccurrencePage() {
                 <div className="space-y-2">
                   <SummaryRow label="Categoria" value={categoriaSelecionada?.nome ?? 'Pendente'} tone={categoriaSelecionada ? 'ok' : 'muted'} />
                   <SummaryRow label="Severidade" value={severity} tone={severity === 'Baixa' ? 'ok' : 'warn'} />
+                  <SummaryRow label="Imagens" value={images.length > 0 ? `${images.length} anexada${images.length > 1 ? 's' : ''}` : 'Nenhuma'} tone={images.length > 0 ? 'ok' : 'muted'} />
                   <SummaryRow label="Bairro" value={bairroSelecionado?.nome ?? 'Pendente'} tone={bairroSelecionado ? 'ok' : 'muted'} />
                   <SummaryRow label="Endereco" value={form.endereco.trim() ? 'Informado' : 'Opcional'} tone={form.endereco.trim() ? 'ok' : 'muted'} />
                   <SummaryRow label="Anonimo" value={anonymous ? 'Sim' : 'Nao'} tone="muted" />

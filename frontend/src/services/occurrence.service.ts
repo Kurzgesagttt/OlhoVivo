@@ -20,6 +20,16 @@ export const occurrenceService = {
     return response.data
   },
 
+  async adicionarImagens(id: string, imagens: File[]): Promise<Ocorrencia> {
+    const formData = new FormData()
+    imagens.forEach(imagem => formData.append('imagens', imagem))
+
+    const response = await api.post<Ocorrencia>(`/ocorrencias/${id}/imagens`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
+
   async atualizarStatus(id: string, data: AtualizarStatusRequest): Promise<Ocorrencia> {
     const response = await api.patch<Ocorrencia>(`/ocorrencias/${id}/status`, data)
     return response.data

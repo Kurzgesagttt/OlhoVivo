@@ -41,9 +41,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/categorias").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/bairros").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/ocorrencias").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/ocorrencias/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/ocorrencias/*/comentarios").permitAll()
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);

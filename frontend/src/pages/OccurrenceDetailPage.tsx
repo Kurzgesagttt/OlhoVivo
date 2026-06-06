@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../hooks/useAuth'
@@ -86,10 +86,6 @@ export default function OccurrenceDetailPage() {
   const [confirmandoDeletar, setConfirmandoDeletar] = useState(false)
 
   const podeAdministrar = usuario?.role === 'ADMIN' || usuario?.role === 'PREFEITURA'
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', localStorage.getItem('theme') === 'dark')
-  }, [])
 
   const ocorrenciasProximas = useMemo(() => {
     const bairroAtual = ocorrencia?.bairro?.id

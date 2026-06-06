@@ -93,7 +93,7 @@ export default function HomePage() {
   const [bairroSelecionado, setBairroSelecionado] = useState('Todos')
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('Todas')
   const [sortMode, setSortMode] = useState<SortMode>('hot')
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark')
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') !== 'light')
   const [mostrarTodosBairros, setMostrarTodosBairros] = useState(false)
   const { data, isLoading, isError } = useOccurrences(page)
   const { data: categorias = [], isLoading: isLoadingCategorias } = useCategories()

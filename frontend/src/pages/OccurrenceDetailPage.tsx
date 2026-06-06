@@ -61,6 +61,15 @@ function getCategoryIcon(name: string | undefined) {
   return 'O'
 }
 
+function getMapUrl(ocorrencia: Ocorrencia) {
+  if (ocorrencia.latitude && ocorrencia.longitude) {
+    return `https://www.google.com/maps?q=${encodeURIComponent(`${ocorrencia.latitude},${ocorrencia.longitude}`)}`
+  }
+
+  const address = ocorrencia.endereco || (ocorrencia.bairro ? `${ocorrencia.bairro.nome}, ${ocorrencia.bairro.cidade}` : '')
+  return address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : null
+}
+
 export default function OccurrenceDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -178,6 +187,7 @@ export default function OccurrenceDetailPage() {
   const comentarios = comentariosPage?.content ?? []
   const autorNome = comentarios.find(comentario => comentario.usuarioId === ocorrencia.usuarioId)?.nomeUsuario ?? 'Morador'
   const novaOcorrenciaPath = usuario ? '/ocorrencias/nova' : '/login'
+  const mapUrl = getMapUrl(ocorrencia)
 
   return (
     <PageShell>
@@ -231,6 +241,7 @@ export default function OccurrenceDetailPage() {
             podeAdministrar={podeAdministrar}
             confirmandoDeletar={confirmandoDeletar}
             deleting={deleteOccurrence.isPending}
+            mapUrl={mapUrl}
             onDelete={handleDeletar}
             onCancelDelete={() => setConfirmandoDeletar(false)}
           />
@@ -268,6 +279,7 @@ function PostCard({
   podeAdministrar,
   confirmandoDeletar,
   deleting,
+  mapUrl,
   onDelete,
   onCancelDelete,
 }: {
@@ -280,6 +292,7 @@ function PostCard({
   podeAdministrar: boolean
   confirmandoDeletar: boolean
   deleting: boolean
+  mapUrl: string | null
   onDelete: () => void
   onCancelDelete: () => void
 }) {
@@ -320,7 +333,21 @@ function PostCard({
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
           {ocorrencia.endereco || (ocorrencia.bairro ? `${ocorrencia.bairro.nome}, ${ocorrencia.bairro.cidade}` : 'Localizacao nao informada')}
         </span>
-        <span className="text-xs text-zinc-500 dark:text-zinc-500">Referencia para exibicao no mapa</span>
+        {ocorrencia.latitude && ocorrencia.longitude && (
+          <span className="text-xs text-zinc-500 dark:text-zinc-500">{ocorrencia.latitude}, {ocorrencia.longitude}</span>
+        )}
+        {mapUrl ? (
+          <a
+            href={mapUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+          >
+            Abrir no mapa
+          </a>
+        ) : (
+          <span className="text-xs text-zinc-500 dark:text-zinc-500">Referencia para exibicao no mapa</span>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 p-4 dark:border-zinc-800">

@@ -46,12 +46,14 @@ export default function CreateOccurrencePage() {
   const createOccurrence = useCreateOccurrence()
   const { data: categorias = [], isLoading: isLoadingCategorias, isError: isErroCategorias } = useCategories()
   const { data: bairros = [], isLoading: isLoadingBairros, isError: isErroBairros } = useNeighborhoods()
-  const [form, setForm] = useState({ titulo: '', descricao: '', categoriaId: '', bairroId: '', endereco: '' })
+  const [form, setForm] = useState({ titulo: '', descricao: '', categoriaId: '', bairroId: '', endereco: '', latitude: '', longitude: '' })
   const [severity, setSeverity] = useState<Severity>('Media')
   const [anonymous, setAnonymous] = useState(false)
   const [tags, setTags] = useState<string[]>(['infraestrutura'])
   const [images, setImages] = useState<SelectedImage[]>([])
   const [erro, setErro] = useState('')
+  const [locationStatus, setLocationStatus] = useState('')
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const imagesRef = useRef<SelectedImage[]>([])
 
@@ -69,7 +71,7 @@ export default function CreateOccurrencePage() {
       form.categoriaId,
       form.titulo.trim().length >= 5,
       form.descricao.trim().length >= 20,
-      form.bairroId || form.endereco.trim(),
+      form.bairroId || form.endereco.trim() || (form.latitude && form.longitude),
     ]
     return Math.round((checks.filter(Boolean).length / checks.length) * 100)
   }, [form])
@@ -137,6 +139,38 @@ export default function CreateOccurrencePage() {
     })
   }
 
+  function useCurrentLocation() {
+    setErro('')
+    setLocationStatus('')
+
+    if (!navigator.geolocation) {
+      setErro('Seu navegador nao permite obter localizacao automaticamente.')
+      return
+    }
+
+    setIsGettingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const latitude = position.coords.latitude.toFixed(6)
+        const longitude = position.coords.longitude.toFixed(6)
+
+        setForm(prev => ({
+          ...prev,
+          latitude,
+          longitude,
+          endereco: prev.endereco || `Localizacao atual (${latitude}, ${longitude})`,
+        }))
+        setLocationStatus('Localizacao atual adicionada a ocorrencia.')
+        setIsGettingLocation(false)
+      },
+      () => {
+        setErro('Nao foi possivel obter sua localizacao. Verifique a permissao do navegador ou informe o endereco manualmente.')
+        setIsGettingLocation(false)
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    )
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setErro('')
@@ -153,8 +187,8 @@ export default function CreateOccurrencePage() {
       setErro('Descricao deve ter pelo menos 20 caracteres.')
       return
     }
-    if (!form.bairroId && !form.endereco.trim()) {
-      setErro('Informe um bairro ou endereco de referencia.')
+    if (!form.bairroId && !form.endereco.trim() && (!form.latitude || !form.longitude)) {
+      setErro('Informe um bairro, endereco ou use sua localizacao atual.')
       return
     }
 
@@ -165,6 +199,7 @@ export default function CreateOccurrencePage() {
         categoriaId: form.categoriaId,
         ...(form.bairroId ? { bairroId: form.bairroId } : {}),
         ...(form.endereco.trim() ? { endereco: form.endereco.trim() } : {}),
+        ...(form.latitude && form.longitude ? { latitude: Number(form.latitude), longitude: Number(form.longitude) } : {}),
       })
 
       if (images.length > 0) {
@@ -359,12 +394,12 @@ export default function CreateOccurrencePage() {
                   </div>
                   <button
                     type="button"
-                    disabled
-                    title="Selecao por mapa ainda nao implementada"
-                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm text-zinc-500 opacity-70 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400"
+                    onClick={useCurrentLocation}
+                    disabled={isGettingLocation}
+                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm font-medium text-zinc-600 transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
                   >
                     <span className="text-2xl text-emerald-600">+</span>
-                    Marcar no mapa
+                    {isGettingLocation ? 'Obtendo GPS...' : 'Usar minha localizacao'}
                   </button>
                 </div>
                 <div>
@@ -376,6 +411,54 @@ export default function CreateOccurrencePage() {
                     className={inputClass}
                   />
                 </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <Label>Latitude</Label>
+                    <input
+                      value={form.latitude}
+                      onChange={event => set('latitude', event.target.value)}
+                      placeholder="-21.6737"
+                      inputMode="decimal"
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <Label>Longitude</Label>
+                    <input
+                      value={form.longitude}
+                      onChange={event => set('longitude', event.target.value)}
+                      placeholder="-49.7425"
+                      inputMode="decimal"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+                {(form.latitude && form.longitude) && (
+                  <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                    <span className="font-medium">Ponto marcado:</span>
+                    <span>{form.latitude}, {form.longitude}</span>
+                    <a
+                      href={`https://www.google.com/maps?q=${encodeURIComponent(`${form.latitude},${form.longitude}`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="ml-auto rounded-full border border-emerald-300 px-3 py-1 text-xs font-semibold hover:bg-emerald-100 dark:border-emerald-800 dark:hover:bg-emerald-900"
+                    >
+                      Abrir mapa
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        set('latitude', '')
+                        set('longitude', '')
+                        setLocationStatus('')
+                      }}
+                      className="rounded-full border border-emerald-300 px-3 py-1 text-xs font-semibold hover:bg-emerald-100 dark:border-emerald-800 dark:hover:bg-emerald-900"
+                    >
+                      Limpar
+                    </button>
+                  </div>
+                )}
+                {locationStatus && <p className="text-xs text-emerald-700 dark:text-emerald-300">{locationStatus}</p>}
               </Card>
 
               <Card className="space-y-3">
@@ -426,6 +509,7 @@ export default function CreateOccurrencePage() {
                   <SummaryRow label="Imagens" value={images.length > 0 ? `${images.length} anexada${images.length > 1 ? 's' : ''}` : 'Nenhuma'} tone={images.length > 0 ? 'ok' : 'muted'} />
                   <SummaryRow label="Bairro" value={bairroSelecionado?.nome ?? 'Pendente'} tone={bairroSelecionado ? 'ok' : 'muted'} />
                   <SummaryRow label="Endereco" value={form.endereco.trim() ? 'Informado' : 'Opcional'} tone={form.endereco.trim() ? 'ok' : 'muted'} />
+                  <SummaryRow label="Mapa" value={form.latitude && form.longitude ? 'Marcado' : 'Pendente'} tone={form.latitude && form.longitude ? 'ok' : 'muted'} />
                   <SummaryRow label="Anonimo" value={anonymous ? 'Sim' : 'Nao'} tone="muted" />
                 </div>
                 {erro && <Notice tone="danger">{erro}</Notice>}

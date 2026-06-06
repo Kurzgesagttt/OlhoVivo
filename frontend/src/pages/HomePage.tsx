@@ -191,7 +191,7 @@ export default function HomePage() {
                 >
                   <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-xs font-semibold text-white">
                     {usuario.fotoPerfilUrl ? (
-                      <img src={usuario.fotoPerfilUrl} alt="" className="h-full w-full object-cover" />
+                      <img src={usuario.fotoPerfilUrl} alt="" className="h-full w-full bg-zinc-950 object-contain p-0.5" />
                     ) : (
                       getInitials(usuario.nome)
                     )}

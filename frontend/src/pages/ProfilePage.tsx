@@ -142,7 +142,7 @@ export default function ProfilePage() {
                     className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-900 bg-emerald-600 text-2xl font-semibold text-white disabled:cursor-wait"
                   >
                     {usuario.fotoPerfilUrl ? (
-                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full object-cover" />
+                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full bg-zinc-950 object-contain p-1" />
                     ) : (
                       getInitials(usuario.nome)
                     )}

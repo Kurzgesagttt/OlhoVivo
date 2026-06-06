@@ -1,7 +1,11 @@
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { AppHeader, Button, Card, PageContainer, PageShell } from '../components/ui'
 import { useAuth } from '../hooks/useAuth'
 import { useOccurrences } from '../hooks/useOccurrences'
+import { authService } from '../services/auth.service'
 import type { Ocorrencia } from '../types/occurrence'
 
 const ROLE_LABEL: Record<string, string> = {
@@ -10,13 +14,6 @@ const ROLE_LABEL: Record<string, string> = {
   ADMIN: 'Administrador',
   PREFEITURA: 'Prefeitura',
 }
-
-const BADGES = [
-  { name: 'Primeiro passo', icon: '1', earned: true },
-  { name: 'Morador verificado', icon: 'V', earned: true },
-  { name: 'Voz ativa', icon: '+', earned: false },
-  { name: 'Influente', icon: '*', earned: false },
-]
 
 function getInitials(name: string) {
   return name
@@ -48,8 +45,19 @@ function formatRelativeDate(value: string) {
 
 export default function ProfilePage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { usuario, isLoading, logout } = useAuth()
   const { data: ocorrenciasPage } = useOccurrences(0)
+  const [bio, setBio] = useState('')
+  const [savingBio, setSavingBio] = useState(false)
+  const [savingPhoto, setSavingPhoto] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    setBio(usuario?.bio ?? '')
+  }, [usuario?.bio])
 
   if (isLoading) {
     return <PageShell><div className="flex min-h-screen items-center justify-center text-sm text-zinc-400">Carregando...</div></PageShell>
@@ -67,6 +75,53 @@ export default function ProfilePage() {
   const bairroPrincipal = minhasOcorrencias.find(ocorrencia => ocorrencia.bairro)?.bairro?.nome ?? 'Lins'
   const karma = minhasOcorrencias.length * 25 + totalVotos * 5 + resolvidas * 40
 
+  async function handleSaveBio(event: FormEvent) {
+    event.preventDefault()
+    setMessage('')
+    setError('')
+    setSavingBio(true)
+
+    try {
+      await authService.atualizarPerfil({ bio })
+      await queryClient.invalidateQueries({ queryKey: ['me'] })
+      setMessage('Descricao atualizada.')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Nao foi possivel atualizar a descricao.'))
+    } finally {
+      setSavingBio(false)
+    }
+  }
+
+  async function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    setMessage('')
+    setError('')
+
+    if (!file.type.startsWith('image/')) {
+      setError('Selecione uma imagem valida.')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('A foto deve ter no maximo 5MB.')
+      return
+    }
+
+    setSavingPhoto(true)
+    try {
+      await authService.atualizarFotoPerfil(file)
+      await queryClient.invalidateQueries({ queryKey: ['me'] })
+      setMessage('Foto de perfil atualizada.')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Nao foi possivel atualizar a foto.'))
+    } finally {
+      setSavingPhoto(false)
+    }
+  }
+
   return (
     <PageShell>
       <AppHeader title="Meu perfil" subtitle="Historico e participacao no bairro" backTo="back" />
@@ -79,9 +134,23 @@ export default function ProfilePage() {
               </div>
               <div className="px-5 pb-5">
                 <div className="-mt-9 flex flex-wrap items-end justify-between gap-3">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-zinc-900 bg-emerald-600 text-2xl font-semibold text-white">
-                    {getInitials(usuario.nome)}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={savingPhoto}
+                    title="Alterar foto de perfil"
+                    className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-900 bg-emerald-600 text-2xl font-semibold text-white disabled:cursor-wait"
+                  >
+                    {usuario.fotoPerfilUrl ? (
+                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full object-cover" />
+                    ) : (
+                      getInitials(usuario.nome)
+                    )}
+                    <span className="absolute inset-x-0 bottom-0 bg-zinc-950/80 py-1 text-[10px] font-semibold opacity-0 transition group-hover:opacity-100">
+                      {savingPhoto ? 'Salvando' : 'Trocar'}
+                    </span>
+                  </button>
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
                   <div className="flex gap-2 pb-1">
                     <button
                       type="button"
@@ -111,7 +180,7 @@ export default function ProfilePage() {
                   </div>
                   <p className="mt-1 text-sm text-zinc-500">u/{usuario.nome.toLowerCase().replace(/\s+/g, '_')}</p>
                   <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">
-                    Morador participante do Olho de Bairro. Suas ocorrencias, votos e comentarios ajudam a organizar prioridades da comunidade.
+                    {usuario.bio || 'Adicione uma descricao para contar um pouco sobre sua relacao com o bairro.'}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-4 text-xs text-zinc-500">
                     <span>{bairroPrincipal}</span>
@@ -130,24 +199,28 @@ export default function ProfilePage() {
             </section>
 
             <Card className="space-y-3">
-              <SectionTitle title="Conquistas" />
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {BADGES.map(badge => (
-                  <div
-                    key={badge.name}
-                    className={`rounded-lg border p-3 text-center ${
-                      badge.earned
-                        ? 'border-emerald-800 bg-emerald-950 text-emerald-200'
-                        : 'border-zinc-800 bg-zinc-950 text-zinc-500'
-                    }`}
-                  >
-                    <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-sm font-bold">
-                      {badge.icon}
-                    </div>
-                    <div className="text-xs font-semibold">{badge.name}</div>
-                  </div>
-                ))}
-              </div>
+              <SectionTitle title="Editar perfil" />
+              <form onSubmit={handleSaveBio} className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-zinc-200">Descricao</label>
+                  <textarea
+                    value={bio}
+                    onChange={event => setBio(event.target.value.slice(0, 500))}
+                    rows={4}
+                    placeholder="Conte um pouco sobre voce e sua relacao com o bairro."
+                    className="mt-1 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-950"
+                  />
+                  <p className="mt-1 text-right text-xs text-zinc-500">{bio.length} / 500</p>
+                </div>
+                {(message || error) && (
+                  <p className={`rounded-lg border px-3 py-2 text-sm ${error ? 'border-red-900 bg-red-950 text-red-200' : 'border-emerald-900 bg-emerald-950 text-emerald-200'}`}>
+                    {error || message}
+                  </p>
+                )}
+                <Button type="submit" variant="primary" disabled={savingBio}>
+                  {savingBio ? 'Salvando...' : 'Salvar descricao'}
+                </Button>
+              </form>
             </Card>
 
             <Card className="space-y-3">
@@ -265,4 +338,11 @@ function InfoRow({ label, value, tone }: { label: string; value: string; tone?: 
       <span className={`font-semibold ${tone === 'ok' ? 'text-emerald-400' : 'text-zinc-200'}`}>{value}</span>
     </div>
   )
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error) && error.response?.data?.message) {
+    return error.response.data.message
+  }
+  return fallback
 }

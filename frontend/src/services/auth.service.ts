@@ -1,5 +1,5 @@
 import api from './api'
-import type { CadastroRequest, LoginRequest, TokenResponse, Usuario } from '../types/auth'
+import type { AtualizarPerfilRequest, CadastroRequest, LoginRequest, TokenResponse, Usuario } from '../types/auth'
 
 export const authService = {
   async cadastrar(data: CadastroRequest): Promise<void> {
@@ -19,6 +19,20 @@ export const authService = {
 
   async perfil(): Promise<Usuario> {
     const response = await api.get<Usuario>('/me')
+    return response.data
+  },
+
+  async atualizarPerfil(data: AtualizarPerfilRequest): Promise<Usuario> {
+    const response = await api.patch<Usuario>('/me', data)
+    return response.data
+  },
+
+  async atualizarFotoPerfil(foto: File): Promise<Usuario> {
+    const formData = new FormData()
+    formData.append('foto', foto)
+    const response = await api.post<Usuario>('/me/foto', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     return response.data
   },
 }

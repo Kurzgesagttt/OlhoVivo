@@ -5,6 +5,8 @@ export interface Usuario {
   id: string
   nome: string
   role: Role
+  bio: string | null
+  fotoPerfilUrl: string | null
   criadoEm: string
 }
 
@@ -25,4 +27,8 @@ export interface CadastroRequest {
 export interface LoginRequest {
   email: string
   senha: string
+}
+
+export interface AtualizarPerfilRequest {
+  bio: string
 }

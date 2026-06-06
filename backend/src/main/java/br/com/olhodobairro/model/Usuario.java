@@ -35,6 +35,12 @@ public class Usuario {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    @Column(length = 500)
+    private String bio;
+
+    @Column(name = "foto_perfil_url", length = 500)
+    private String fotoPerfilUrl;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
@@ -60,6 +66,10 @@ public class Usuario {
     public void setRole(Role role) { this.role = role; }
     public Boolean getAtivo() { return ativo; }
     public void setAtivo(Boolean ativo) { this.ativo = ativo; }
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
+    public String getFotoPerfilUrl() { return fotoPerfilUrl; }
+    public void setFotoPerfilUrl(String fotoPerfilUrl) { this.fotoPerfilUrl = fotoPerfilUrl; }
     public OffsetDateTime getCriadoEm() { return criadoEm; }
     public OffsetDateTime getAtualizadoEm() { return atualizadoEm; }
 }

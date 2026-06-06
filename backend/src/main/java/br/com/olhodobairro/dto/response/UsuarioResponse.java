@@ -9,5 +9,7 @@ public record UsuarioResponse(
         UUID id,
         String nome,
         Role role,
+        String bio,
+        String fotoPerfilUrl,
         OffsetDateTime criadoEm
 ) {}

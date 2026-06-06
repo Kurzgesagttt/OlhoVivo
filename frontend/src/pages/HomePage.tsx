@@ -471,6 +471,16 @@ function OccurrencePostCard({
       return
     }
 
+    if (action === 'add' && ocorrencia.votadoPeloUsuario) {
+      setVoteMessage('Voce ja confirmou esta ocorrencia.')
+      return
+    }
+
+    if (action === 'remove' && !ocorrencia.votadoPeloUsuario) {
+      setVoteMessage('Voce ainda nao confirmou esta ocorrencia.')
+      return
+    }
+
     try {
       if (action === 'add') {
         await votar()
@@ -490,10 +500,14 @@ function OccurrencePostCard({
         <button
           type="button"
           onClick={() => void handleVote('add')}
-          disabled={isVoting}
+          disabled={isVoting || ocorrencia.votadoPeloUsuario}
           aria-label="Confirmar ocorrencia"
-          title="Confirmar ocorrencia"
-          className="text-lg leading-none text-zinc-400 hover:text-emerald-700 disabled:opacity-50 dark:hover:text-emerald-400"
+          title={ocorrencia.votadoPeloUsuario ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
+          className={`text-lg leading-none disabled:opacity-60 ${
+            ocorrencia.votadoPeloUsuario
+              ? 'text-emerald-700 dark:text-emerald-400'
+              : 'text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400'
+          }`}
         >
           ^
         </button>
@@ -501,9 +515,9 @@ function OccurrencePostCard({
         <button
           type="button"
           onClick={() => void handleVote('remove')}
-          disabled={isVoting}
+          disabled={isVoting || !ocorrencia.votadoPeloUsuario}
           aria-label="Remover confirmacao"
-          title="Remover confirmacao"
+          title={ocorrencia.votadoPeloUsuario ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
           className="text-lg leading-none text-zinc-300 hover:text-red-600 disabled:opacity-50 dark:text-zinc-600"
         >
           v

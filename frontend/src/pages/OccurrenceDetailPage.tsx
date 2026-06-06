@@ -103,8 +103,20 @@ export default function OccurrenceDetailPage() {
   async function handleVote(action: 'add' | 'remove') {
     setErroVoto('')
 
+    if (!ocorrencia) return
+
     if (!usuario) {
       navigate('/login')
+      return
+    }
+
+    if (action === 'add' && ocorrencia.votadoPeloUsuario) {
+      setErroVoto('Voce ja confirmou esta ocorrencia.')
+      return
+    }
+
+    if (action === 'remove' && !ocorrencia.votadoPeloUsuario) {
+      setErroVoto('Voce ainda nao confirmou esta ocorrencia.')
       return
     }
 
@@ -316,8 +328,13 @@ function PostCard({
           <button
             type="button"
             onClick={() => void onVote()}
-            disabled={isVoting}
-            className="px-1 text-lg leading-none text-zinc-500 hover:text-emerald-700 disabled:opacity-50 dark:hover:text-emerald-400"
+            disabled={isVoting || ocorrencia.votadoPeloUsuario}
+            title={ocorrencia.votadoPeloUsuario ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
+            className={`px-1 text-lg leading-none disabled:opacity-60 ${
+              ocorrencia.votadoPeloUsuario
+                ? 'text-emerald-700 dark:text-emerald-400'
+                : 'text-zinc-500 hover:text-emerald-700 dark:hover:text-emerald-400'
+            }`}
           >
             ^
           </button>
@@ -325,7 +342,8 @@ function PostCard({
           <button
             type="button"
             onClick={() => void onRemoveVote()}
-            disabled={isVoting}
+            disabled={isVoting || !ocorrencia.votadoPeloUsuario}
+            title={ocorrencia.votadoPeloUsuario ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
             className="px-1 text-lg leading-none text-zinc-400 hover:text-red-600 disabled:opacity-50"
           >
             v
@@ -336,10 +354,11 @@ function PostCard({
         <button
           type="button"
           onClick={() => void onVote()}
-          disabled={isVoting}
+          disabled={isVoting || ocorrencia.votadoPeloUsuario}
+          title={ocorrencia.votadoPeloUsuario ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
           className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
         >
-          {isVoting ? 'Confirmando...' : 'Confirmar ocorrencia'}
+          {ocorrencia.votadoPeloUsuario ? 'Confirmado' : isVoting ? 'Confirmando...' : 'Confirmar ocorrencia'}
         </button>
 
         {podeAdministrar && (

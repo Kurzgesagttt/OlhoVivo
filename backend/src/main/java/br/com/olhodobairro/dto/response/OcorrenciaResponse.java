@@ -19,6 +19,7 @@ public record OcorrenciaResponse(
         BigDecimal longitude,
         String endereco,
         int votosCount,
+        boolean votadoPeloUsuario,
         List<String> imagensUrl,
         OffsetDateTime criadoEm,
         OffsetDateTime atualizadoEm,

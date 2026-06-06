@@ -18,7 +18,11 @@ function isOccurrencePage(data: unknown): data is PageResponse<Ocorrencia> {
 function updateOccurrenceVotes(data: unknown, ocorrenciaId: string, delta: number) {
   if (isOccurrence(data)) {
     if (data.id !== ocorrenciaId) return data
-    return { ...data, votosCount: Math.max(0, data.votosCount + delta) }
+    return {
+      ...data,
+      votosCount: Math.max(0, data.votosCount + delta),
+      votadoPeloUsuario: delta > 0,
+    }
   }
 
   if (isOccurrencePage(data)) {
@@ -26,7 +30,11 @@ function updateOccurrenceVotes(data: unknown, ocorrenciaId: string, delta: numbe
       ...data,
       content: data.content.map(ocorrencia => (
         ocorrencia.id === ocorrenciaId
-          ? { ...ocorrencia, votosCount: Math.max(0, ocorrencia.votosCount + delta) }
+          ? {
+              ...ocorrencia,
+              votosCount: Math.max(0, ocorrencia.votosCount + delta),
+              votadoPeloUsuario: delta > 0,
+            }
           : ocorrencia
       )),
     }

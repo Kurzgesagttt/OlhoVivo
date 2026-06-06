@@ -11,6 +11,7 @@ import br.com.olhodobairro.model.Usuario;
 import br.com.olhodobairro.repository.CategoriaRepository;
 import br.com.olhodobairro.repository.OcorrenciaRepository;
 import br.com.olhodobairro.repository.UsuarioRepository;
+import br.com.olhodobairro.repository.VotoRepository;
 import br.com.olhodobairro.security.SecurityContextHelper;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -28,15 +29,18 @@ public class OcorrenciaService {
     private final OcorrenciaRepository ocorrenciaRepository;
     private final CategoriaRepository categoriaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final VotoRepository votoRepository;
     private final SecurityContextHelper securityContextHelper;
 
     public OcorrenciaService(OcorrenciaRepository ocorrenciaRepository,
                               CategoriaRepository categoriaRepository,
                               UsuarioRepository usuarioRepository,
+                              VotoRepository votoRepository,
                               SecurityContextHelper securityContextHelper) {
         this.ocorrenciaRepository = ocorrenciaRepository;
         this.categoriaRepository = categoriaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.votoRepository = votoRepository;
         this.securityContextHelper = securityContextHelper;
     }
 
@@ -106,6 +110,10 @@ public class OcorrenciaService {
                 o.getBairro().getLatitude(),
                 o.getBairro().getLongitude()
         );
+        boolean votadoPeloUsuario = securityContextHelper.getUsuarioIdAutenticadoOptional()
+                .map(usuarioId -> votoRepository.existsByOcorrenciaIdAndUsuarioId(o.getId(), usuarioId))
+                .orElse(false);
+
         return new OcorrenciaResponse(
                 o.getId(),
                 o.getTitulo(),
@@ -118,6 +126,7 @@ public class OcorrenciaService {
                 o.getLongitude(),
                 o.getEndereco(),
                 o.getVotosCount(),
+                votadoPeloUsuario,
                 List.of(),
                 o.getCriadoEm(),
                 o.getAtualizadoEm(),

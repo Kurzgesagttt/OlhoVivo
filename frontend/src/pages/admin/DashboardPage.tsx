@@ -43,6 +43,7 @@ export default function DashboardPage() {
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <AdminLink to="/admin/moderacao" title="Moderacao" description="Gerenciar e resolver ocorrencias" />
+          <AdminLink to="/admin/encerradas" title="Ocorrencias encerradas" description="Consultar ocorrencias fechadas pela equipe" />
           <AdminLink
             title="Usuarios"
             description="Endpoint de usuarios ainda nao existe no backend"

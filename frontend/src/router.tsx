@@ -10,6 +10,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import AdminLoginPage from './pages/admin/AdminLoginPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import ModerationPage from './pages/admin/ModerationPage'
+import ClosedOccurrencesPage from './pages/admin/ClosedOccurrencesPage'
 
 const ADMIN_ROLES = ['ADMIN', 'MODERADOR', 'PREFEITURA'] as const
 
@@ -27,6 +28,7 @@ export default function Router() {
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/dashboard" element={<ProtectedRoute roles={[...ADMIN_ROLES]}><DashboardPage /></ProtectedRoute>} />
         <Route path="/admin/moderacao" element={<ProtectedRoute roles={[...ADMIN_ROLES]}><ModerationPage /></ProtectedRoute>} />
+        <Route path="/admin/encerradas" element={<ProtectedRoute roles={[...ADMIN_ROLES]}><ClosedOccurrencesPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

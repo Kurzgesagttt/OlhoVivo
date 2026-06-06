@@ -1,11 +1,39 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { AppHeader, Button, Card, Field, Notice, PageContainer, PageShell, SelectInput, TextArea, TextInput } from '../components/ui'
+import { AppHeader, Button, Card, Notice, PageContainer, PageShell } from '../components/ui'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useCreateOccurrence } from '../hooks/useOccurrences'
 import { useAuth } from '../hooks/useAuth'
+import type { Categoria } from '../types/occurrence'
+
+type Severity = 'Baixa' | 'Media' | 'Alta' | 'Critica'
+
+const TAGS = ['infraestrutura', 'eletrica', 'urgente', 'prefeitura', 'transito', 'seguranca']
+
+const CATEGORY_COLORS = [
+  'border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200',
+  'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200',
+  'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-200',
+  'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200',
+  'border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-200',
+]
+
+function getCategoryIcon(categoria: Categoria) {
+  const key = `${categoria.icone ?? ''} ${categoria.nome}`.toLowerCase()
+
+  if (key.includes('alert')) return '!'
+  if (key.includes('evento') || key.includes('calendar')) return '#'
+  if (key.includes('noticia') || key.includes('news')) return 'N'
+  if (key.includes('servico') || key.includes('tools')) return 'S'
+
+  return 'O'
+}
+
+function getCategoryColor(index: number) {
+  return CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+}
 
 export default function CreateOccurrencePage() {
   const navigate = useNavigate()
@@ -14,16 +42,50 @@ export default function CreateOccurrencePage() {
   const { data: categorias = [], isLoading: isLoadingCategorias, isError: isErroCategorias } = useCategories()
   const { data: bairros = [], isLoading: isLoadingBairros, isError: isErroBairros } = useNeighborhoods()
   const [form, setForm] = useState({ titulo: '', descricao: '', categoriaId: '', bairroId: '', endereco: '' })
+  const [severity, setSeverity] = useState<Severity>('Media')
+  const [anonymous, setAnonymous] = useState(false)
+  const [tags, setTags] = useState<string[]>(['infraestrutura'])
   const [erro, setErro] = useState('')
+
+  const categoriaSelecionada = useMemo(
+    () => categorias.find(categoria => categoria.id === form.categoriaId),
+    [categorias, form.categoriaId],
+  )
+  const bairroSelecionado = useMemo(
+    () => bairros.find(bairro => bairro.id === form.bairroId),
+    [bairros, form.bairroId],
+  )
+
+  const formProgress = useMemo(() => {
+    const checks = [
+      form.categoriaId,
+      form.titulo.trim().length >= 5,
+      form.descricao.trim().length >= 20,
+      form.bairroId || form.endereco.trim(),
+    ]
+    return Math.round((checks.filter(Boolean).length / checks.length) * 100)
+  }, [form])
 
   function set(field: string, value: string) {
     setForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  function toggleTag(tag: string) {
+    setTags(current => (
+      current.includes(tag)
+        ? current.filter(item => item !== tag)
+        : [...current, tag]
+    ))
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
     setErro('')
 
+    if (!form.categoriaId) {
+      setErro('Selecione uma categoria.')
+      return
+    }
     if (form.titulo.trim().length < 5) {
       setErro('Titulo deve ter pelo menos 5 caracteres.')
       return
@@ -32,14 +94,18 @@ export default function CreateOccurrencePage() {
       setErro('Descricao deve ter pelo menos 20 caracteres.')
       return
     }
+    if (!form.bairroId && !form.endereco.trim()) {
+      setErro('Informe um bairro ou endereco de referencia.')
+      return
+    }
 
     try {
       const ocorrencia = await createOccurrence.mutateAsync({
-        titulo: form.titulo,
-        descricao: form.descricao,
+        titulo: form.titulo.trim(),
+        descricao: form.descricao.trim(),
         categoriaId: form.categoriaId,
         ...(form.bairroId ? { bairroId: form.bairroId } : {}),
-        ...(form.endereco ? { endereco: form.endereco } : {}),
+        ...(form.endereco.trim() ? { endereco: form.endereco.trim() } : {}),
       })
       navigate(`/ocorrencias/${ocorrencia.id}`)
     } catch (err) {
@@ -54,7 +120,7 @@ export default function CreateOccurrencePage() {
   return (
     <PageShell>
       <AppHeader title="Nova ocorrencia" subtitle="Registre um problema do bairro" backTo="back" />
-      <PageContainer className="max-w-2xl">
+      <PageContainer>
         {isLoadingAuth && (
           <Card>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">Verificando sua sessao...</p>
@@ -62,7 +128,7 @@ export default function CreateOccurrencePage() {
         )}
 
         {!isLoadingAuth && !usuario && (
-          <Card className="space-y-4">
+          <Card className="mx-auto max-w-xl space-y-4">
             <div>
               <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">Entre para registrar uma ocorrencia</h1>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -76,69 +142,272 @@ export default function CreateOccurrencePage() {
         )}
 
         {!isLoadingAuth && usuario && (
-        <Card>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Field label="Titulo" hint={`${form.titulo.length}/100 (min. 5)`}>
-              <TextInput
-                required
-                value={form.titulo}
-                onChange={event => set('titulo', event.target.value)}
-                placeholder="Resumo do problema"
-                maxLength={100}
-                minLength={5}
-              />
-            </Field>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <section className="min-w-0 space-y-4">
+              <Card className="flex flex-wrap items-center gap-3">
+                <div>
+                  <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">Nova ocorrencia</h1>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Preencha os detalhes principais antes de publicar.</p>
+                </div>
+                <div className="ml-auto flex items-center gap-3">
+                  <div className="hidden h-2 w-36 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800 sm:block">
+                    <div className="h-full rounded-full bg-emerald-600 transition-all" style={{ width: `${formProgress}%` }} />
+                  </div>
+                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{formProgress}%</span>
+                </div>
+              </Card>
 
-            <Field label="Descricao" hint={`${form.descricao.length}/500 (min. 20)`}>
-              <TextArea
-                required
-                value={form.descricao}
-                onChange={event => set('descricao', event.target.value)}
-                rows={4}
-                placeholder="Descreva o problema com detalhes"
-                maxLength={500}
-                minLength={20}
-              />
-            </Field>
+              <Card className="space-y-3">
+                <SectionTitle icon="*" title="Tipo de ocorrencia" required />
+                {isErroCategorias && <Notice tone="danger">Nao foi possivel carregar as categorias.</Notice>}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {isLoadingCategorias && (
+                    <p className="col-span-full text-sm text-zinc-500 dark:text-zinc-400">Carregando categorias...</p>
+                  )}
+                  {categorias.map((categoria, index) => {
+                    const selected = form.categoriaId === categoria.id
+                    return (
+                      <button
+                        key={categoria.id}
+                        type="button"
+                        onClick={() => set('categoriaId', categoria.id)}
+                        className={`min-h-24 rounded-lg border p-3 text-center transition ${
+                          selected
+                            ? getCategoryColor(index)
+                            : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-base font-bold dark:bg-zinc-950/40">
+                          {getCategoryIcon(categoria)}
+                        </span>
+                        <span className="block text-xs font-semibold leading-snug">{categoria.nome}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
 
-            <Field label="Categoria">
-              <SelectInput
-                required
-                value={form.categoriaId}
-                onChange={event => set('categoriaId', event.target.value)}
-                disabled={isLoadingCategorias || isErroCategorias}
-              >
-                <option value="">{isLoadingCategorias ? 'Carregando categorias...' : 'Selecione uma categoria'}</option>
-                {categorias.map(categoria => <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>)}
-              </SelectInput>
-              {isErroCategorias && <p className="mt-1 text-sm text-red-600 dark:text-red-300">Nao foi possivel carregar as categorias.</p>}
-            </Field>
+              <Card className="space-y-4">
+                <SectionTitle icon="T" title="Detalhes" />
+                <div>
+                  <Label required>Titulo</Label>
+                  <input
+                    required
+                    value={form.titulo}
+                    onChange={event => set('titulo', event.target.value.slice(0, 80))}
+                    placeholder="Descreva brevemente o problema"
+                    className={inputClass}
+                  />
+                  <CharacterCount value={form.titulo.length} max={80} min={5} />
+                </div>
+                <div>
+                  <Label required>Descricao completa</Label>
+                  <textarea
+                    required
+                    value={form.descricao}
+                    onChange={event => set('descricao', event.target.value.slice(0, 600))}
+                    rows={5}
+                    placeholder="Detalhe o que aconteceu, quando, quem foi afetado e o que ja foi tentado."
+                    className={`${inputClass} resize-y leading-6`}
+                  />
+                  <CharacterCount value={form.descricao.length} max={600} min={20} />
+                </div>
+                <div>
+                  <Label>Tags relacionadas</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {TAGS.map(tag => {
+                      const selected = tags.includes(tag)
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => toggleTag(tag)}
+                          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                            selected
+                              ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+                              : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </Card>
 
-            <Field label="Bairro">
-              <SelectInput
-                value={form.bairroId}
-                onChange={event => set('bairroId', event.target.value)}
-                disabled={isLoadingBairros || isErroBairros}
-              >
-                <option value="">{isLoadingBairros ? 'Carregando bairros...' : 'Selecione um bairro'}</option>
-                {bairros.map(bairro => <option key={bairro.id} value={bairro.id}>{bairro.nome}</option>)}
-              </SelectInput>
-              {isErroBairros && <p className="mt-1 text-sm text-red-600 dark:text-red-300">Nao foi possivel carregar os bairros.</p>}
-            </Field>
+              <Card className="space-y-3">
+                <SectionTitle icon="+" title="Fotos e videos" />
+                <button
+                  type="button"
+                  disabled
+                  title="Upload de anexos ainda nao implementado"
+                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center opacity-70 dark:border-zinc-700 dark:bg-zinc-950"
+                >
+                  <span className="text-3xl text-zinc-400">+</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Adicionar fotos</span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-500">JPG, PNG ou MP4</span>
+                </button>
+              </Card>
 
-            <Field label="Endereco" hint="Opcional">
-              <TextInput value={form.endereco} onChange={event => set('endereco', event.target.value)} placeholder="Rua, numero, bairro" />
-            </Field>
+              <Card className="space-y-3">
+                <SectionTitle icon="P" title="Localizacao" required />
+                <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
+                  <div>
+                    <Label>Bairro</Label>
+                    <select
+                      value={form.bairroId}
+                      onChange={event => set('bairroId', event.target.value)}
+                      disabled={isLoadingBairros || isErroBairros}
+                      className={inputClass}
+                    >
+                      <option value="">{isLoadingBairros ? 'Carregando bairros...' : 'Selecione um bairro'}</option>
+                      {bairros.map(bairro => <option key={bairro.id} value={bairro.id}>{bairro.nome}</option>)}
+                    </select>
+                    {isErroBairros && <p className="mt-1 text-xs text-red-600 dark:text-red-300">Nao foi possivel carregar os bairros.</p>}
+                  </div>
+                  <button
+                    type="button"
+                    disabled
+                    title="Selecao por mapa ainda nao implementada"
+                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm text-zinc-500 opacity-70 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400"
+                  >
+                    <span className="text-2xl text-emerald-600">+</span>
+                    Marcar no mapa
+                  </button>
+                </div>
+                <div>
+                  <Label>Endereco de referencia</Label>
+                  <input
+                    value={form.endereco}
+                    onChange={event => set('endereco', event.target.value)}
+                    placeholder="Rua, numero, ponto de referencia"
+                    className={inputClass}
+                  />
+                </div>
+              </Card>
 
-            {erro && <Notice tone="danger">{erro}</Notice>}
+              <Card className="space-y-3">
+                <SectionTitle icon="!" title="Severidade" />
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {(['Baixa', 'Media', 'Alta', 'Critica'] as Severity[]).map(option => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setSeverity(option)}
+                      className={`min-h-12 rounded-lg border px-3 text-sm font-semibold transition ${
+                        severity === option
+                          ? severityClass(option)
+                          : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </Card>
 
-            <Button type="submit" variant="primary" disabled={createOccurrence.isPending} className="w-full">
-              {createOccurrence.isPending ? 'Enviando...' : 'Registrar ocorrencia'}
-            </Button>
+              <Card>
+                <button
+                  type="button"
+                  onClick={() => setAnonymous(current => !current)}
+                  className="flex w-full items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left dark:border-zinc-800 dark:bg-zinc-950"
+                >
+                  <span className={`relative h-6 w-11 rounded-full transition ${anonymous ? 'bg-emerald-600' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+                    <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${anonymous ? 'left-6' : 'left-1'}`} />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Publicar anonimamente</span>
+                    <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                      {anonymous ? 'Seu nome nao aparecera no post.' : `Publicando como ${usuario.nome}.`}
+                    </span>
+                  </span>
+                </button>
+              </Card>
+            </section>
+
+            <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+              <Card className="space-y-4">
+                <SectionTitle icon=">" title="Resumo" />
+                <div className="space-y-2">
+                  <SummaryRow label="Categoria" value={categoriaSelecionada?.nome ?? 'Pendente'} tone={categoriaSelecionada ? 'ok' : 'muted'} />
+                  <SummaryRow label="Severidade" value={severity} tone={severity === 'Baixa' ? 'ok' : 'warn'} />
+                  <SummaryRow label="Bairro" value={bairroSelecionado?.nome ?? 'Pendente'} tone={bairroSelecionado ? 'ok' : 'muted'} />
+                  <SummaryRow label="Endereco" value={form.endereco.trim() ? 'Informado' : 'Opcional'} tone={form.endereco.trim() ? 'ok' : 'muted'} />
+                  <SummaryRow label="Anonimo" value={anonymous ? 'Sim' : 'Nao'} tone="muted" />
+                </div>
+                {erro && <Notice tone="danger">{erro}</Notice>}
+                <Button type="submit" variant="primary" disabled={createOccurrence.isPending} className="w-full">
+                  {createOccurrence.isPending ? 'Publicando...' : 'Publicar ocorrencia'}
+                </Button>
+                <button
+                  type="button"
+                  disabled
+                  title="Rascunhos ainda nao implementados"
+                  className="min-h-10 w-full rounded-full border border-zinc-200 text-sm font-semibold text-zinc-400 disabled:cursor-not-allowed dark:border-zinc-700 dark:text-zinc-500"
+                >
+                  Salvar rascunho
+                </button>
+              </Card>
+
+              <Card>
+                <SectionTitle icon="?" title="Dica" />
+                <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                  Quanto mais claro for o titulo, a descricao e o local, mais facil fica para outros moradores confirmarem a ocorrencia.
+                </p>
+              </Card>
+            </aside>
           </form>
-        </Card>
         )}
       </PageContainer>
     </PageShell>
+  )
+}
+
+const inputClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-emerald-950'
+
+function SectionTitle({ icon, title, required }: { icon: string; title: string; required?: boolean }) {
+  return (
+    <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{icon}</span>
+      {title}
+      {required && <span className="text-red-600 dark:text-red-300">*</span>}
+    </h2>
+  )
+}
+
+function Label({ children, required }: { children: ReactNode; required?: boolean }) {
+  return (
+    <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+      {children} {required && <span className="text-red-600 dark:text-red-300">*</span>}
+    </label>
+  )
+}
+
+function CharacterCount({ value, min, max }: { value: number; min: number; max: number }) {
+  const tone = value >= min ? 'text-emerald-700 dark:text-emerald-300' : 'text-zinc-400 dark:text-zinc-500'
+  return <p className={`mt-1 text-right text-xs ${tone}`}>{value} / {max}</p>
+}
+
+function severityClass(severity: Severity) {
+  if (severity === 'Baixa') return 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+  if (severity === 'Media') return 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200'
+  return 'border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200'
+}
+
+function SummaryRow({ label, value, tone }: { label: string; value: string; tone: 'ok' | 'warn' | 'muted' }) {
+  return (
+    <div className="flex items-center justify-between border-b border-zinc-100 py-2 text-sm last:border-b-0 dark:border-zinc-800">
+      <span className="text-zinc-500 dark:text-zinc-400">{label}</span>
+      <span className={`font-semibold ${
+        tone === 'ok'
+          ? 'text-emerald-700 dark:text-emerald-300'
+          : tone === 'warn'
+            ? 'text-amber-700 dark:text-amber-300'
+            : 'text-zinc-700 dark:text-zinc-200'
+      }`}>
+        {value}
+      </span>
+    </div>
   )
 }

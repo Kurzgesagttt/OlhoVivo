@@ -118,7 +118,8 @@ export default function HomePage() {
   const ocorrenciasFiltradas = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     const filtered = ocorrencias.filter(ocorrencia => {
-      if (sortMode === 'closed' && ocorrencia.status !== 'ENCERRADA') {
+      const isEncerrada = ocorrencia.status === 'ENCERRADA'
+      if ((sortMode === 'closed' && !isEncerrada) || (sortMode !== 'closed' && isEncerrada)) {
         return false
       }
 

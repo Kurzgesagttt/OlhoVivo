@@ -3,9 +3,11 @@ package br.com.olhodobairro.service;
 import br.com.olhodobairro.dto.request.CadastroRequest;
 import br.com.olhodobairro.dto.request.LoginRequest;
 import br.com.olhodobairro.dto.response.TokenResponse;
+import br.com.olhodobairro.model.ConsentLog;
 import br.com.olhodobairro.model.RefreshToken;
 import br.com.olhodobairro.model.Usuario;
 import br.com.olhodobairro.model.enums.Role;
+import br.com.olhodobairro.repository.ConsentLogRepository;
 import br.com.olhodobairro.repository.RefreshTokenRepository;
 import br.com.olhodobairro.repository.UsuarioRepository;
 import br.com.olhodobairro.security.JwtService;
@@ -29,31 +31,41 @@ public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ConsentLogRepository consentLogRepository;
+    private final AuditService auditService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final long refreshTokenExpirationDays;
+    private final String versaoPoliticaPrivacidade;
 
     public AuthService(
             UsuarioRepository usuarioRepository,
             RefreshTokenRepository refreshTokenRepository,
+            ConsentLogRepository consentLogRepository,
+            AuditService auditService,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            @Value("${jwt.refresh-token-expiration-days}") long refreshTokenExpirationDays) {
+            @Value("${jwt.refresh-token-expiration-days}") long refreshTokenExpirationDays,
+            @Value("${app.privacy-policy.version}") String versaoPoliticaPrivacidade) {
         this.usuarioRepository = usuarioRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.consentLogRepository = consentLogRepository;
+        this.auditService = auditService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenExpirationDays = refreshTokenExpirationDays;
+        this.versaoPoliticaPrivacidade = versaoPoliticaPrivacidade;
     }
 
     @Transactional
-    public void cadastrar(CadastroRequest request) {
+    public void cadastrar(CadastroRequest request, String ipCliente) {
         if (!request.aceitouPolitica()) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Aceitação da política é obrigatória");
         }
 
         String emailHash = sha256Hex(request.email().toLowerCase());
         String cpfHash = sha256Hex(request.cpf());
+        String ipHash = sha256Hex(ipCliente == null ? "" : ipCliente);
 
         if (usuarioRepository.existsByEmailHash(emailHash)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "E-mail já cadastrado");
@@ -69,7 +81,22 @@ public class AuthService {
         usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
         usuario.setRole(Role.MORADOR);
 
-        usuarioRepository.save(usuario);
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        ConsentLog consentLog = new ConsentLog();
+        consentLog.setUsuario(usuarioSalvo);
+        consentLog.setVersaoPolitica(versaoPoliticaPrivacidade);
+        consentLog.setIpHash(ipHash);
+        consentLogRepository.save(consentLog);
+
+        auditService.registrar(
+                usuarioSalvo,
+                "CADASTRO_USUARIO",
+                "Usuario",
+                usuarioSalvo.getId(),
+                Map.of("role", usuarioSalvo.getRole().name()),
+                ipHash
+        );
     }
 
     @Transactional

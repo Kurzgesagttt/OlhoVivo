@@ -33,6 +33,10 @@ jwt:
   access-token-expiration-ms: 900000       # 15 minutos
   refresh-token-expiration-days: 7
 
+app:
+  privacy-policy:
+    version: ${PRIVACY_POLICY_VERSION:v1}
+
 logging:
   level:
     br.com.olhodobairro: INFO

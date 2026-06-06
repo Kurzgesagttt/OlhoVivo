@@ -9,6 +9,7 @@ import br.com.olhodobairro.model.Categoria;
 import br.com.olhodobairro.model.ImagemOcorrencia;
 import br.com.olhodobairro.model.Ocorrencia;
 import br.com.olhodobairro.model.Usuario;
+import br.com.olhodobairro.repository.BairroRepository;
 import br.com.olhodobairro.repository.CategoriaRepository;
 import br.com.olhodobairro.repository.ImagemOcorrenciaRepository;
 import br.com.olhodobairro.repository.OcorrenciaRepository;
@@ -36,6 +37,7 @@ public class OcorrenciaService {
 
     private final OcorrenciaRepository ocorrenciaRepository;
     private final CategoriaRepository categoriaRepository;
+    private final BairroRepository bairroRepository;
     private final UsuarioRepository usuarioRepository;
     private final VotoRepository votoRepository;
     private final ImagemOcorrenciaRepository imagemOcorrenciaRepository;
@@ -44,6 +46,7 @@ public class OcorrenciaService {
 
     public OcorrenciaService(OcorrenciaRepository ocorrenciaRepository,
                               CategoriaRepository categoriaRepository,
+                              BairroRepository bairroRepository,
                               UsuarioRepository usuarioRepository,
                               VotoRepository votoRepository,
                               ImagemOcorrenciaRepository imagemOcorrenciaRepository,
@@ -51,6 +54,7 @@ public class OcorrenciaService {
                               @Value("${app.upload-dir:uploads}") String uploadDir) {
         this.ocorrenciaRepository = ocorrenciaRepository;
         this.categoriaRepository = categoriaRepository;
+        this.bairroRepository = bairroRepository;
         this.usuarioRepository = usuarioRepository;
         this.votoRepository = votoRepository;
         this.imagemOcorrenciaRepository = imagemOcorrenciaRepository;
@@ -86,6 +90,10 @@ public class OcorrenciaService {
         ocorrencia.setLatitude(request.latitude());
         ocorrencia.setLongitude(request.longitude());
         ocorrencia.setEndereco(request.endereco());
+        if (request.bairroId() != null) {
+            ocorrencia.setBairro(bairroRepository.findById(request.bairroId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bairro nao encontrado")));
+        }
 
         return toResponse(ocorrenciaRepository.save(ocorrencia));
     }

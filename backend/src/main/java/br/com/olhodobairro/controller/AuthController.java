@@ -5,6 +5,7 @@ import br.com.olhodobairro.dto.request.LoginRequest;
 import br.com.olhodobairro.dto.response.TokenResponse;
 import br.com.olhodobairro.service.AuthService;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,8 +28,10 @@ public class AuthController {
     }
 
     @PostMapping("/cadastro")
-    public ResponseEntity<Void> cadastro(@Valid @RequestBody CadastroRequest request) {
-        authService.cadastrar(request);
+    public ResponseEntity<Void> cadastro(
+            @Valid @RequestBody CadastroRequest request,
+            HttpServletRequest httpRequest) {
+        authService.cadastrar(request, extrairIpCliente(httpRequest));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -74,5 +77,13 @@ public class AuthController {
         cookie.setPath("/api/v1/auth");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+    }
+
+    private String extrairIpCliente(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }

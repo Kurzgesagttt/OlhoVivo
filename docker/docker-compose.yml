@@ -1,18 +1,16 @@
+name: olho-do-bairro
+
 services:
   db:
     image: postgres:15-alpine
     env_file:
       - ../.env.local
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,10 +22,6 @@ services:
     env_file:
       - ../.env.local
     environment:
-      DB_URL: jdbc:postgresql://db:5432/${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
       SPRING_PROFILES_ACTIVE: local
     ports:
       - "8080:8080"

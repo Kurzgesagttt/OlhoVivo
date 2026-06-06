@@ -23,12 +23,32 @@ const STATUS_LABEL: Record<StatusOcorrencia, string> = {
 }
 
 const STATUS_OPTIONS: StatusOcorrencia[] = ['PENDENTE', 'EM_ANDAMENTO', 'CONCLUIDA', 'ENCERRADA']
+type StatusFilter = 'TODOS' | StatusOcorrencia
+
+const FILTER_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
+  { value: 'TODOS', label: 'Todos' },
+  { value: 'PENDENTE', label: 'Pendentes' },
+  { value: 'EM_ANDAMENTO', label: 'Em andamento' },
+  { value: 'CONCLUIDA', label: 'Concluidas' },
+  { value: 'ENCERRADA', label: 'Encerradas' },
+]
 
 export default function ModerationPage() {
   const [page, setPage] = useState(0)
+  const [statusFiltro, setStatusFiltro] = useState<StatusFilter>('TODOS')
   const [atualizandoId, setAtualizandoId] = useState<string | null>(null)
   const { data, isLoading } = useOccurrences(page)
   const queryClient = useQueryClient()
+  const ocorrencias = data?.content ?? []
+  const ocorrenciasFiltradas = statusFiltro === 'TODOS'
+    ? ocorrencias
+    : ocorrencias.filter(ocorrencia => ocorrencia.status === statusFiltro)
+  const counts = FILTER_OPTIONS.reduce<Record<StatusFilter, number>>((acc, option) => {
+    acc[option.value] = option.value === 'TODOS'
+      ? ocorrencias.length
+      : ocorrencias.filter(ocorrencia => ocorrencia.status === option.value).length
+    return acc
+  }, {} as Record<StatusFilter, number>)
 
   async function alterarStatus(id: string, status: StatusOcorrencia) {
     setAtualizandoId(id)
@@ -44,10 +64,28 @@ export default function ModerationPage() {
     <PageShell>
       <AppHeader title="Moderacao" subtitle="Gerencie status de ocorrencias" backTo="/admin/dashboard" />
       <PageContainer className="space-y-4">
+        <Card className="flex flex-wrap items-center gap-2">
+          {FILTER_OPTIONS.map(option => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setStatusFiltro(option.value)}
+              className={`min-h-10 rounded-full px-4 text-sm font-semibold transition ${
+                statusFiltro === option.value
+                  ? 'bg-emerald-600 text-white'
+                  : 'border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+              }`}
+            >
+              {option.label}
+              <span className="ml-2 opacity-70">{counts[option.value] ?? 0}</span>
+            </button>
+          ))}
+        </Card>
+
         {isLoading && <p className="text-sm text-zinc-500 dark:text-zinc-400">Carregando...</p>}
 
         <div className="space-y-3">
-          {data?.content.map(ocorrencia => (
+          {ocorrenciasFiltradas.map(ocorrencia => (
             <Card key={ocorrencia.id} className="flex items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <Link to={`/ocorrencias/${ocorrencia.id}`} className="block truncate font-medium text-zinc-900 hover:text-emerald-700 dark:text-zinc-100 dark:hover:text-emerald-400">
@@ -77,6 +115,12 @@ export default function ModerationPage() {
             </Card>
           ))}
         </div>
+
+        {!isLoading && ocorrenciasFiltradas.length === 0 && (
+          <Card className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+            Nenhuma ocorrencia encontrada para este filtro nesta pagina.
+          </Card>
+        )}
 
         {data && data.totalPages > 1 && (
           <div className="flex justify-center gap-3 pt-4">

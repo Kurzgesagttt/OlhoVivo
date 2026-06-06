@@ -46,7 +46,7 @@ const NEIGHBORHOOD_DOT_COLORS = [
   'bg-sky-500',
 ]
 
-type SortMode = 'hot' | 'recent' | 'top'
+type SortMode = 'hot' | 'recent' | 'top' | 'closed'
 
 function formatRelativeDate(value: string) {
   const date = new Date(value)
@@ -118,6 +118,10 @@ export default function HomePage() {
   const ocorrenciasFiltradas = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     const filtered = ocorrencias.filter(ocorrencia => {
+      if (sortMode === 'closed' && ocorrencia.status !== 'ENCERRADA') {
+        return false
+      }
+
       const matchesQuery =
         !normalizedQuery ||
         ocorrencia.titulo.toLowerCase().includes(normalizedQuery) ||
@@ -135,6 +139,10 @@ export default function HomePage() {
     })
 
     return [...filtered].sort((a, b) => {
+      if (sortMode === 'closed') {
+        return new Date(b.atualizadoEm).getTime() - new Date(a.atualizadoEm).getTime()
+      }
+
       if (sortMode === 'recent') {
         return new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()
       }
@@ -151,6 +159,7 @@ export default function HomePage() {
 
   const totalPendentes = ocorrencias.filter(ocorrencia => ocorrencia.status === 'PENDENTE').length
   const totalConcluidas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
+  const totalEncerradas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'ENCERRADA').length
   const totalVotos = ocorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const novaOcorrenciaPath = usuario ? '/ocorrencias/nova' : '/login'
 
@@ -334,6 +343,7 @@ export default function HomePage() {
               <StatBox label="Posts" value={String(data?.totalElements ?? ocorrencias.length)} />
               <StatBox label="Pendentes" value={String(totalPendentes)} />
               <StatBox label="Concluidas" value={String(totalConcluidas)} />
+              <StatBox label="Encerradas" value={String(totalEncerradas)} />
               <StatBox label="Votos" value={String(totalVotos)} />
             </div>
           </Panel>
@@ -362,6 +372,7 @@ export default function HomePage() {
                 ['hot', 'Em alta'],
                 ['recent', 'Recentes'],
                 ['top', 'Mais votadas'],
+                ['closed', 'Encerradas'],
               ] as const).map(([mode, label]) => (
                 <button
                   key={mode}

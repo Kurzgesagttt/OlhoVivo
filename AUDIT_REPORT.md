@@ -352,3 +352,64 @@ Comportamento aplicado:
 - Endpoints backend removidos: 0.
 - Itens mantidos por cautela/PRD: 4.
 - Regra de login para criar ocorrencia: implementada no frontend e ja existente no backend.
+
+## Fase 5 - Validacao final
+
+Data: 2026-06-05
+
+### Escopo executado
+
+- Build completo dos containers de producao.
+- Inicializacao dos containers locais de frontend e backend.
+- Validacao de rotas principais do frontend.
+- Validacao de endpoints publicos do backend.
+- Confirmacao de que nao ficaram imports quebrados detectaveis no build.
+
+### Comandos executados
+
+- `docker compose -f docker/docker-compose.prod.yml build`
+- `docker compose -f docker/docker-compose.prod.yml up -d`
+- `docker compose -f docker/docker-compose.prod.yml ps`
+
+### Status dos containers
+
+| Servico | Porta | Resultado |
+| --- | --- | --- |
+| `backend` | `8080` | Container iniciado com sucesso |
+| `frontend` | `80` | Container iniciado com sucesso |
+
+### Rotas frontend validadas
+
+| Rota | Status HTTP | Resultado |
+| --- | --- | --- |
+| `/` | 200 | OK |
+| `/login` | 200 | OK |
+| `/home` | 200 | OK |
+| `/cadastro` | 200 | OK |
+| `/ocorrencias/nova` | 200 | OK |
+| `/admin/dashboard` | 200 | OK |
+
+### Endpoints backend validados
+
+| Endpoint | Status HTTP | Resultado |
+| --- | --- | --- |
+| `GET /api/v1/categorias` | 200 | OK |
+| `GET /api/v1/bairros?cidade=Lins&estado=SP` | 200 | OK |
+| `GET /api/v1/ocorrencias?page=0&size=1` | 200 | OK |
+| `GET /api/v1/me` | 403 | OK para requisicao sem token |
+
+### Resumo final consolidado
+
+- Componentes compartilhados criados/unificados: 11.
+- Paginas migradas para layout compartilhado: 10.
+- Links corrigidos: 4.
+- Botoes/features corrigidos ou desabilitados: 5.
+- Links de criacao de ocorrencia protegidos por estado de autenticacao: 4.
+- Arquivos de codigo morto deletados: 3.
+- Funcoes/metodos de codigo morto deletados: 1.
+- Imports quebrados detectados no build: 0.
+- Rotas principais com erro de carregamento: 0.
+
+### Itens BROKEN pendentes
+
+- `GET /api/v1/admin/usuarios`: chamado por `frontend/src/pages/admin/UsersPage.tsx`, mas ainda sem endpoint correspondente no backend.

@@ -73,7 +73,6 @@ export default function ProfilePage() {
   const totalVotos = minhasOcorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const resolvidas = minhasOcorrencias.filter(ocorrencia => ocorrencia.status === 'RESOLVIDA').length
   const bairroPrincipal = minhasOcorrencias.find(ocorrencia => ocorrencia.bairro)?.bairro?.nome ?? 'Lins'
-  const karma = minhasOcorrencias.length * 25 + totalVotos * 5 + resolvidas * 40
 
   async function handleSaveBio(event: FormEvent) {
     event.preventDefault()
@@ -189,10 +188,9 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-zinc-800 pt-5 sm:grid-cols-4">
+                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-zinc-800 pt-5">
                   <StatBox label="Posts" value={String(minhasOcorrencias.length)} />
                   <StatBox label="Resolvidos" value={String(resolvidas)} tone="green" />
-                  <StatBox label="Karma" value={String(karma)} />
                   <StatBox label="Votos" value={String(totalVotos)} />
                 </div>
               </div>
@@ -241,17 +239,6 @@ export default function ProfilePage() {
           </main>
 
           <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <Card>
-              <SectionTitle title="Karma do bairro" />
-              <div className="py-3 text-center">
-                <div className="text-4xl font-semibold text-emerald-400">{karma}</div>
-                <div className="text-xs text-zinc-500">pontos acumulados</div>
-              </div>
-              <KarmaRow label="Posts" value={minhasOcorrencias.length * 25} />
-              <KarmaRow label="Resolvidos" value={resolvidas * 40} />
-              <KarmaRow label="Votos recebidos" value={totalVotos * 5} />
-            </Card>
-
             <Card>
               <SectionTitle title="Impacto real" />
               <InfoRow label="Problemas registrados" value={String(minhasOcorrencias.length)} />
@@ -313,21 +300,6 @@ function ProfileOccurrence({ ocorrencia }: { ocorrencia: Ocorrencia }) {
         </div>
       </div>
     </Link>
-  )
-}
-
-function KarmaRow({ label, value }: { label: string; value: number }) {
-  const width = Math.min(100, value)
-  return (
-    <div className="mb-3 last:mb-0">
-      <div className="mb-1 flex justify-between text-xs">
-        <span className="text-zinc-500">{label}</span>
-        <span className="font-semibold text-zinc-200">+{value}</span>
-      </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
-        <div className="h-full rounded-full bg-emerald-500" style={{ width: `${width}%` }} />
-      </div>
-    </div>
   )
 }
 

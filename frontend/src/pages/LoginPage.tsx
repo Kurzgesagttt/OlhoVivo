@@ -63,6 +63,15 @@ export default function LoginPage() {
           Cadastre-se
         </Link>
       </p>
+
+      <div className="mt-6 border-t border-zinc-200 pt-5 text-center dark:border-zinc-800">
+        <Link
+          to="/admin/login"
+          className="inline-flex min-h-10 items-center justify-center rounded-full border border-zinc-200 px-4 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          Acesso de responsaveis
+        </Link>
+      </div>
     </AuthShell>
   )
 }

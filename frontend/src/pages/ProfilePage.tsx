@@ -71,7 +71,7 @@ export default function ProfilePage() {
   const ocorrencias = ocorrenciasPage?.content ?? []
   const minhasOcorrencias = ocorrencias.filter(ocorrencia => ocorrencia.usuarioId === usuario.id)
   const totalVotos = minhasOcorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
-  const resolvidas = minhasOcorrencias.filter(ocorrencia => ocorrencia.status === 'RESOLVIDA').length
+  const resolvidas = minhasOcorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
   const bairroPrincipal = minhasOcorrencias.find(ocorrencia => ocorrencia.bairro)?.bairro?.nome ?? 'Lins'
 
   async function handleSaveBio(event: FormEvent) {
@@ -291,7 +291,9 @@ function ProfileOccurrence({ ocorrencia }: { ocorrencia: Ocorrencia }) {
       <div className="min-w-0">
         <div className="mb-1 flex flex-wrap gap-2">
           <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-zinc-300">{ocorrencia.categoria.nome}</span>
-          {ocorrencia.status === 'RESOLVIDA' && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Resolvido</span>}
+          {(ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA') && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Concluida</span>}
+          {ocorrencia.status === 'EM_ANDAMENTO' && <span className="rounded-full bg-sky-950 px-2 py-0.5 text-xs font-semibold text-sky-300">Em andamento</span>}
+          {ocorrencia.status === 'ENCERRADA' && <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-zinc-300">Encerrada</span>}
         </div>
         <h3 className="line-clamp-2 text-sm font-semibold text-zinc-100 hover:text-emerald-300">{ocorrencia.titulo}</h3>
         <div className="mt-1 flex flex-wrap gap-3 text-xs text-zinc-500">

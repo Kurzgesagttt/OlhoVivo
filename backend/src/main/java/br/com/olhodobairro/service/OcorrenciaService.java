@@ -103,8 +103,12 @@ public class OcorrenciaService {
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrência não encontrada"));
         ocorrencia.setStatus(request.status());
-        if ("RESOLVIDA".equals(request.status().name())) {
+        if ("CONCLUIDA".equals(request.status().name())
+                || "ENCERRADA".equals(request.status().name())
+                || "RESOLVIDA".equals(request.status().name())) {
             ocorrencia.setResolvidoEm(java.time.OffsetDateTime.now());
+        } else {
+            ocorrencia.setResolvidoEm(null);
         }
         return toResponse(ocorrenciaRepository.save(ocorrencia));
     }

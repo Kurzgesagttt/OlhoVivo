@@ -1,6 +1,6 @@
 // Tipos de domínio: Ocorrência, Categoria, Bairro
 export type Role = 'MORADOR' | 'MODERADOR' | 'ADMIN' | 'PREFEITURA'
-export type StatusOcorrencia = 'PENDENTE' | 'RESOLVIDA'
+export type StatusOcorrencia = 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'ENCERRADA' | 'RESOLVIDA'
 
 export interface Categoria {
   id: string

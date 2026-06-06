@@ -10,11 +10,17 @@ import type { Ocorrencia } from '../types/occurrence'
 
 const STATUS_LABEL: Record<string, string> = {
   PENDENTE: 'Pendente',
+  EM_ANDAMENTO: 'Em andamento',
+  CONCLUIDA: 'Concluida',
+  ENCERRADA: 'Encerrada',
   RESOLVIDA: 'Resolvida',
 }
 
 const STATUS_STYLE: Record<string, string> = {
   PENDENTE: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-800',
+  EM_ANDAMENTO: 'bg-sky-50 text-sky-800 ring-1 ring-sky-200 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800',
+  CONCLUIDA: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-800',
+  ENCERRADA: 'bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700',
   RESOLVIDA: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-800',
 }
 
@@ -144,7 +150,7 @@ export default function HomePage() {
   }, [bairroSelecionado, categoriaSelecionada, ocorrencias, query, sortMode])
 
   const totalPendentes = ocorrencias.filter(ocorrencia => ocorrencia.status === 'PENDENTE').length
-  const totalResolvidas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'RESOLVIDA').length
+  const totalConcluidas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
   const totalVotos = ocorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const novaOcorrenciaPath = usuario ? '/ocorrencias/nova' : '/login'
 
@@ -327,7 +333,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-2">
               <StatBox label="Posts" value={String(data?.totalElements ?? ocorrencias.length)} />
               <StatBox label="Pendentes" value={String(totalPendentes)} />
-              <StatBox label="Resolvidas" value={String(totalResolvidas)} />
+              <StatBox label="Concluidas" value={String(totalConcluidas)} />
               <StatBox label="Votos" value={String(totalVotos)} />
             </div>
           </Panel>
@@ -542,8 +548,8 @@ function OccurrencePostCard({
             {ocorrencia.bairro?.nome ? `em ${ocorrencia.bairro.nome}` : 'sem bairro'}
           </span>
           <span className="text-xs text-zinc-400 dark:text-zinc-500">por morador - {formatRelativeDate(ocorrencia.criadoEm)}</span>
-          <span className={`ml-auto rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[ocorrencia.status]}`}>
-            {STATUS_LABEL[ocorrencia.status]}
+          <span className={`ml-auto rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[ocorrencia.status] ?? STATUS_STYLE.PENDENTE}`}>
+            {STATUS_LABEL[ocorrencia.status] ?? ocorrencia.status}
           </span>
         </div>
 

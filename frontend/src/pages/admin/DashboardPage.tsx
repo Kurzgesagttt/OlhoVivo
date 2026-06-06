@@ -5,14 +5,18 @@ import { useOccurrences } from '../../hooks/useOccurrences'
 const metricStyle = {
   total: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-200',
   pending: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-200',
+  progress: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200',
   done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
+  closed: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200',
 }
 
 export default function DashboardPage() {
   const { data } = useOccurrences(0)
 
   const total = data?.totalElements ?? 0
-  const resolvidas = data?.content.filter(ocorrencia => ocorrencia.status === 'RESOLVIDA').length ?? 0
+  const concluidas = data?.content.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length ?? 0
+  const emAndamento = data?.content.filter(ocorrencia => ocorrencia.status === 'EM_ANDAMENTO').length ?? 0
+  const encerradas = data?.content.filter(ocorrencia => ocorrencia.status === 'ENCERRADA').length ?? 0
   const pendentes = data?.content.filter(ocorrencia => ocorrencia.status === 'PENDENTE').length ?? 0
 
   return (
@@ -21,11 +25,13 @@ export default function DashboardPage() {
       <PageContainer className="space-y-6">
         <section>
           <h1 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-100">Visao geral</h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {[
               { label: 'Total de ocorrencias', value: total, className: metricStyle.total },
               { label: 'Pendentes', value: pendentes, className: metricStyle.pending },
-              { label: 'Resolvidas', value: resolvidas, className: metricStyle.done },
+              { label: 'Em andamento', value: emAndamento, className: metricStyle.progress },
+              { label: 'Concluidas', value: concluidas, className: metricStyle.done },
+              { label: 'Encerradas', value: encerradas, className: metricStyle.closed },
             ].map(card => (
               <Card key={card.label} className={card.className}>
                 <p className="text-3xl font-bold">{card.value}</p>

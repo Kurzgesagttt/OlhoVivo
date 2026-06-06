@@ -6,9 +6,13 @@ import OccurrenceDetailPage from './pages/OccurrenceDetailPage'
 import CreateOccurrencePage from './pages/CreateOccurrencePage'
 import ProfilePage from './pages/ProfilePage'
 import NotFoundPage from './pages/NotFoundPage'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import ModerationPage from './pages/admin/ModerationPage'
 import UsersPage from './pages/admin/UsersPage'
+
+const ADMIN_ROLES = ['ADMIN', 'MODERADOR', 'PREFEITURA'] as const
 
 export default function Router() {
   return (
@@ -21,9 +25,10 @@ export default function Router() {
         <Route path="/ocorrencias/:id" element={<OccurrenceDetailPage />} />
         <Route path="/ocorrencias/nova" element={<CreateOccurrencePage />} />
         <Route path="/perfil" element={<ProfilePage />} />
-        <Route path="/admin/dashboard" element={<DashboardPage />} />
-        <Route path="/admin/moderacao" element={<ModerationPage />} />
-        <Route path="/admin/usuarios" element={<UsersPage />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute roles={[...ADMIN_ROLES]}><DashboardPage /></ProtectedRoute>} />
+        <Route path="/admin/moderacao" element={<ProtectedRoute roles={[...ADMIN_ROLES]}><ModerationPage /></ProtectedRoute>} />
+        <Route path="/admin/usuarios" element={<ProtectedRoute roles={['ADMIN']}><UsersPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

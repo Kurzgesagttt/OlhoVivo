@@ -195,39 +195,49 @@ export const Fab = forwardRef<HTMLButtonElement, FabProps>(function Fab(
 
 export interface VoteButtonProps {
   count: number
-  voted?: 'up' | 'down' | null
+  voted?: boolean
   onVote?: (dir: 'up' | 'down') => void
+  disabled?: boolean
+  className?: string
 }
 
-export function VoteButton({ count, voted, onVote }: VoteButtonProps) {
-  const displayedCount = voted === 'up' ? count + 1 : voted === 'down' ? count - 1 : count
-
+export function VoteButton({ count, voted = false, onVote, disabled = false, className }: VoteButtonProps) {
   return (
-    <div className="inline-flex overflow-hidden rounded-full border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <div
+      className={cn(
+        'inline-flex overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+        disabled && 'opacity-70',
+        className
+      )}
+    >
       <button
         type="button"
         onClick={() => onVote?.('up')}
+        disabled={disabled || voted}
+        title={voted ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
         aria-label="Confirmar ocorrencia"
         className={cn(
-          'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-medium transition-colors',
-          voted === 'up'
+          'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed',
+          voted
             ? 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300'
             : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 dark:text-gray-400 dark:hover:bg-teal-950'
         )}
       >
         <span aria-hidden="true">^</span>
-        <span>{displayedCount}</span>
+        <span>{count}</span>
       </button>
       <div className="h-5 w-px self-center bg-gray-200 dark:bg-gray-700" />
       <button
         type="button"
         onClick={() => onVote?.('down')}
+        disabled={disabled || !voted}
+        title={voted ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
         aria-label="Remover confirmacao"
         className={cn(
-          'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors',
-          voted === 'down'
-            ? 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400'
-            : 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950'
+          'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors disabled:cursor-not-allowed',
+          voted
+            ? 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950'
+            : 'text-gray-300 dark:text-gray-700'
         )}
       >
         <span aria-hidden="true">v</span>

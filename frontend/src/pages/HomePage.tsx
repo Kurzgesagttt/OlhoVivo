@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
-import { ButtonGroup, PageShell } from '../components/ui'
+import { ButtonGroup, PageShell, VoteButton } from '../components/ui'
 import type { Ocorrencia } from '../types/occurrence'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -514,32 +514,14 @@ function OccurrencePostCard({
     <article
       className="group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 sm:grid-cols-[44px_minmax(0,1fr)_104px]"
     >
-      <div className="flex flex-col items-center gap-1 bg-zinc-50 px-2 py-3 dark:bg-zinc-950">
-        <button
-          type="button"
-          onClick={() => void handleVote('add')}
-          disabled={isVoting || ocorrencia.votadoPeloUsuario}
-          aria-label="Confirmar ocorrencia"
-          title={ocorrencia.votadoPeloUsuario ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
-          className={`text-lg leading-none disabled:opacity-60 ${
-            ocorrencia.votadoPeloUsuario
-              ? 'text-emerald-700 dark:text-emerald-400'
-              : 'text-zinc-400 hover:text-emerald-700 dark:hover:text-emerald-400'
-          }`}
-        >
-          ^
-        </button>
-        <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">{ocorrencia.votosCount}</span>
-        <button
-          type="button"
-          onClick={() => void handleVote('remove')}
-          disabled={isVoting || !ocorrencia.votadoPeloUsuario}
-          aria-label="Remover confirmacao"
-          title={ocorrencia.votadoPeloUsuario ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
-          className="text-lg leading-none text-zinc-300 hover:text-red-600 disabled:opacity-50 dark:text-zinc-600"
-        >
-          v
-        </button>
+      <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-zinc-950">
+        <VoteButton
+          count={ocorrencia.votosCount}
+          voted={ocorrencia.votadoPeloUsuario}
+          disabled={isVoting}
+          onVote={direction => void handleVote(direction === 'up' ? 'add' : 'remove')}
+          className="scale-90 sm:scale-100"
+        />
         {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
       </div>
 

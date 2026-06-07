@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useComments, useCreateComment } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
-import { PageShell } from '../components/ui'
+import { PageShell, VoteButton } from '../components/ui'
 import type { Comentario } from '../types/comment'
 import type { Ocorrencia } from '../types/occurrence'
 
@@ -347,42 +347,14 @@ function PostCard({
       </div>
 
       <div className="flex flex-wrap items-center gap-2 border-t border-zinc-200 p-4 dark:border-zinc-800">
-        <div className="flex items-center gap-1 rounded-full border border-zinc-200 px-2 py-1 dark:border-zinc-700">
-          <button
-            type="button"
-            onClick={() => void onVote()}
-            disabled={isVoting || ocorrencia.votadoPeloUsuario}
-            title={ocorrencia.votadoPeloUsuario ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
-            className={`px-1 text-lg leading-none disabled:opacity-60 ${
-              ocorrencia.votadoPeloUsuario
-                ? 'text-emerald-700 dark:text-emerald-400'
-                : 'text-zinc-500 hover:text-emerald-700 dark:hover:text-emerald-400'
-            }`}
-          >
-            ^
-          </button>
-          <span className="px-2 text-sm font-semibold">{ocorrencia.votosCount}</span>
-          <button
-            type="button"
-            onClick={() => void onRemoveVote()}
-            disabled={isVoting || !ocorrencia.votadoPeloUsuario}
-            title={ocorrencia.votadoPeloUsuario ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
-            className="px-1 text-lg leading-none text-zinc-400 hover:text-red-600 disabled:opacity-50"
-          >
-            v
-          </button>
-        </div>
+        <VoteButton
+          count={ocorrencia.votosCount}
+          voted={ocorrencia.votadoPeloUsuario}
+          disabled={isVoting}
+          onVote={direction => void (direction === 'up' ? onVote() : onRemoveVote())}
+        />
         <button type="button" disabled title="Compartilhamento ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Compartilhar</button>
         <button type="button" disabled title="Salvar ocorrencia ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Salvar</button>
-        <button
-          type="button"
-          onClick={() => void onVote()}
-          disabled={isVoting || ocorrencia.votadoPeloUsuario}
-          title={ocorrencia.votadoPeloUsuario ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
-          className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-        >
-          {ocorrencia.votadoPeloUsuario ? 'Confirmado' : isVoting ? 'Confirmando...' : 'Confirmar ocorrencia'}
-        </button>
 
         {podeAdministrar && (
           <button

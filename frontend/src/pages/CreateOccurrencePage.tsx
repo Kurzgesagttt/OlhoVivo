@@ -211,15 +211,15 @@ export default function CreateOccurrencePage() {
       <PageContainer>
         {isLoadingAuth && (
           <Card>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">Verificando sua sessao...</p>
+            <p className="text-sm text-zinc-500 dark:text-muted">Verificando sua sessao...</p>
           </Card>
         )}
 
         {!isLoadingAuth && !usuario && (
           <Card className="mx-auto max-w-xl space-y-4">
             <div>
-              <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">Entre para registrar uma ocorrencia</h1>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <h1 className="text-lg font-semibold text-zinc-950 dark:text-foreground">Entre para registrar uma ocorrencia</h1>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-muted">
                 Apenas usuarios logados podem publicar novas ocorrencias no bairro.
               </p>
             </div>
@@ -234,14 +234,14 @@ export default function CreateOccurrencePage() {
             <section className="min-w-0 space-y-4">
               <Card className="flex flex-wrap items-center gap-3">
                 <div>
-                  <h1 className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">Nova ocorrencia</h1>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Preencha os detalhes principais antes de publicar.</p>
+                  <h1 className="text-lg font-semibold text-zinc-950 dark:text-foreground">Nova ocorrencia</h1>
+                  <p className="text-sm text-zinc-500 dark:text-muted">Preencha os detalhes principais antes de publicar.</p>
                 </div>
                 <div className="ml-auto flex items-center gap-3">
-                  <div className="hidden h-2 w-36 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800 sm:block">
-                    <div className="h-full rounded-full bg-emerald-600 transition-all" style={{ width: `${formProgress}%` }} />
+                  <div className="hidden h-2 w-36 overflow-hidden rounded-full bg-zinc-100 dark:bg-surface-muted sm:block">
+                    <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${formProgress}%` }} />
                   </div>
-                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{formProgress}%</span>
+                  <span className="text-xs font-medium text-zinc-500 dark:text-muted">{formProgress}%</span>
                 </div>
               </Card>
 
@@ -250,7 +250,7 @@ export default function CreateOccurrencePage() {
                 {isErroCategorias && <Notice tone="danger">Nao foi possivel carregar as categorias.</Notice>}
                 <div className="flex flex-wrap gap-2">
                   {isLoadingCategorias && (
-                    <p className="w-full text-sm text-zinc-500 dark:text-zinc-400">Carregando categorias...</p>
+                    <p className="w-full text-sm text-zinc-500 dark:text-muted">Carregando categorias...</p>
                   )}
                   {categorias.map(categoria => {
                     const selected = form.categoriaId === categoria.id
@@ -310,8 +310,8 @@ export default function CreateOccurrencePage() {
                           onClick={() => toggleTag(tag)}
                           className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                             selected
-                              ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                              : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                              ? 'border-brand/40 bg-brand/20 text-brand dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100'
+                              : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:bg-zinc-100 dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:bg-surface-elevated'
                           }`}
                         >
                           {tag}
@@ -336,24 +336,24 @@ export default function CreateOccurrencePage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={images.length >= 5}
-                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
+                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center transition hover:border-brand hover:bg-brand/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-line dark:bg-surface-muted dark:hover:border-brand dark:hover:bg-brand-muted"
                 >
-                  <span className="text-3xl text-zinc-400">+</span>
-                  <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <span className="text-3xl text-brand">+</span>
+                  <span className="text-sm font-medium text-zinc-700 dark:text-foreground">
                     {images.length >= 5 ? 'Limite de imagens atingido' : 'Adicionar fotos'}
                   </span>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-500">JPG, PNG, WEBP ou GIF - max. 5MB cada</span>
+                  <span className="text-xs text-zinc-500 dark:text-subtle">JPG, PNG, WEBP ou GIF - max. 5MB cada</span>
                 </button>
                 {images.length > 0 && (
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                     {images.map((image, index) => (
-                      <div key={image.previewUrl} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900">
+                      <div key={image.previewUrl} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-line dark:bg-surface-muted">
                         <img src={image.previewUrl} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
                           aria-label="Remover imagem"
-                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950/80 text-xs font-bold text-white opacity-90 transition hover:bg-red-700"
+                          className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-950/80 text-xs font-bold text-white opacity-90 transition hover:bg-status-danger"
                         >
                           x
                         </button>
@@ -377,15 +377,15 @@ export default function CreateOccurrencePage() {
                       <option value="">{isLoadingBairros ? 'Carregando bairros...' : 'Selecione um bairro'}</option>
                       {bairros.map(bairro => <option key={bairro.id} value={bairro.id}>{bairro.nome}</option>)}
                     </select>
-                    {isErroBairros && <p className="mt-1 text-xs text-red-600 dark:text-red-300">Nao foi possivel carregar os bairros.</p>}
+                    {isErroBairros && <p className="mt-1 text-xs text-status-danger">Nao foi possivel carregar os bairros.</p>}
                   </div>
                   <button
                     type="button"
                     onClick={useCurrentLocation}
                     disabled={isGettingLocation}
-                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm font-medium text-zinc-600 transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
+                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm font-medium text-zinc-600 transition hover:border-brand hover:bg-brand/10 disabled:cursor-wait disabled:opacity-60 dark:border-line dark:bg-surface-muted dark:text-foreground dark:hover:border-brand dark:hover:bg-brand-muted"
                   >
-                    <span className="text-2xl text-emerald-600">+</span>
+                    <span className="text-2xl text-brand">+</span>
                     {isGettingLocation ? 'Obtendo GPS...' : 'Usar minha localizacao'}
                   </button>
                 </div>
@@ -421,14 +421,14 @@ export default function CreateOccurrencePage() {
                   </div>
                 </div>
                 {(form.latitude && form.longitude) && (
-                  <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+                  <div className="flex flex-wrap items-center gap-2 rounded-lg border border-brand/30 bg-brand/10 p-3 text-sm text-brand dark:bg-brand-muted dark:text-brand-100">
                     <span className="font-medium">Ponto marcado:</span>
                     <span>{form.latitude}, {form.longitude}</span>
                     <a
                       href={`https://www.google.com/maps?q=${encodeURIComponent(`${form.latitude},${form.longitude}`)}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="ml-auto rounded-full border border-emerald-300 px-3 py-1 text-xs font-semibold hover:bg-emerald-100 dark:border-emerald-800 dark:hover:bg-emerald-900"
+                      className="ml-auto rounded-full border border-brand/40 px-3 py-1 text-xs font-semibold hover:bg-brand/10 dark:hover:bg-brand-dark"
                     >
                       Abrir mapa
                     </a>
@@ -439,13 +439,13 @@ export default function CreateOccurrencePage() {
                         set('longitude', '')
                         setLocationStatus('')
                       }}
-                      className="rounded-full border border-emerald-300 px-3 py-1 text-xs font-semibold hover:bg-emerald-100 dark:border-emerald-800 dark:hover:bg-emerald-900"
+                      className="rounded-full border border-brand/40 px-3 py-1 text-xs font-semibold hover:bg-brand/10 dark:hover:bg-brand-dark"
                     >
                       Limpar
                     </button>
                   </div>
                 )}
-                {locationStatus && <p className="text-xs text-emerald-700 dark:text-emerald-300">{locationStatus}</p>}
+                {locationStatus && <p className="text-xs text-brand dark:text-brand-100">{locationStatus}</p>}
               </Card>
 
               <Card className="space-y-3">
@@ -459,7 +459,7 @@ export default function CreateOccurrencePage() {
                       className={`min-h-12 rounded-lg border px-3 text-sm font-semibold transition ${
                         severity === option
                           ? severityClass(option)
-                          : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                          : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:bg-surface-elevated'
                       }`}
                     >
                       {option}
@@ -472,14 +472,14 @@ export default function CreateOccurrencePage() {
                 <button
                   type="button"
                   onClick={() => setAnonymous(current => !current)}
-                  className="flex w-full items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left dark:border-zinc-700 dark:bg-zinc-900"
+                  className="flex w-full items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left dark:border-line dark:bg-surface-muted"
                 >
-                  <span className={`relative h-6 w-11 rounded-full transition ${anonymous ? 'bg-emerald-600' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
+                  <span className={`relative h-6 w-11 rounded-full transition ${anonymous ? 'bg-brand' : 'bg-zinc-300 dark:bg-line'}`}>
                     <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${anonymous ? 'left-6' : 'left-1'}`} />
                   </span>
                   <span>
-                    <span className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Publicar anonimamente</span>
-                    <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+                    <span className="block text-sm font-semibold text-zinc-900 dark:text-foreground">Publicar anonimamente</span>
+                    <span className="block text-xs text-zinc-500 dark:text-muted">
                       {anonymous ? 'Seu nome nao aparecera no post.' : `Publicando como ${usuario.nome}.`}
                     </span>
                   </span>
@@ -507,7 +507,7 @@ export default function CreateOccurrencePage() {
                   type="button"
                   disabled
                   title="Rascunhos ainda nao implementados"
-                  className="min-h-10 w-full rounded-full border border-zinc-200 text-sm font-semibold text-zinc-400 disabled:cursor-not-allowed dark:border-zinc-700 dark:text-zinc-500"
+                  className="min-h-10 w-full rounded-full border border-zinc-200 text-sm font-semibold text-zinc-400 disabled:cursor-not-allowed dark:border-line dark:text-subtle"
                 >
                   Salvar rascunho
                 </button>
@@ -515,7 +515,7 @@ export default function CreateOccurrencePage() {
 
               <Card>
                 <SectionTitle icon="?" title="Dica" />
-                <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+                <p className="text-sm leading-6 text-zinc-600 dark:text-muted">
                   Quanto mais claro for o titulo, a descricao e o local, mais facil fica para outros moradores confirmarem a ocorrencia.
                 </p>
               </Card>
@@ -527,47 +527,47 @@ export default function CreateOccurrencePage() {
   )
 }
 
-const inputClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-emerald-950'
+const inputClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-line dark:bg-surface-muted dark:text-foreground dark:focus:ring-brand/20'
 
 function SectionTitle({ icon, title, required }: { icon: string; title: string; required?: boolean }) {
   return (
-    <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{icon}</span>
+    <h2 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-muted">
+      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-zinc-100 text-zinc-600 dark:bg-surface-muted dark:text-foreground">{icon}</span>
       {title}
-      {required && <span className="text-red-600 dark:text-red-300">*</span>}
+      {required && <span className="text-status-danger">*</span>}
     </h2>
   )
 }
 
 function Label({ children, required }: { children: ReactNode; required?: boolean }) {
   return (
-    <label className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
-      {children} {required && <span className="text-red-600 dark:text-red-300">*</span>}
+    <label className="text-sm font-medium text-zinc-800 dark:text-foreground">
+      {children} {required && <span className="text-status-danger">*</span>}
     </label>
   )
 }
 
 function CharacterCount({ value, min, max }: { value: number; min: number; max: number }) {
-  const tone = value >= min ? 'text-emerald-700 dark:text-emerald-300' : 'text-zinc-400 dark:text-zinc-500'
+  const tone = value >= min ? 'text-brand dark:text-brand-100' : 'text-zinc-400 dark:text-subtle'
   return <p className={`mt-1 text-right text-xs ${tone}`}>{value} / {max}</p>
 }
 
 function severityClass(severity: Severity) {
-  if (severity === 'Baixa') return 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-  if (severity === 'Media') return 'border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200'
-  return 'border-red-300 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200'
+  if (severity === 'Baixa') return 'border-status-done/30 bg-status-done/10 text-status-done'
+  if (severity === 'Media') return 'border-status-pending/30 bg-status-pending/10 text-status-pending'
+  return 'border-status-danger/30 bg-status-danger/10 text-status-danger'
 }
 
 function SummaryRow({ label, value, tone }: { label: string; value: string; tone: 'ok' | 'warn' | 'muted' }) {
   return (
-    <div className="flex items-center justify-between border-b border-zinc-100 py-2 text-sm last:border-b-0 dark:border-zinc-800">
-      <span className="text-zinc-500 dark:text-zinc-400">{label}</span>
+    <div className="flex items-center justify-between border-b border-zinc-100 py-2 text-sm last:border-b-0 dark:border-line">
+      <span className="text-zinc-500 dark:text-muted">{label}</span>
       <span className={`font-semibold ${
         tone === 'ok'
-          ? 'text-emerald-700 dark:text-emerald-300'
+          ? 'text-brand dark:text-brand-100'
           : tone === 'warn'
-            ? 'text-amber-700 dark:text-amber-300'
-            : 'text-zinc-700 dark:text-zinc-200'
+            ? 'text-status-pending'
+            : 'text-zinc-700 dark:text-foreground'
       }`}>
         {value}
       </span>

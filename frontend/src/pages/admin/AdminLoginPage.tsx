@@ -68,9 +68,9 @@ export default function AdminLoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="mt-6 text-center text-sm text-zinc-500 dark:text-muted">
         Voltar para{' '}
-        <Link to="/login" className="font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">
+        <Link to="/login" className="font-medium text-brand hover:text-brand-hover dark:text-brand-100">
           login do morador
         </Link>
       </p>

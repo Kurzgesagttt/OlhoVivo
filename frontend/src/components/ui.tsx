@@ -439,7 +439,7 @@ export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const chipVariantClass: Record<ChipVariant, string> = {
   default: 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:border-zinc-300 hover:text-zinc-950 dark:border-line dark:bg-surface-elevated dark:text-muted',
-  active: 'border-brand/40 bg-brand/15 text-brand-100 dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100',
+  active: 'border-brand/40 bg-brand/20 text-brand dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100',
   ocorrencia: 'border-category-occurrence/40 bg-category-occurrence/10 text-category-occurrence',
   alerta: 'border-category-alert/40 bg-category-alert/10 text-category-alert',
   evento: 'border-category-event/40 bg-category-event/10 text-category-event',

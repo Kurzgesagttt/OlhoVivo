@@ -18,25 +18,25 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  PENDENTE: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:ring-amber-800',
-  EM_ANDAMENTO: 'bg-sky-50 text-sky-800 ring-1 ring-sky-200 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800',
-  CONCLUIDA: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-800',
-  ENCERRADA: 'bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700',
-  RESOLVIDA: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-800',
+  PENDENTE: 'bg-status-pending/10 text-status-pending ring-1 ring-status-pending/30',
+  EM_ANDAMENTO: 'bg-status-progress/10 text-status-progress ring-1 ring-status-progress/30',
+  CONCLUIDA: 'bg-status-done/10 text-status-done ring-1 ring-status-done/30',
+  ENCERRADA: 'bg-status-closed/10 text-status-closed ring-1 ring-status-closed/30',
+  RESOLVIDA: 'bg-status-done/10 text-status-done ring-1 ring-status-done/30',
 }
 
 const NEIGHBORHOOD_DOT_COLORS = [
-  'bg-blue-500',
-  'bg-orange-500',
-  'bg-violet-500',
-  'bg-amber-500',
-  'bg-emerald-500',
-  'bg-cyan-500',
-  'bg-rose-500',
-  'bg-lime-500',
-  'bg-fuchsia-500',
-  'bg-teal-500',
-  'bg-sky-500',
+  'bg-status-progress',
+  'bg-category-occurrence',
+  'bg-brand',
+  'bg-status-pending',
+  'bg-status-done',
+  'bg-category-service',
+  'bg-status-danger',
+  'bg-category-news',
+  'bg-brand-dark',
+  'bg-status-closed',
+  'bg-brand-hover',
 ]
 
 type SortMode = 'hot' | 'recent' | 'top' | 'closed'
@@ -155,22 +155,22 @@ export default function HomePage() {
 
   return (
     <PageShell>
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
+      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-line dark:bg-app/95">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
+          <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-foreground">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
               OB
             </span>
             <span className="hidden sm:inline">Olho do Bairro</span>
           </Link>
 
-          <label className="flex min-h-11 flex-1 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-100 px-4 text-sm text-zinc-500 focus-within:border-emerald-500 focus-within:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:focus-within:bg-zinc-800">
+          <label className="flex min-h-11 flex-1 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-100 px-4 text-sm text-zinc-500 focus-within:border-brand focus-within:bg-white dark:border-line dark:bg-surface dark:text-muted dark:focus-within:bg-surface-elevated">
             <span aria-hidden="true" className="text-base">/</span>
             <span className="sr-only">Buscar ocorrencias</span>
             <input
               value={query}
               onChange={event => setQuery(event.target.value)}
-              className="w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-500 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+              className="w-full bg-transparent text-base text-zinc-900 outline-none placeholder:text-zinc-500 dark:text-foreground dark:placeholder:text-subtle"
               placeholder="Buscar no seu bairro"
               type="search"
             />
@@ -182,7 +182,7 @@ export default function HomePage() {
               onClick={() => setDarkMode(current => !current)}
               aria-label={darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'}
               title={darkMode ? 'Modo claro' : 'Modo escuro'}
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-zinc-200 text-sm font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated"
             >
               {darkMode ? '☼' : '☾'}
             </button>
@@ -192,23 +192,23 @@ export default function HomePage() {
                 <Link
                   to="/perfil"
                   title="Abrir perfil"
-                  className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 sm:flex"
+                  className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 transition hover:bg-zinc-100 dark:border-line dark:bg-surface dark:hover:bg-surface-elevated sm:flex"
                 >
-                  <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-xs font-semibold text-white">
+                  <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-brand text-xs font-semibold text-white">
                     {usuario.fotoPerfilUrl ? (
-                      <img src={usuario.fotoPerfilUrl} alt="" className="h-full w-full bg-zinc-950 object-contain p-0.5" />
+                      <img src={usuario.fotoPerfilUrl} alt="" className="h-full w-full bg-app object-contain p-0.5" />
                     ) : (
                       getInitials(usuario.nome)
                     )}
                   </span>
-                  <span className="max-w-28 truncate text-sm text-zinc-700 dark:text-zinc-200">{usuario.nome}</span>
+                  <span className="max-w-28 truncate text-sm text-zinc-700 dark:text-foreground">{usuario.nome}</span>
                 </Link>
                 <button
                   onClick={() => {
                     logout()
                     navigate('/login')
                   }}
-                  className="min-h-11 rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                  className="min-h-11 rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated"
                 >
                   Sair
                 </button>
@@ -217,13 +217,13 @@ export default function HomePage() {
               <>
                 <Link
                   to="/login"
-                  className="hidden min-h-11 items-center rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900 sm:flex"
+                  className="hidden min-h-11 items-center rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated sm:flex"
                 >
                   Entrar
                 </Link>
                 <Link
                   to="/cadastro"
-                  className="hidden min-h-11 items-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 sm:flex"
+                  className="hidden min-h-11 items-center rounded-full bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-hover sm:flex"
                 >
                   Registrar
                 </Link>
@@ -252,8 +252,8 @@ export default function HomePage() {
                   onClick={() => setBairroSelecionado(bairro)}
                   className={`flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
                     bairroSelecionado === bairro
-                      ? 'bg-emerald-50 font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                      ? 'bg-brand/10 font-medium text-brand dark:bg-brand-muted dark:text-brand-100'
+                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-muted dark:hover:bg-surface-elevated'
                   }`}
                 >
                   <span
@@ -264,13 +264,13 @@ export default function HomePage() {
                 </button>
               ))}
               {isLoadingBairros && (
-                <div className="px-2 py-2 text-sm text-zinc-500 dark:text-zinc-400">Carregando...</div>
+                <div className="px-2 py-2 text-sm text-zinc-500 dark:text-muted">Carregando...</div>
               )}
               {bairros.length > 4 && (
                 <button
                   type="button"
                   onClick={() => setMostrarTodosBairros(current => !current)}
-                  className="flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                  className="flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left text-sm text-zinc-700 hover:bg-zinc-100 dark:text-muted dark:hover:bg-surface-elevated"
                 >
                   <span aria-hidden="true" className="w-2 text-center text-base leading-none">
                     {mostrarTodosBairros ? '-' : '+'}
@@ -294,7 +294,7 @@ export default function HomePage() {
               </button>
 
               {isLoadingCategorias && (
-                <div className="w-full px-2 py-2 text-sm text-zinc-500 dark:text-zinc-400">Carregando...</div>
+                <div className="w-full px-2 py-2 text-sm text-zinc-500 dark:text-muted">Carregando...</div>
               )}
 
               {categorias.map(categoria => (
@@ -318,9 +318,9 @@ export default function HomePage() {
           <Panel title="Mapa do bairro">
             <Link
               to={novaOcorrenciaPath}
-              className="flex h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 text-center text-sm text-zinc-600 hover:border-emerald-500 hover:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
+              className="flex h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 text-center text-sm text-zinc-600 hover:border-brand hover:bg-brand/10 dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:border-brand dark:hover:bg-brand-muted"
             >
-              <span className="text-2xl text-emerald-700 dark:text-emerald-400" aria-hidden="true">+</span>
+              <span className="text-2xl text-brand" aria-hidden="true">+</span>
               Informar ponto no mapa
             </Link>
           </Panel>
@@ -344,8 +344,8 @@ export default function HomePage() {
                 .map((ocorrencia, index) => (
                   <Link key={ocorrencia.id} to={`/ocorrencias/${ocorrencia.id}`} className="block text-sm">
                     <span className="text-xs text-zinc-400">#{index + 1}</span>
-                    <span className="ml-2 font-medium text-zinc-800 hover:text-emerald-700 dark:text-zinc-200 dark:hover:text-emerald-400">{ocorrencia.titulo}</span>
-                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-zinc-500">{ocorrencia.votosCount} votos</span>
+                    <span className="ml-2 font-medium text-zinc-800 hover:text-brand dark:text-foreground dark:hover:text-brand-100">{ocorrencia.titulo}</span>
+                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">{ocorrencia.votosCount} votos</span>
                   </Link>
                 ))}
             </div>
@@ -353,7 +353,7 @@ export default function HomePage() {
         </aside>
 
         <section className="min-w-0">
-          <div className="mb-3 rounded-lg border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-800">
+          <div className="mb-3 rounded-lg border border-zinc-200 bg-white p-2 dark:border-line dark:bg-surface">
             <div className="flex flex-wrap items-center gap-2">
               <ButtonGroup
                 value={sortMode}
@@ -382,7 +382,7 @@ export default function HomePage() {
               value={bairroSelecionado}
               onChange={event => setBairroSelecionado(event.target.value)}
               aria-label="Filtrar por bairro"
-              className="min-h-11 rounded-lg border border-zinc-200 bg-white px-3 text-base text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+              className="min-h-11 rounded-lg border border-zinc-200 bg-white px-3 text-base text-zinc-800 dark:border-line dark:bg-surface dark:text-foreground"
             >
               <option>Todos</option>
               {bairros.map(bairro => (
@@ -393,7 +393,7 @@ export default function HomePage() {
               value={categoriaSelecionada}
               onChange={event => setCategoriaSelecionada(event.target.value)}
               aria-label="Filtrar por categoria"
-              className="min-h-11 rounded-lg border border-zinc-200 bg-white px-3 text-base text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+              className="min-h-11 rounded-lg border border-zinc-200 bg-white px-3 text-base text-zinc-800 dark:border-line dark:bg-surface dark:text-foreground"
             >
               <option>Todas</option>
               {categorias.map(categoria => (
@@ -403,13 +403,13 @@ export default function HomePage() {
           </div>
 
           {isLoading && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-500 dark:border-line dark:bg-surface dark:text-muted">
               Carregando ocorrencias...
             </div>
           )}
 
           {isError && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-200">
+            <div className="rounded-lg border border-status-danger/30 bg-status-danger/10 p-6 text-sm text-status-danger">
               Nao foi possivel carregar as ocorrencias. Tente novamente em instantes.
             </div>
           )}
@@ -425,9 +425,9 @@ export default function HomePage() {
           </div>
 
           {!isLoading && ocorrenciasFiltradas.length === 0 && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-800">
-              <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100">Nenhuma ocorrencia encontrada.</p>
-              <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ajuste os filtros ou publique um novo relato.</p>
+            <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center dark:border-line dark:bg-surface">
+              <p className="text-sm font-medium text-zinc-800 dark:text-foreground">Nenhuma ocorrencia encontrada.</p>
+              <p className="mt-1 text-sm text-zinc-500 dark:text-muted">Ajuste os filtros ou publique um novo relato.</p>
             </div>
           )}
 
@@ -436,15 +436,15 @@ export default function HomePage() {
               <button
                 disabled={data.first}
                 onClick={() => setPage(currentPage => currentPage - 1)}
-                className="min-h-11 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 disabled:opacity-40 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                className="min-h-11 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 disabled:opacity-40 hover:bg-zinc-100 dark:border-line dark:bg-surface dark:text-foreground dark:hover:bg-surface-elevated"
               >
                 Anterior
               </button>
-              <span className="text-sm text-zinc-500 dark:text-zinc-400">{page + 1} / {data.totalPages}</span>
+              <span className="text-sm text-zinc-500 dark:text-muted">{page + 1} / {data.totalPages}</span>
               <button
                 disabled={data.last}
                 onClick={() => setPage(currentPage => currentPage + 1)}
-                className="min-h-11 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 disabled:opacity-40 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                className="min-h-11 rounded-full border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 disabled:opacity-40 hover:bg-zinc-100 dark:border-line dark:bg-surface dark:text-foreground dark:hover:bg-surface-elevated"
               >
                 Proxima
               </button>
@@ -520,11 +520,11 @@ function OccurrencePostCard({
 
   return (
     <article
-      className={`group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 ${
+      className={`group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-line dark:bg-surface dark:hover:border-muted ${
         hasImage ? 'sm:grid-cols-[44px_minmax(0,1fr)_104px]' : ''
       }`}
     >
-      <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-zinc-900">
+      <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-surface-muted">
         <VoteButton
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
@@ -543,19 +543,19 @@ function OccurrencePostCard({
           >
             {ocorrencia.categoria.nome}
           </Chip>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <span className="text-xs text-zinc-500 dark:text-muted">
             {ocorrencia.bairro?.nome ? `em ${ocorrencia.bairro.nome}` : 'sem bairro'}
           </span>
-          <span className="text-xs text-zinc-400 dark:text-zinc-500">por morador - {formatRelativeDate(ocorrencia.criadoEm)}</span>
+          <span className="text-xs text-zinc-400 dark:text-subtle">por morador - {formatRelativeDate(ocorrencia.criadoEm)}</span>
           <span className={`ml-auto rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[ocorrencia.status] ?? STATUS_STYLE.PENDENTE}`}>
             {STATUS_LABEL[ocorrencia.status] ?? ocorrencia.status}
           </span>
         </div>
 
-        <h2 className="line-clamp-2 text-base font-semibold leading-snug text-zinc-950 group-hover:text-emerald-800 dark:text-zinc-100 dark:group-hover:text-emerald-400">
+        <h2 className="line-clamp-2 text-base font-semibold leading-snug text-zinc-950 group-hover:text-brand dark:text-foreground dark:group-hover:text-brand-100">
           {ocorrencia.titulo}
         </h2>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{ocorrencia.descricao}</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-600 dark:text-muted">{ocorrencia.descricao}</p>
         </Link>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -588,13 +588,13 @@ function OccurrencePostCard({
           >
             Compartilhar
           </Button>
-          {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">{ocorrencia.endereco}</span>}
+          {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-surface-elevated">{ocorrencia.endereco}</span>}
         </div>
         {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}
       </div>
 
       {hasImage && (
-        <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-900 sm:flex">
+        <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-surface-muted sm:flex">
           <img
             src={ocorrencia.imagensUrl[0]}
             alt=""
@@ -608,8 +608,8 @@ function OccurrencePostCard({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{title}</h2>
+    <section className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-line dark:bg-surface">
+      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-muted">{title}</h2>
       {children}
     </section>
   )
@@ -617,9 +617,9 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-zinc-100 p-3 dark:bg-zinc-900">
-      <div className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">{value}</div>
-      <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
+    <div className="rounded-md bg-zinc-100 p-3 dark:bg-surface-muted">
+      <div className="text-lg font-semibold text-zinc-950 dark:text-foreground">{value}</div>
+      <div className="text-xs text-zinc-500 dark:text-muted">{label}</div>
     </div>
   )
 }

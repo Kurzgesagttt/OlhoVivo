@@ -7,11 +7,11 @@ import { occurrenceService } from '../../services/occurrence.service'
 import type { StatusOcorrencia } from '../../types/occurrence'
 
 const STATUS_COLOR: Record<string, string> = {
-  PENDENTE: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-200',
-  EM_ANDAMENTO: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-200',
-  CONCLUIDA: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
-  ENCERRADA: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200',
-  RESOLVIDA: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
+  PENDENTE: 'bg-status-pending/10 text-status-pending',
+  EM_ANDAMENTO: 'bg-status-progress/10 text-status-progress',
+  CONCLUIDA: 'bg-status-done/10 text-status-done',
+  ENCERRADA: 'bg-status-closed/10 text-status-closed',
+  RESOLVIDA: 'bg-status-done/10 text-status-done',
 }
 
 const STATUS_LABEL: Record<StatusOcorrencia, string> = {
@@ -75,16 +75,16 @@ export default function ModerationPage() {
           />
         </Card>
 
-        {isLoading && <p className="text-sm text-zinc-500 dark:text-zinc-400">Carregando...</p>}
+        {isLoading && <p className="text-sm text-zinc-500 dark:text-muted">Carregando...</p>}
 
         <div className="space-y-3">
           {ocorrenciasFiltradas.map(ocorrencia => (
             <Card key={ocorrencia.id} className="flex items-center justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <Link to={`/ocorrencias/${ocorrencia.id}`} className="block truncate font-medium text-zinc-900 hover:text-emerald-700 dark:text-zinc-100 dark:hover:text-emerald-400">
+                <Link to={`/ocorrencias/${ocorrencia.id}`} className="block truncate font-medium text-zinc-900 hover:text-brand dark:text-foreground dark:hover:text-brand-100">
                   {ocorrencia.titulo}
                 </Link>
-                <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">{ocorrencia.categoria.nome} - {new Date(ocorrencia.criadoEm).toLocaleDateString('pt-BR')}</p>
+                <p className="mt-0.5 text-sm text-zinc-500 dark:text-muted">{ocorrencia.categoria.nome} - {new Date(ocorrencia.criadoEm).toLocaleDateString('pt-BR')}</p>
               </div>
               <div className="flex shrink-0 items-center gap-3">
                 <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_COLOR[ocorrencia.status]}`}>
@@ -110,7 +110,7 @@ export default function ModerationPage() {
         </div>
 
         {!isLoading && ocorrenciasFiltradas.length === 0 && (
-          <Card className="text-center text-sm text-zinc-500 dark:text-zinc-400">
+          <Card className="text-center text-sm text-zinc-500 dark:text-muted">
             Nenhuma ocorrencia encontrada para este filtro nesta pagina.
           </Card>
         )}
@@ -118,7 +118,7 @@ export default function ModerationPage() {
         {data && data.totalPages > 1 && (
           <div className="flex justify-center gap-3 pt-4">
             <Button type="button" disabled={data.first} onClick={() => setPage(current => current - 1)}>Anterior</Button>
-            <span className="px-4 py-2 text-sm text-zinc-500 dark:text-zinc-400">{page + 1} / {data.totalPages}</span>
+            <span className="px-4 py-2 text-sm text-zinc-500 dark:text-muted">{page + 1} / {data.totalPages}</span>
             <Button type="button" disabled={data.last} onClick={() => setPage(current => current + 1)}>Proxima</Button>
           </div>
         )}

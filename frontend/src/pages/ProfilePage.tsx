@@ -74,7 +74,7 @@ export default function ProfilePage() {
   }, [usuario?.bio])
 
   if (isLoading) {
-    return <PageShell><div className="flex min-h-screen items-center justify-center text-sm text-zinc-400">Carregando...</div></PageShell>
+    return <PageShell><div className="flex min-h-screen items-center justify-center text-sm text-muted">Carregando...</div></PageShell>
   }
 
   if (!usuario) {
@@ -143,10 +143,8 @@ export default function ProfilePage() {
       <PageContainer>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
           <main className="min-w-0 space-y-4">
-            <section className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800">
-              <div className="relative h-28 bg-gradient-to-br from-emerald-600 to-emerald-950">
-                <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,#fff_1px,transparent_1px)] [background-size:18px_18px]" />
-              </div>
+            <section className="overflow-hidden rounded-lg border border-line bg-surface">
+              <div className="h-28 bg-brand-dark" />
               <div className="px-5 pb-5">
                 <div className="-mt-9 flex flex-wrap items-end justify-between gap-3">
                   <button
@@ -154,14 +152,14 @@ export default function ProfilePage() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={savingPhoto}
                     title="Alterar foto de perfil"
-                    className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-800 bg-emerald-600 text-2xl font-semibold text-white disabled:cursor-wait"
+                    className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-brand text-2xl font-semibold text-white disabled:cursor-wait"
                   >
                     {usuario.fotoPerfilUrl ? (
-                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full bg-zinc-900 object-contain p-1" />
+                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full bg-app object-contain p-1" />
                     ) : (
                       getInitials(usuario.nome)
                     )}
-                    <span className="absolute inset-x-0 bottom-0 bg-zinc-950/80 py-1 text-[10px] font-semibold opacity-0 transition group-hover:opacity-100">
+                    <span className="absolute inset-x-0 bottom-0 bg-app/85 py-1 text-[10px] font-semibold opacity-0 transition group-hover:opacity-100">
                       {savingPhoto ? 'Salvando' : 'Trocar'}
                     </span>
                   </button>
@@ -171,7 +169,7 @@ export default function ProfilePage() {
                       type="button"
                       disabled
                       title="Seguidores ainda nao implementados"
-                      className="min-h-10 rounded-full bg-zinc-800 px-4 text-sm font-semibold text-zinc-400 disabled:cursor-not-allowed"
+                      className="min-h-10 rounded-full bg-surface-muted px-4 text-sm font-semibold text-subtle disabled:cursor-not-allowed"
                     >
                       Seguir
                     </button>
@@ -179,7 +177,7 @@ export default function ProfilePage() {
                       type="button"
                       disabled
                       title="Mensagens ainda nao implementadas"
-                      className="min-h-10 rounded-full border border-zinc-700 px-4 text-sm font-semibold text-zinc-400 disabled:cursor-not-allowed"
+                      className="min-h-10 rounded-full border border-line px-4 text-sm font-semibold text-subtle disabled:cursor-not-allowed"
                     >
                       Mensagem
                     </button>
@@ -188,23 +186,23 @@ export default function ProfilePage() {
 
                 <div className="mt-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-xl font-semibold text-zinc-100">{usuario.nome}</h1>
-                    <span className="rounded-full bg-emerald-950 px-2.5 py-1 text-xs font-semibold text-emerald-300">
+                    <h1 className="text-xl font-semibold text-foreground">{usuario.nome}</h1>
+                    <span className="rounded-full bg-brand-muted px-2.5 py-1 text-xs font-semibold text-brand-100">
                       {ROLE_LABEL[usuario.role] ?? usuario.role}
                     </span>
                   </div>
-                  <p className="mt-1 text-sm text-zinc-500">u/{usuario.nome.toLowerCase().replace(/\s+/g, '_')}</p>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-300">
+                  <p className="mt-1 text-sm text-muted">u/{usuario.nome.toLowerCase().replace(/\s+/g, '_')}</p>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-muted">
                     {usuario.bio || 'Adicione uma descricao para contar um pouco sobre sua relacao com o bairro.'}
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-4 text-xs text-zinc-500">
+                  <div className="mt-4 flex flex-wrap gap-4 text-xs text-subtle">
                     <span>{bairroPrincipal}</span>
                     <span>Desde {formatDate(usuario.criadoEm)}</span>
                     <span>Conta verificada</span>
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-zinc-700 pt-5 sm:grid-cols-4">
+                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5 sm:grid-cols-4">
                   <StatBox label="Posts" value={String(minhasOcorrencias.length)} />
                   <StatBox label="Resolvidos" value={String(resolvidas)} tone="green" />
                   <StatBox label="Votos" value={String(totalVotos)} />
@@ -217,18 +215,18 @@ export default function ProfilePage() {
               <SectionTitle title="Editar perfil" />
               <form onSubmit={handleSaveBio} className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-zinc-200">Descricao</label>
+                  <label className="text-sm font-medium text-foreground">Descricao</label>
                   <textarea
                     value={bio}
                     onChange={event => setBio(event.target.value.slice(0, 500))}
                     rows={4}
                     placeholder="Conte um pouco sobre voce e sua relacao com o bairro."
-                    className="mt-1 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-950"
+                    className="mt-1 w-full resize-y rounded-lg border border-line bg-surface-muted px-3 py-2.5 text-sm text-foreground outline-none transition placeholder:text-subtle focus:border-brand focus:ring-2 focus:ring-brand/20"
                   />
-                  <p className="mt-1 text-right text-xs text-zinc-500">{bio.length} / 500</p>
+                  <p className="mt-1 text-right text-xs text-subtle">{bio.length} / 500</p>
                 </div>
                 {(message || error) && (
-                  <p className={`rounded-lg border px-3 py-2 text-sm ${error ? 'border-red-900 bg-red-950 text-red-200' : 'border-emerald-900 bg-emerald-950 text-emerald-200'}`}>
+                  <p className={`rounded-lg border px-3 py-2 text-sm ${error ? 'border-status-danger/30 bg-status-danger/10 text-status-danger' : 'border-status-done/30 bg-status-done/10 text-status-done'}`}>
                     {error || message}
                   </p>
                 )}
@@ -241,14 +239,14 @@ export default function ProfilePage() {
             <Card className="space-y-3">
               <SectionTitle title="Ocorrencias publicadas" />
               {minhasOcorrencias.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-zinc-800 p-6 text-center">
-                  <p className="text-sm font-medium text-zinc-300">Nenhuma ocorrencia publicada ainda.</p>
+                <div className="rounded-lg border border-dashed border-line p-6 text-center">
+                  <p className="text-sm font-medium text-foreground">Nenhuma ocorrencia publicada ainda.</p>
                   <ButtonLink to="/ocorrencias/nova" variant="primary" size="sm" pill className="mt-3">
                     Criar primeira ocorrencia
                   </ButtonLink>
                 </div>
               ) : (
-                <div className="divide-y divide-zinc-800">
+                <div className="divide-y divide-line">
                   {minhasOcorrencias.map(ocorrencia => <ProfileOccurrence key={ocorrencia.id} ocorrencia={ocorrencia} />)}
                 </div>
               )}
@@ -257,14 +255,14 @@ export default function ProfilePage() {
             <Card className="space-y-3">
               <SectionTitle title="Ocorrencias salvas" />
               {isLoadingSalvas ? (
-                <p className="rounded-lg border border-dashed border-zinc-700 p-4 text-sm text-zinc-400">Carregando ocorrencias salvas...</p>
+                <p className="rounded-lg border border-dashed border-line p-4 text-sm text-muted">Carregando ocorrencias salvas...</p>
               ) : ocorrenciasSalvas.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-zinc-700 p-6 text-center">
-                  <p className="text-sm font-medium text-zinc-300">Nenhuma ocorrencia salva ainda.</p>
-                  <p className="mt-1 text-sm text-zinc-500">Use o botao Salvar em uma ocorrencia para guardar aqui.</p>
+                <div className="rounded-lg border border-dashed border-line p-6 text-center">
+                  <p className="text-sm font-medium text-foreground">Nenhuma ocorrencia salva ainda.</p>
+                  <p className="mt-1 text-sm text-muted">Use o botao Salvar em uma ocorrencia para guardar aqui.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-zinc-700">
+                <div className="divide-y divide-line">
                   {ocorrenciasSalvas.map(ocorrencia => (
                     <ProfileOccurrence key={ocorrencia.id} ocorrencia={ocorrencia} saved />
                   ))}
@@ -315,37 +313,37 @@ export default function ProfilePage() {
 }
 
 function SectionTitle({ title }: { title: string }) {
-  return <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{title}</h2>
+  return <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">{title}</h2>
 }
 
 function StatBox({ label, value, tone }: { label: string; value: string; tone?: 'green' }) {
   return (
     <div className="text-center">
-      <div className={`text-2xl font-semibold ${tone === 'green' ? 'text-emerald-400' : 'text-zinc-100'}`}>{value}</div>
-      <div className="text-xs text-zinc-500">{label}</div>
+      <div className={`text-2xl font-semibold ${tone === 'green' ? 'text-status-done' : 'text-foreground'}`}>{value}</div>
+      <div className="text-xs text-muted">{label}</div>
     </div>
   )
 }
 
 function ProfileOccurrence({ ocorrencia, saved = false }: { ocorrencia: Ocorrencia; saved?: boolean }) {
   return (
-    <Link to={`/ocorrencias/${ocorrencia.id}`} className="grid grid-cols-[44px_minmax(0,1fr)] gap-3 py-3 hover:bg-zinc-900">
-      <div className="flex flex-col items-center text-zinc-500">
+    <Link to={`/ocorrencias/${ocorrencia.id}`} className="grid grid-cols-[44px_minmax(0,1fr)] gap-3 py-3 hover:bg-surface-elevated">
+      <div className="flex flex-col items-center text-muted">
         <span>^</span>
-        <span className="text-xs font-semibold text-zinc-300">{ocorrencia.votosCount}</span>
+        <span className="text-xs font-semibold text-foreground">{ocorrencia.votosCount}</span>
       </div>
       <div className="min-w-0">
         <div className="mb-1 flex flex-wrap gap-2">
           <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)}>
             {ocorrencia.categoria.nome}
           </Chip>
-          {saved && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Salva</span>}
-          {(ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA') && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Concluida</span>}
-          {ocorrencia.status === 'EM_ANDAMENTO' && <span className="rounded-full bg-sky-950 px-2 py-0.5 text-xs font-semibold text-sky-300">Em andamento</span>}
-          {ocorrencia.status === 'ENCERRADA' && <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-zinc-300">Encerrada</span>}
+          {saved && <span className="rounded-full bg-brand-muted px-2 py-0.5 text-xs font-semibold text-brand-100">Salva</span>}
+          {(ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA') && <span className="rounded-full bg-status-done/10 px-2 py-0.5 text-xs font-semibold text-status-done">Concluida</span>}
+          {ocorrencia.status === 'EM_ANDAMENTO' && <span className="rounded-full bg-status-progress/10 px-2 py-0.5 text-xs font-semibold text-status-progress">Em andamento</span>}
+          {ocorrencia.status === 'ENCERRADA' && <span className="rounded-full bg-status-closed/10 px-2 py-0.5 text-xs font-semibold text-status-closed">Encerrada</span>}
         </div>
-        <h3 className="line-clamp-2 text-sm font-semibold text-zinc-100 hover:text-emerald-300">{ocorrencia.titulo}</h3>
-        <div className="mt-1 flex flex-wrap gap-3 text-xs text-zinc-500">
+        <h3 className="line-clamp-2 text-sm font-semibold text-foreground hover:text-brand-100">{ocorrencia.titulo}</h3>
+        <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted">
           <span>{ocorrencia.bairro?.nome ?? 'Sem bairro'}</span>
           <span>{formatRelativeDate(ocorrencia.criadoEm)}</span>
         </div>
@@ -356,9 +354,9 @@ function ProfileOccurrence({ ocorrencia, saved = false }: { ocorrencia: Ocorrenc
 
 function InfoRow({ label, value, tone }: { label: string; value: string; tone?: 'ok' }) {
   return (
-    <div className="flex items-center justify-between border-b border-zinc-800 py-2 text-sm last:border-b-0">
-      <span className="text-zinc-500">{label}</span>
-      <span className={`font-semibold ${tone === 'ok' ? 'text-emerald-400' : 'text-zinc-200'}`}>{value}</span>
+    <div className="flex items-center justify-between border-b border-line py-2 text-sm last:border-b-0">
+      <span className="text-muted">{label}</span>
+      <span className={`font-semibold ${tone === 'ok' ? 'text-status-done' : 'text-foreground'}`}>{value}</span>
     </div>
   )
 }

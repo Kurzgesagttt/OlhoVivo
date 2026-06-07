@@ -57,17 +57,17 @@ export default function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="mt-6 text-center text-sm text-zinc-500 dark:text-muted">
         Nao tem conta?{' '}
-        <Link to="/cadastro" className="font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">
+        <Link to="/cadastro" className="font-medium text-brand hover:text-brand-hover dark:text-brand-100">
           Cadastre-se
         </Link>
       </p>
 
-      <div className="mt-6 border-t border-zinc-200 pt-5 text-center dark:border-zinc-800">
+      <div className="mt-6 border-t border-zinc-200 pt-5 text-center dark:border-line">
         <Link
           to="/admin/login"
-          className="inline-flex min-h-10 items-center justify-center rounded-full border border-zinc-200 px-4 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+          className="inline-flex min-h-10 items-center justify-center rounded-full border border-zinc-200 px-4 text-sm font-semibold text-zinc-600 transition hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated"
         >
           Acesso de responsaveis
         </Link>

@@ -3,11 +3,11 @@ import { AppHeader, Card, PageContainer, PageShell } from '../../components/ui'
 import { useOccurrences } from '../../hooks/useOccurrences'
 
 const metricStyle = {
-  total: 'bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-200',
-  pending: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-200',
-  progress: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-200',
-  done: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200',
-  closed: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200',
+  total: 'bg-status-progress/10 text-status-progress',
+  pending: 'bg-status-pending/10 text-status-pending',
+  progress: 'bg-status-progress/10 text-status-progress',
+  done: 'bg-status-done/10 text-status-done',
+  closed: 'bg-status-closed/10 text-status-closed',
 }
 
 export default function DashboardPage() {
@@ -21,10 +21,10 @@ export default function DashboardPage() {
 
   return (
     <PageShell>
-      <AppHeader title="Painel Admin" subtitle="Visao geral do sistema" actions={<Link to="/home" className="text-sm font-medium text-zinc-600 hover:text-emerald-700 dark:text-zinc-300 dark:hover:text-emerald-400">Voltar ao site</Link>} />
+      <AppHeader title="Painel Admin" subtitle="Visao geral do sistema" actions={<Link to="/home" className="text-sm font-medium text-zinc-600 hover:text-brand dark:text-muted dark:hover:text-brand-100">Voltar ao site</Link>} />
       <PageContainer className="space-y-6">
         <section>
-          <h1 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-zinc-100">Visao geral</h1>
+          <h1 className="mb-4 text-lg font-semibold text-zinc-950 dark:text-foreground">Visao geral</h1>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {[
               { label: 'Total de ocorrencias', value: total, className: metricStyle.total },
@@ -60,8 +60,8 @@ function AdminLink({ to, title, description, disabled }: { to?: string; title: s
     return (
       <div title="Feature desabilitada: endpoint backend ainda nao implementado">
         <Card className="cursor-not-allowed opacity-60">
-          <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
+          <h2 className="font-semibold text-zinc-900 dark:text-foreground">{title}</h2>
+          <p className="mt-1 text-sm text-zinc-500 dark:text-muted">{description}</p>
         </Card>
       </div>
     )
@@ -69,9 +69,9 @@ function AdminLink({ to, title, description, disabled }: { to?: string; title: s
 
   return (
     <Link to={to ?? '#'}>
-      <Card className="transition hover:border-emerald-300 dark:hover:border-emerald-800">
-        <h2 className="font-semibold text-zinc-900 dark:text-zinc-100">{title}</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{description}</p>
+      <Card className="transition hover:border-brand/40">
+        <h2 className="font-semibold text-zinc-900 dark:text-foreground">{title}</h2>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-muted">{description}</p>
       </Card>
     </Link>
   )

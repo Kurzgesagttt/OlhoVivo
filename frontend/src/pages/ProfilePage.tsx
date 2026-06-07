@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { AppHeader, Button, ButtonLink, Card, Chip, PageContainer, PageShell, type ChipVariant } from '../components/ui'
+import { AppHeader, Button, ButtonLink, Card, Chip, PageContainer, PageShell, StatusBadge, getCategoryVariantFromName } from '../components/ui'
 import { useAuth } from '../hooks/useAuth'
 import { useOccurrences, useSavedOccurrences } from '../hooks/useOccurrences'
 import { authService } from '../services/auth.service'
@@ -43,17 +43,6 @@ function formatRelativeDate(value: string) {
   if (hours < 24) return `${hours}h`
   const days = Math.floor(hours / 24)
   return `${days}d`
-}
-
-function getCategoryVariant(name: string | undefined): ChipVariant {
-  const key = (name ?? '').toLowerCase()
-
-  if (key.includes('alerta')) return 'alerta'
-  if (key.includes('evento')) return 'evento'
-  if (key.includes('noticia')) return 'noticia'
-  if (key.includes('servico')) return 'servico'
-
-  return 'ocorrencia'
 }
 
 export default function ProfilePage() {
@@ -334,13 +323,11 @@ function ProfileOccurrence({ ocorrencia, saved = false }: { ocorrencia: Ocorrenc
       </div>
       <div className="min-w-0">
         <div className="mb-1 flex flex-wrap gap-2">
-          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)}>
+          <Chip variant={getCategoryVariantFromName(ocorrencia.categoria.nome, ocorrencia.categoria.icone)}>
             {ocorrencia.categoria.nome}
           </Chip>
           {saved && <span className="rounded-full bg-brand-muted px-2 py-0.5 text-xs font-semibold text-brand-100">Salva</span>}
-          {(ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA') && <span className="rounded-full bg-status-done/10 px-2 py-0.5 text-xs font-semibold text-status-done">Concluida</span>}
-          {ocorrencia.status === 'EM_ANDAMENTO' && <span className="rounded-full bg-status-progress/10 px-2 py-0.5 text-xs font-semibold text-status-progress">Em andamento</span>}
-          {ocorrencia.status === 'ENCERRADA' && <span className="rounded-full bg-status-closed/10 px-2 py-0.5 text-xs font-semibold text-status-closed">Encerrada</span>}
+          {ocorrencia.status !== 'PENDENTE' && <StatusBadge status={ocorrencia.status} className="px-2 py-0.5" />}
         </div>
         <h3 className="line-clamp-2 text-sm font-semibold text-foreground hover:text-brand-100">{ocorrencia.titulo}</h3>
         <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted">

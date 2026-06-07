@@ -6,24 +6,8 @@ import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { Button, ButtonGroup, ButtonLink, Chip, PageShell, VoteButton, type ChipVariant } from '../components/ui'
+import { Button, ButtonGroup, ButtonLink, Chip, PageShell, StatusBadge, VoteButton, getCategoryVariantFromName } from '../components/ui'
 import type { Ocorrencia } from '../types/occurrence'
-
-const STATUS_LABEL: Record<string, string> = {
-  PENDENTE: 'Pendente',
-  EM_ANDAMENTO: 'Em andamento',
-  CONCLUIDA: 'Concluida',
-  ENCERRADA: 'Encerrada',
-  RESOLVIDA: 'Resolvida',
-}
-
-const STATUS_STYLE: Record<string, string> = {
-  PENDENTE: 'bg-status-pending/10 text-status-pending ring-1 ring-status-pending/30',
-  EM_ANDAMENTO: 'bg-status-progress/10 text-status-progress ring-1 ring-status-progress/30',
-  CONCLUIDA: 'bg-status-done/10 text-status-done ring-1 ring-status-done/30',
-  ENCERRADA: 'bg-status-closed/10 text-status-closed ring-1 ring-status-closed/30',
-  RESOLVIDA: 'bg-status-done/10 text-status-done ring-1 ring-status-done/30',
-}
 
 const NEIGHBORHOOD_DOT_COLORS = [
   'bg-status-progress',
@@ -66,18 +50,6 @@ function getInitials(name: string | undefined) {
     .map(part => part[0])
     .join('')
     .toUpperCase()
-}
-
-function getCategoryVariant(icon: string | null | undefined, name: string | undefined): ChipVariant {
-  const key = `${icon ?? ''} ${name ?? ''}`.toLowerCase()
-
-  if (key.includes('alerta') || key.includes('bell')) return 'alerta'
-  if (key.includes('evento') || key.includes('calendar')) return 'evento'
-  if (key.includes('noticia') || key.includes('news')) return 'noticia'
-  if (key.includes('servico') || key.includes('tools')) return 'servico'
-  if (key.includes('infra')) return 'infraestrutura'
-
-  return 'ocorrencia'
 }
 
 export default function HomePage() {
@@ -305,7 +277,7 @@ export default function HomePage() {
                   className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
                 >
                   <Chip
-                    variant={categoriaSelecionada === categoria.nome ? 'active' : getCategoryVariant(categoria.icone, categoria.nome)}
+                    variant={categoriaSelecionada === categoria.nome ? 'active' : getCategoryVariantFromName(categoria.nome, categoria.icone)}
                     className="px-3 py-1"
                   >
                     {categoria.nome}
@@ -539,7 +511,7 @@ function OccurrencePostCard({
         <Link to={`/ocorrencias/${ocorrencia.id}`} className="block">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Chip
-            variant={getCategoryVariant(ocorrencia.categoria.icone, ocorrencia.categoria.nome)}
+            variant={getCategoryVariantFromName(ocorrencia.categoria.nome, ocorrencia.categoria.icone)}
           >
             {ocorrencia.categoria.nome}
           </Chip>
@@ -547,9 +519,7 @@ function OccurrencePostCard({
             {ocorrencia.bairro?.nome ? `em ${ocorrencia.bairro.nome}` : 'sem bairro'}
           </span>
           <span className="text-xs text-zinc-400 dark:text-subtle">por morador - {formatRelativeDate(ocorrencia.criadoEm)}</span>
-          <span className={`ml-auto rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[ocorrencia.status] ?? STATUS_STYLE.PENDENTE}`}>
-            {STATUS_LABEL[ocorrencia.status] ?? ocorrencia.status}
-          </span>
+          <StatusBadge status={ocorrencia.status} className="ml-auto" />
         </div>
 
         <h2 className="line-clamp-2 text-base font-semibold leading-snug text-zinc-950 group-hover:text-brand dark:text-foreground dark:group-hover:text-brand-100">

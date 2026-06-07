@@ -6,7 +6,7 @@ import { useComments, useCreateComment } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { Button, ButtonLink, Chip, PageShell, VoteButton, type ChipVariant } from '../components/ui'
+import { Button, ButtonLink, Chip, PageShell, VoteButton, getCategoryVariantFromName } from '../components/ui'
 import type { Comentario } from '../types/comment'
 import type { Ocorrencia } from '../types/occurrence'
 
@@ -47,17 +47,6 @@ function getCategoryIcon(name: string | undefined) {
   if (key.includes('servico')) return 'S'
 
   return 'O'
-}
-
-function getCategoryVariant(name: string | undefined): ChipVariant {
-  const key = (name ?? '').toLowerCase()
-
-  if (key.includes('alerta')) return 'alerta'
-  if (key.includes('evento')) return 'evento'
-  if (key.includes('noticia')) return 'noticia'
-  if (key.includes('servico')) return 'servico'
-
-  return 'ocorrencia'
 }
 
 function getMapUrl(ocorrencia: Ocorrencia) {
@@ -334,7 +323,7 @@ function PostCard({
     <article className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-line dark:bg-surface">
       <div className="p-4 pb-0">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)}>
+          <Chip variant={getCategoryVariantFromName(ocorrencia.categoria.nome, ocorrencia.categoria.icone)}>
             {ocorrencia.categoria.nome}
           </Chip>
           {ocorrencia.bairro && (

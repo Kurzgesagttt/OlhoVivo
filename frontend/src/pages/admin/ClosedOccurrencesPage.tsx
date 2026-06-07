@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AppHeader, Button, Card, PageContainer, PageShell } from '../../components/ui'
+import { AppHeader, Button, Card, PageContainer, PageShell, StatusBadge } from '../../components/ui'
 import { useOccurrences } from '../../hooks/useOccurrences'
 
 export default function ClosedOccurrencesPage() {
@@ -25,9 +25,7 @@ export default function ClosedOccurrencesPage() {
                   {ocorrencia.categoria.nome} - {ocorrencia.bairro?.nome ?? 'Sem bairro'} - {new Date(ocorrencia.criadoEm).toLocaleDateString('pt-BR')}
                 </p>
               </div>
-              <span className="w-fit rounded-full bg-status-closed/10 px-3 py-1 text-xs font-semibold text-status-closed">
-                Encerrada
-              </span>
+              <StatusBadge status={ocorrencia.status} className="w-fit" />
             </Card>
           ))}
         </div>

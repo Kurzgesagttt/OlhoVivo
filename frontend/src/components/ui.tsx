@@ -477,6 +477,38 @@ export function Chip({ variant = 'default', icon, removable = false, onRemove, c
   )
 }
 
+export const occurrenceStatusLabel: Record<string, string> = {
+  PENDENTE: 'Pendente',
+  EM_ANDAMENTO: 'Em andamento',
+  CONCLUIDA: 'Concluida',
+  ENCERRADA: 'Encerrada',
+  RESOLVIDA: 'Resolvida',
+}
+
+const occurrenceStatusClass: Record<string, string> = {
+  PENDENTE: 'bg-status-pending/10 text-status-pending ring-1 ring-status-pending/30',
+  EM_ANDAMENTO: 'bg-status-progress/10 text-status-progress ring-1 ring-status-progress/30',
+  CONCLUIDA: 'bg-status-done/10 text-status-done ring-1 ring-status-done/30',
+  ENCERRADA: 'bg-status-closed/10 text-status-closed ring-1 ring-status-closed/30',
+  RESOLVIDA: 'bg-status-done/10 text-status-done ring-1 ring-status-done/30',
+}
+
+export function getStatusLabel(status: string) {
+  return occurrenceStatusLabel[status] ?? status
+}
+
+export function getStatusBadgeClass(status: string) {
+  return occurrenceStatusClass[status] ?? occurrenceStatusClass.PENDENTE
+}
+
+export function StatusBadge({ status, className }: { status: string; className?: string }) {
+  return (
+    <span className={cn('rounded-full px-2.5 py-1 text-xs font-semibold', getStatusBadgeClass(status), className)}>
+      {getStatusLabel(status)}
+    </span>
+  )
+}
+
 export type OcorrenciaCategoria = 'ocorrencia' | 'alerta' | 'evento' | 'noticia' | 'servico' | 'infraestrutura'
 
 const categoryChipConfig: Record<OcorrenciaCategoria, { label: string; icon: string; variant: ChipVariant }> = {
@@ -486,6 +518,18 @@ const categoryChipConfig: Record<OcorrenciaCategoria, { label: string; icon: str
   noticia: { label: 'Noticia', icon: '', variant: 'noticia' },
   servico: { label: 'Servico publico', icon: '', variant: 'servico' },
   infraestrutura: { label: 'Infraestrutura', icon: '', variant: 'infraestrutura' },
+}
+
+export function getCategoryVariantFromName(name: string | undefined, icon?: string | null): ChipVariant {
+  const key = `${icon ?? ''} ${name ?? ''}`.toLowerCase()
+
+  if (key.includes('alerta') || key.includes('bell')) return 'alerta'
+  if (key.includes('evento') || key.includes('calendar')) return 'evento'
+  if (key.includes('noticia') || key.includes('news')) return 'noticia'
+  if (key.includes('servico') || key.includes('tools')) return 'servico'
+  if (key.includes('infra')) return 'infraestrutura'
+
+  return 'ocorrencia'
 }
 
 export interface CategoryChipProps {

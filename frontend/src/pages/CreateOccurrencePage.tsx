@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { AppHeader, Button, Card, Chip, Notice, PageContainer, PageShell, type ChipVariant } from '../components/ui'
+import { AppHeader, Button, Card, Chip, Notice, PageContainer, PageShell, getCategoryVariantFromName } from '../components/ui'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useCreateOccurrence } from '../hooks/useOccurrences'
 import { useAuth } from '../hooks/useAuth'
 import { occurrenceService } from '../services/occurrence.service'
-import type { Categoria } from '../types/occurrence'
 
 type Severity = 'Baixa' | 'Media' | 'Alta' | 'Critica'
 type SelectedImage = {
@@ -16,18 +15,6 @@ type SelectedImage = {
 }
 
 const TAGS = ['infraestrutura', 'eletrica', 'urgente', 'prefeitura', 'transito', 'seguranca']
-
-function getCategoryVariant(categoria: Categoria): ChipVariant {
-  const key = `${categoria.icone ?? ''} ${categoria.nome}`.toLowerCase()
-
-  if (key.includes('alerta') || key.includes('bell')) return 'alerta'
-  if (key.includes('evento') || key.includes('calendar')) return 'evento'
-  if (key.includes('noticia') || key.includes('news')) return 'noticia'
-  if (key.includes('servico') || key.includes('tools')) return 'servico'
-  if (key.includes('infra')) return 'infraestrutura'
-
-  return 'ocorrencia'
-}
 
 export default function CreateOccurrencePage() {
   const navigate = useNavigate()
@@ -262,7 +249,7 @@ export default function CreateOccurrencePage() {
                         className="rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
                       >
                         <Chip
-                          variant={selected ? 'active' : getCategoryVariant(categoria)}
+                          variant={selected ? 'active' : getCategoryVariantFromName(categoria.nome, categoria.icone)}
                           className="px-4 py-2 text-sm"
                         >
                           {categoria.nome}

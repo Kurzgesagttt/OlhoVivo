@@ -15,4 +15,14 @@ export const commentService = {
     const response = await api.post<Comentario>(`/ocorrencias/${ocorrenciaId}/comentarios`, data)
     return response.data
   },
+
+  async curtir(ocorrenciaId: string, comentarioId: string): Promise<Comentario> {
+    const response = await api.post<Comentario>(`/ocorrencias/${ocorrenciaId}/comentarios/${comentarioId}/curtida`)
+    return response.data
+  },
+
+  async descurtir(ocorrenciaId: string, comentarioId: string): Promise<Comentario> {
+    const response = await api.delete<Comentario>(`/ocorrencias/${ocorrenciaId}/comentarios/${comentarioId}/curtida`)
+    return response.data
+  },
 }

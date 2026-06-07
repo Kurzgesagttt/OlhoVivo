@@ -6,6 +6,8 @@ export interface Comentario {
   nomeUsuario: string | null
   conteudo: string
   criadoEm: string
+  curtidasCount: number
+  curtidoPeloUsuario: boolean
 }
 
 export interface CriarComentarioRequest {

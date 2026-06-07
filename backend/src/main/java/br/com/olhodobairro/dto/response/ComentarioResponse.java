@@ -9,5 +9,7 @@ public record ComentarioResponse(
         UUID usuarioId,
         String nomeUsuario,
         String conteudo,
-        OffsetDateTime criadoEm
+        OffsetDateTime criadoEm,
+        int curtidasCount,
+        boolean curtidoPeloUsuario
 ) {}

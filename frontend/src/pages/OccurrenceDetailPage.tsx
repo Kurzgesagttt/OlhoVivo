@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../hooks/useAuth'
-import { useComments, useCreateComment } from '../hooks/useComments'
+import { useComments, useCreateComment, useToggleCommentLike } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
@@ -72,10 +72,12 @@ export default function OccurrenceDetailPage() {
   const { votar, removerVoto, isVoting } = useVote(id!)
   const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
+  const toggleCommentLike = useToggleCommentLike(id!)
   const deleteOccurrence = useDeleteOccurrence()
   const [novoComentario, setNovoComentario] = useState('')
   const [erroComentario, setErroComentario] = useState('')
   const [erroVoto, setErroVoto] = useState('')
+  const [erroCurtidaComentario, setErroCurtidaComentario] = useState('')
   const [erroSalvamento, setErroSalvamento] = useState('')
   const [confirmandoDeletar, setConfirmandoDeletar] = useState(false)
 
@@ -173,6 +175,28 @@ export default function OccurrenceDetailPage() {
     }
   }
 
+  async function handleCommentLike(comentario: Comentario) {
+    setErroCurtidaComentario('')
+
+    if (!usuario) {
+      navigate('/login')
+      return
+    }
+
+    try {
+      await toggleCommentLike.mutateAsync({
+        comentarioId: comentario.id,
+        curtido: comentario.curtidoPeloUsuario,
+      })
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setErroCurtidaComentario(err.response.data.message)
+      } else {
+        setErroCurtidaComentario('Nao foi possivel atualizar a curtida.')
+      }
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-100 text-sm text-zinc-500 dark:bg-app dark:text-muted">
@@ -265,9 +289,13 @@ export default function OccurrenceDetailPage() {
             usuarioLogado={!!usuario}
             novoComentario={novoComentario}
             erroComentario={erroComentario}
+            erroCurtidaComentario={erroCurtidaComentario}
             enviando={createComment.isPending}
+            curtindoComentarioId={toggleCommentLike.isPending ? toggleCommentLike.variables?.comentarioId : null}
+            usuarioId={usuario?.id ?? null}
             onChangeComentario={value => setNovoComentario(value.slice(0, MAX_COMENTARIO))}
             onSubmit={enviarComentario}
+            onLikeComentario={handleCommentLike}
           />
         </section>
 
@@ -416,35 +444,18 @@ function PostCard({
 }
 
 function PhotoStrip({ ocorrencia }: { ocorrencia: Ocorrencia }) {
-  const hasImages = ocorrencia.imagensUrl.length > 0
+  if (ocorrencia.imagensUrl.length === 0) return null
 
   return (
     <div className="flex gap-2 overflow-x-auto px-4 py-4">
-      {hasImages ? (
-        ocorrencia.imagensUrl.map((url, index) => (
-          <img
-            key={url}
-            src={url}
-            alt={`Imagem ${index + 1} da ocorrencia`}
-            className="h-24 w-36 shrink-0 rounded-md border border-zinc-200 object-cover dark:border-line"
-          />
-        ))
-      ) : (
-        <>
-          <PhotoPlaceholder label="Foto" tone="bg-status-pending/10 text-status-pending" />
-          <PhotoPlaceholder label="Rua" tone="bg-status-progress/10 text-status-progress" />
-          <PhotoPlaceholder label="Local" tone="bg-status-danger/10 text-status-danger" />
-        </>
-      )}
-    </div>
-  )
-}
-
-function PhotoPlaceholder({ label, tone }: { label: string; tone: string }) {
-  return (
-    <div className={`flex h-24 w-32 shrink-0 flex-col items-center justify-center gap-1 rounded-md border border-zinc-200 text-sm dark:border-line ${tone}`}>
-      <span className="text-2xl" aria-hidden="true">#</span>
-      <span className="text-xs font-medium">{label}</span>
+      {ocorrencia.imagensUrl.map((url, index) => (
+        <img
+          key={url}
+          src={url}
+          alt={`Imagem ${index + 1} da ocorrencia`}
+          className="h-28 w-44 shrink-0 rounded-md border border-zinc-200 object-cover dark:border-line"
+        />
+      ))}
     </div>
   )
 }
@@ -490,18 +501,26 @@ function CommentsCard({
   usuarioLogado,
   novoComentario,
   erroComentario,
+  erroCurtidaComentario,
   enviando,
+  curtindoComentarioId,
+  usuarioId,
   onChangeComentario,
   onSubmit,
+  onLikeComentario,
 }: {
   comentarios: Comentario[]
   total: number
   usuarioLogado: boolean
   novoComentario: string
   erroComentario: string
+  erroCurtidaComentario: string
   enviando: boolean
+  curtindoComentarioId: string | null | undefined
+  usuarioId: string | null
   onChangeComentario: (value: string) => void
   onSubmit: (event: FormEvent) => void
+  onLikeComentario: (comentario: Comentario) => void | Promise<void>
 }) {
   return (
     <section className="rounded-lg border border-zinc-200 bg-white dark:border-line dark:bg-surface">
@@ -535,12 +554,16 @@ function CommentsCard({
         )}
 
         {erroComentario && <p className="rounded-md border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-xs text-status-danger">{erroComentario}</p>}
+        {erroCurtidaComentario && <p className="rounded-md border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-xs text-status-danger">{erroCurtidaComentario}</p>}
 
         {comentarios.map((comentario, index) => (
           <CommentItem
             key={comentario.id}
             comentario={comentario}
             official={index === 0 && !!comentario.nomeUsuario?.toLowerCase().includes('prefeitura')}
+            isOwn={comentario.usuarioId === usuarioId}
+            isLiking={curtindoComentarioId === comentario.id}
+            onLike={() => void onLikeComentario(comentario)}
           />
         ))}
 
@@ -552,7 +575,19 @@ function CommentsCard({
   )
 }
 
-function CommentItem({ comentario, official }: { comentario: Comentario; official: boolean }) {
+function CommentItem({
+  comentario,
+  official,
+  isOwn,
+  isLiking,
+  onLike,
+}: {
+  comentario: Comentario
+  official: boolean
+  isOwn: boolean
+  isLiking: boolean
+  onLike: () => void
+}) {
   return (
     <div className={`rounded-md border p-3 ${official ? 'border-brand/30 bg-brand/10 dark:bg-brand-muted' : 'border-zinc-200 bg-zinc-50 dark:border-line dark:bg-surface-muted'}`}>
       <div className="mb-2 flex items-center gap-2">
@@ -562,6 +597,22 @@ function CommentItem({ comentario, official }: { comentario: Comentario; officia
         <span className="ml-auto text-xs text-zinc-400 dark:text-subtle">{formatDateTime(comentario.criadoEm)}</span>
       </div>
       <p className="text-sm leading-6 text-zinc-600 whitespace-pre-wrap dark:text-muted">{comentario.conteudo}</p>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onLike}
+          disabled={isOwn || isLiking}
+          title={isOwn ? 'Voce nao pode curtir seu proprio comentario' : comentario.curtidoPeloUsuario ? 'Remover curtida' : 'Curtir comentario'}
+          className={`inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+            comentario.curtidoPeloUsuario
+              ? 'bg-brand/15 text-brand dark:bg-brand-muted dark:text-brand-100'
+              : 'bg-zinc-100 text-zinc-500 hover:bg-brand/10 hover:text-brand dark:bg-surface dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100'
+          }`}
+        >
+          <span>{comentario.curtidoPeloUsuario ? 'Curtido' : 'Curtir'}</span>
+          <span>{comentario.curtidasCount}</span>
+        </button>
+      </div>
     </div>
   )
 }

@@ -225,7 +225,7 @@ export function VoteButton({
   return (
     <div
       className={cn(
-        'inline-flex overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm dark:border-line dark:bg-surface',
+        'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-1 py-1 dark:bg-surface-muted',
         disabled && 'opacity-70',
         className
       )}
@@ -237,16 +237,17 @@ export function VoteButton({
         title={activeVote === 1 ? 'Remover voto positivo' : 'Votar positivo'}
         aria-label="Votar positivo"
         className={cn(
-          'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed',
+          'inline-flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-bold transition-colors disabled:cursor-not-allowed',
           activeVote === 1
-            ? 'bg-brand/10 text-brand'
-            : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted'
+            ? 'bg-brand text-white'
+            : 'text-zinc-500 hover:bg-white hover:text-brand dark:text-muted dark:hover:bg-surface-elevated dark:hover:text-brand-100'
         )}
       >
         <span aria-hidden="true">^</span>
-        <span>{count}</span>
       </button>
-      <div className="h-5 w-px self-center bg-zinc-200 dark:bg-line" />
+      <span className="min-w-5 text-center text-xs font-bold text-zinc-900 dark:text-foreground">
+        {count}
+      </span>
       <button
         type="button"
         onClick={() => onVote?.('down')}
@@ -254,10 +255,10 @@ export function VoteButton({
         title={activeVote === -1 ? 'Remover voto negativo' : 'Votar negativo'}
         aria-label="Votar negativo"
         className={cn(
-          'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors disabled:cursor-not-allowed',
+          'inline-flex h-7 w-7 items-center justify-center rounded-full text-[15px] font-bold transition-colors disabled:cursor-not-allowed',
           activeVote === -1
-            ? 'bg-status-danger/10 text-status-danger'
-            : 'text-zinc-300 hover:bg-status-danger/10 hover:text-status-danger dark:text-subtle'
+            ? 'bg-status-danger text-white'
+            : 'text-zinc-400 hover:bg-white hover:text-status-danger dark:text-subtle dark:hover:bg-surface-elevated'
         )}
       >
         <span aria-hidden="true">v</span>

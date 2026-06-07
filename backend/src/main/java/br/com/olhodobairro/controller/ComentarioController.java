@@ -40,4 +40,16 @@ public class ComentarioController {
         comentarioService.deletar(ocorrenciaId, id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/curtida")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ComentarioResponse> curtir(@PathVariable UUID ocorrenciaId, @PathVariable UUID id) {
+        return ResponseEntity.ok(comentarioService.curtir(ocorrenciaId, id));
+    }
+
+    @DeleteMapping("/{id}/curtida")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ComentarioResponse> descurtir(@PathVariable UUID ocorrenciaId, @PathVariable UUID id) {
+        return ResponseEntity.ok(comentarioService.descurtir(ocorrenciaId, id));
+    }
 }

@@ -216,9 +216,11 @@ public class OcorrenciaService {
                 o.getBairro().getLatitude(),
                 o.getBairro().getLongitude()
         );
-        boolean votadoPeloUsuario = securityContextHelper.getUsuarioIdAutenticadoOptional()
-                .map(usuarioId -> votoRepository.existsByOcorrenciaIdAndUsuarioId(o.getId(), usuarioId))
-                .orElse(false);
+        Integer votoDoUsuario = securityContextHelper.getUsuarioIdAutenticadoOptional()
+                .flatMap(usuarioId -> votoRepository.findByOcorrenciaIdAndUsuarioId(o.getId(), usuarioId))
+                .map(voto -> voto.getValor())
+                .orElse(null);
+        boolean votadoPeloUsuario = votoDoUsuario != null;
         boolean salvoPeloUsuario = securityContextHelper.getUsuarioIdAutenticadoOptional()
                 .map(usuarioId -> ocorrenciaSalvaRepository.existsByOcorrenciaIdAndUsuarioId(o.getId(), usuarioId))
                 .orElse(false);
@@ -240,6 +242,7 @@ public class OcorrenciaService {
                 o.getEndereco(),
                 o.getVotosCount(),
                 votadoPeloUsuario,
+                votoDoUsuario,
                 salvoPeloUsuario,
                 imagensUrl,
                 o.getCriadoEm(),

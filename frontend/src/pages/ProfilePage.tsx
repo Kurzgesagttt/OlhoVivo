@@ -194,7 +194,7 @@ export default function ProfilePage() {
                 <div className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5 sm:grid-cols-4">
                   <StatBox label="Posts" value={String(minhasOcorrencias.length)} />
                   <StatBox label="Resolvidos" value={String(resolvidas)} tone="green" />
-                  <StatBox label="Votos" value={String(totalVotos)} />
+                  <StatBox label="Pontuacao" value={String(totalVotos)} />
                   <StatBox label="Salvas" value={String(ocorrenciasSalvas.length)} />
                 </div>
               </div>

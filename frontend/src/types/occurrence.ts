@@ -1,6 +1,7 @@
 // Tipos de domínio: Ocorrência, Categoria, Bairro
 export type Role = 'MORADOR' | 'MODERADOR' | 'ADMIN' | 'PREFEITURA'
 export type StatusOcorrencia = 'PENDENTE' | 'EM_ANDAMENTO' | 'CONCLUIDA' | 'ENCERRADA' | 'RESOLVIDA'
+export type ValorVoto = -1 | 1
 
 export interface Categoria {
   id: string
@@ -31,6 +32,7 @@ export interface Ocorrencia {
   endereco: string | null
   votosCount: number
   votadoPeloUsuario: boolean
+  votoDoUsuario: ValorVoto | null
   salvoPeloUsuario: boolean
   imagensUrl: string[]
   criadoEm: string

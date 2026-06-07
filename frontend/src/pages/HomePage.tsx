@@ -7,7 +7,7 @@ import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
 import { BrandMark, Button, ButtonGroup, ButtonLink, Chip, PageShell, StatusBadge, VoteButton, getCategoryVariantFromName } from '../components/ui'
-import type { Ocorrencia } from '../types/occurrence'
+import type { Ocorrencia, ValorVoto } from '../types/occurrence'
 
 const NEIGHBORHOOD_DOT_COLORS = [
   'bg-status-progress',
@@ -301,7 +301,7 @@ export default function HomePage() {
               <StatBox label="Pendentes" value={String(totalPendentes)} />
               <StatBox label="Concluidas" value={String(totalConcluidas)} />
               <StatBox label="Encerradas" value={String(totalEncerradas)} />
-              <StatBox label="Votos" value={String(totalVotos)} />
+              <StatBox label="Pontuacao" value={String(totalVotos)} />
             </div>
           </Panel>
 
@@ -315,7 +315,7 @@ export default function HomePage() {
                   <Link key={ocorrencia.id} to={`/ocorrencias/${ocorrencia.id}`} className="block text-sm">
                     <span className="text-xs text-zinc-400">#{index + 1}</span>
                     <span className="ml-2 font-medium text-zinc-800 hover:text-brand dark:text-foreground dark:hover:text-brand-100">{ocorrencia.titulo}</span>
-                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">{ocorrencia.votosCount} votos</span>
+                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">{ocorrencia.votosCount} pontos</span>
                   </Link>
                 ))}
             </div>
@@ -331,7 +331,7 @@ export default function HomePage() {
                 options={[
                   { value: 'hot', label: 'Em alta' },
                   { value: 'recent', label: 'Recentes' },
-                  { value: 'top', label: 'Mais votadas' },
+                  { value: 'top', label: 'Mais pontuadas' },
                   { value: 'closed', label: 'Encerradas' },
                 ]}
               />
@@ -434,13 +434,13 @@ function OccurrencePostCard({
   usuarioLogado: boolean
 }) {
   const navigate = useNavigate()
-  const { votar, removerVoto, isVoting } = useVote(ocorrencia.id)
+  const { votar, isVoting } = useVote(ocorrencia.id)
   const { salvar, remover, isSaving } = useSavedOccurrence(ocorrencia.id)
   const [voteMessage, setVoteMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
   const hasImage = ocorrencia.imagensUrl.length > 0
 
-  async function handleVote(action: 'add' | 'remove') {
+  async function handleVote(valor: ValorVoto) {
     setVoteMessage('')
 
     if (!usuarioLogado) {
@@ -448,24 +448,15 @@ function OccurrencePostCard({
       return
     }
 
-    if (action === 'add' && ocorrencia.votadoPeloUsuario) {
-      setVoteMessage('Voce ja confirmou esta ocorrencia.')
-      return
-    }
-
-    if (action === 'remove' && !ocorrencia.votadoPeloUsuario) {
-      setVoteMessage('Voce ainda nao confirmou esta ocorrencia.')
+    if (ocorrencia.votoDoUsuario === valor) {
+      setVoteMessage('Este ja e o seu voto atual.')
       return
     }
 
     try {
-      if (action === 'add') {
-        await votar()
-      } else {
-        await removerVoto()
-      }
+      await votar(valor)
     } catch {
-      setVoteMessage(action === 'add' ? 'Voce ja confirmou esta ocorrencia.' : 'Voce ainda nao confirmou esta ocorrencia.')
+      setVoteMessage('Nao foi possivel atualizar seu voto.')
     }
   }
 
@@ -498,9 +489,10 @@ function OccurrencePostCard({
         <VoteButton
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
+          voteValue={ocorrencia.votoDoUsuario}
           disabled={isVoting}
           orientation="vertical"
-          onVote={direction => void handleVote(direction === 'up' ? 'add' : 'remove')}
+          onVote={direction => void handleVote(direction === 'up' ? 1 : -1)}
         />
         {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
       </div>

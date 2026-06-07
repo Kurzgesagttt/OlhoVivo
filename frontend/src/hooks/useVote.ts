@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { voteService } from '../services/vote.service'
 import type { PageResponse } from '../types/api'
-import type { Ocorrencia } from '../types/occurrence'
+import type { Ocorrencia, ValorVoto } from '../types/occurrence'
 
 type VoteContext = {
   previousOccurrences: Array<[readonly unknown[], unknown]>
@@ -15,27 +15,32 @@ function isOccurrencePage(data: unknown): data is PageResponse<Ocorrencia> {
   return !!data && typeof data === 'object' && 'content' in data && Array.isArray((data as PageResponse<Ocorrencia>).content)
 }
 
-function updateOccurrenceVotes(data: unknown, ocorrenciaId: string, delta: number) {
+function currentVoteValue(ocorrencia: Ocorrencia): ValorVoto | null {
+  return ocorrencia.votoDoUsuario ?? (ocorrencia.votadoPeloUsuario ? 1 : null)
+}
+
+function applyVoteToOccurrence(ocorrencia: Ocorrencia, nextVote: ValorVoto | null): Ocorrencia {
+  const previousVote = currentVoteValue(ocorrencia) ?? 0
+  const nextValue = nextVote ?? 0
+
+  return {
+    ...ocorrencia,
+    votosCount: ocorrencia.votosCount + nextValue - previousVote,
+    votadoPeloUsuario: nextVote !== null,
+    votoDoUsuario: nextVote,
+  }
+}
+
+function updateOccurrenceVotes(data: unknown, ocorrenciaId: string, nextVote: ValorVoto | null) {
   if (isOccurrence(data)) {
-    if (data.id !== ocorrenciaId) return data
-    return {
-      ...data,
-      votosCount: Math.max(0, data.votosCount + delta),
-      votadoPeloUsuario: delta > 0,
-    }
+    return data.id === ocorrenciaId ? applyVoteToOccurrence(data, nextVote) : data
   }
 
   if (isOccurrencePage(data)) {
     return {
       ...data,
       content: data.content.map(ocorrencia => (
-        ocorrencia.id === ocorrenciaId
-          ? {
-              ...ocorrencia,
-              votosCount: Math.max(0, ocorrencia.votosCount + delta),
-              votadoPeloUsuario: delta > 0,
-            }
-          : ocorrencia
+        ocorrencia.id === ocorrenciaId ? applyVoteToOccurrence(ocorrencia, nextVote) : ocorrencia
       )),
     }
   }
@@ -46,14 +51,14 @@ function updateOccurrenceVotes(data: unknown, ocorrenciaId: string, delta: numbe
 export function useVote(ocorrenciaId: string) {
   const queryClient = useQueryClient()
 
-  async function applyOptimisticVote(delta: number): Promise<VoteContext> {
+  async function applyOptimisticVote(nextVote: ValorVoto | null): Promise<VoteContext> {
     await queryClient.cancelQueries({ queryKey: ['ocorrencias'] })
 
     const previousOccurrences = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
 
     queryClient.setQueriesData(
       { queryKey: ['ocorrencias'] },
-      current => updateOccurrenceVotes(current, ocorrenciaId, delta),
+      current => updateOccurrenceVotes(current, ocorrenciaId, nextVote),
     )
 
     return { previousOccurrences }
@@ -66,15 +71,15 @@ export function useVote(ocorrenciaId: string) {
   }
 
   const votar = useMutation({
-    mutationFn: () => voteService.votar(ocorrenciaId),
-    onMutate: () => applyOptimisticVote(1),
+    mutationFn: (valor: ValorVoto) => voteService.votar(ocorrenciaId, valor),
+    onMutate: (valor) => applyOptimisticVote(valor),
     onError: (_error, _variables, context) => rollbackVote(context),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })
 
   const removerVoto = useMutation({
     mutationFn: () => voteService.removerVoto(ocorrenciaId),
-    onMutate: () => applyOptimisticVote(-1),
+    onMutate: () => applyOptimisticVote(null),
     onError: (_error, _variables, context) => rollbackVote(context),
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })

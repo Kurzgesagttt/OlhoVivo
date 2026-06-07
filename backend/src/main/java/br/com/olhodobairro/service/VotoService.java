@@ -33,36 +33,56 @@ public class VotoService {
     }
 
     @Transactional
-    public void votar(UUID ocorrenciaId) {
+    public void votar(UUID ocorrenciaId, int valor) {
+        validarValor(valor);
+
         UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
-        if (votoRepository.existsByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Você já votou nesta ocorrência");
-        }
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrência não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
         Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario nao encontrado"));
+
+        Voto votoExistente = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId).orElse(null);
+        if (votoExistente != null) {
+            int valorAnterior = votoExistente.getValor();
+            if (valorAnterior != valor) {
+                votoExistente.setValor(valor);
+                votoRepository.save(votoExistente);
+                atualizarPontuacao(ocorrencia, valor - valorAnterior);
+            }
+            return;
+        }
 
         Voto voto = new Voto();
         voto.setOcorrencia(ocorrencia);
         voto.setUsuario(usuario);
+        voto.setValor(valor);
         votoRepository.save(voto);
 
-        ocorrencia.setVotosCount(ocorrencia.getVotosCount() + 1);
-        ocorrenciaRepository.save(ocorrencia);
+        atualizarPontuacao(ocorrencia, valor);
     }
 
     @Transactional
     public void removerVoto(UUID ocorrenciaId) {
         UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
         Voto voto = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voto não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voto nao encontrado"));
         votoRepository.delete(voto);
 
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrência não encontrada"));
-        ocorrencia.setVotosCount(Math.max(0, ocorrencia.getVotosCount() - 1));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
+        ocorrencia.setVotosCount(ocorrencia.getVotosCount() - voto.getValor());
         ocorrenciaRepository.save(ocorrencia);
     }
 
+    private void validarValor(int valor) {
+        if (valor != 1 && valor != -1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voto deve ser 1 ou -1");
+        }
+    }
+
+    private void atualizarPontuacao(Ocorrencia ocorrencia, int delta) {
+        ocorrencia.setVotosCount(ocorrencia.getVotosCount() + delta);
+        ocorrenciaRepository.save(ocorrencia);
+    }
 }

@@ -503,7 +503,7 @@ export default function CreateOccurrencePage() {
               <Card>
                 <SectionTitle icon="?" title="Dica" />
                 <p className="text-sm leading-6 text-zinc-600 dark:text-muted">
-                  Quanto mais claro for o titulo, a descricao e o local, mais facil fica para outros moradores confirmarem a ocorrencia.
+                  Quanto mais claro for o titulo, a descricao e o local, mais facil fica para outros moradores avaliarem a ocorrencia.
                 </p>
               </Card>
             </aside>

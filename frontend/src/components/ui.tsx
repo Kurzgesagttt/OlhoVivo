@@ -253,6 +253,7 @@ export const Fab = forwardRef<HTMLButtonElement, FabProps>(function Fab(
 export interface VoteButtonProps {
   count: number
   voted?: boolean
+  voteValue?: -1 | 1 | null
   onVote?: (dir: 'up' | 'down') => void
   disabled?: boolean
   orientation?: 'horizontal' | 'vertical'
@@ -262,11 +263,14 @@ export interface VoteButtonProps {
 export function VoteButton({
   count,
   voted = false,
+  voteValue,
   onVote,
   disabled = false,
   orientation = 'horizontal',
   className,
 }: VoteButtonProps) {
+  const activeVote = voteValue ?? (voted ? 1 : null)
+
   if (orientation === 'vertical') {
     return (
       <div
@@ -279,12 +283,12 @@ export function VoteButton({
         <button
           type="button"
           onClick={() => onVote?.('up')}
-          disabled={disabled || voted}
-          title={voted ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
-          aria-label="Confirmar ocorrencia"
+          disabled={disabled}
+          title={activeVote === 1 ? 'Seu voto atual e positivo' : 'Votar positivo'}
+          aria-label="Votar positivo"
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
-            voted
+            activeVote === 1
               ? 'bg-brand-muted text-brand-100'
               : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100'
           )}
@@ -297,14 +301,14 @@ export function VoteButton({
         <button
           type="button"
           onClick={() => onVote?.('down')}
-          disabled={disabled || !voted}
-          title={voted ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
-          aria-label="Remover confirmacao"
+          disabled={disabled}
+          title={activeVote === -1 ? 'Seu voto atual e negativo' : 'Votar negativo'}
+          aria-label="Votar negativo"
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
-            voted
-              ? 'text-muted hover:bg-status-danger/10 hover:text-status-danger'
-              : 'text-zinc-300 dark:text-subtle'
+            activeVote === -1
+              ? 'bg-status-danger/10 text-status-danger'
+              : 'text-zinc-300 hover:bg-status-danger/10 hover:text-status-danger dark:text-subtle'
           )}
         >
           <span aria-hidden="true">v</span>
@@ -324,12 +328,12 @@ export function VoteButton({
       <button
         type="button"
         onClick={() => onVote?.('up')}
-        disabled={disabled || voted}
-        title={voted ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
-        aria-label="Confirmar ocorrencia"
+        disabled={disabled}
+        title={activeVote === 1 ? 'Seu voto atual e positivo' : 'Votar positivo'}
+        aria-label="Votar positivo"
         className={cn(
           'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed',
-          voted
+          activeVote === 1
             ? 'bg-brand/10 text-brand'
             : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted'
         )}
@@ -341,14 +345,14 @@ export function VoteButton({
       <button
         type="button"
         onClick={() => onVote?.('down')}
-        disabled={disabled || !voted}
-        title={voted ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
-        aria-label="Remover confirmacao"
+        disabled={disabled}
+        title={activeVote === -1 ? 'Seu voto atual e negativo' : 'Votar negativo'}
+        aria-label="Votar negativo"
         className={cn(
           'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors disabled:cursor-not-allowed',
-          voted
-            ? 'text-muted hover:bg-status-danger/10 hover:text-status-danger'
-            : 'text-zinc-300 dark:text-subtle'
+          activeVote === -1
+            ? 'bg-status-danger/10 text-status-danger'
+            : 'text-zinc-300 hover:bg-status-danger/10 hover:text-status-danger dark:text-subtle'
         )}
       >
         <span aria-hidden="true">v</span>

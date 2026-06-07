@@ -8,7 +8,7 @@ import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
 import { BrandMark, Button, ButtonLink, Chip, PageShell, VoteButton, getCategoryVariantFromName } from '../components/ui'
 import type { Comentario } from '../types/comment'
-import type { Ocorrencia } from '../types/occurrence'
+import type { Ocorrencia, ValorVoto } from '../types/occurrence'
 
 const MAX_COMENTARIO = 500
 
@@ -65,7 +65,7 @@ export default function OccurrenceDetailPage() {
   const { data: ocorrencia, isLoading, isError } = useOccurrence(id!)
   const { data: comentariosPage } = useComments(id!)
   const { data: ocorrenciasPage } = useOccurrences(0)
-  const { votar, removerVoto, isVoting } = useVote(id!)
+  const { votar, isVoting } = useVote(id!)
   const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
   const deleteOccurrence = useDeleteOccurrence()
@@ -95,7 +95,7 @@ export default function OccurrenceDetailPage() {
     navigate('/home')
   }
 
-  async function handleVote(action: 'add' | 'remove') {
+  async function handleVote(valor: ValorVoto) {
     setErroVoto('')
 
     if (!ocorrencia) return
@@ -105,27 +105,18 @@ export default function OccurrenceDetailPage() {
       return
     }
 
-    if (action === 'add' && ocorrencia.votadoPeloUsuario) {
-      setErroVoto('Voce ja confirmou esta ocorrencia.')
-      return
-    }
-
-    if (action === 'remove' && !ocorrencia.votadoPeloUsuario) {
-      setErroVoto('Voce ainda nao confirmou esta ocorrencia.')
+    if (ocorrencia.votoDoUsuario === valor) {
+      setErroVoto('Este ja e o seu voto atual.')
       return
     }
 
     try {
-      if (action === 'add') {
-        await votar()
-      } else {
-        await removerVoto()
-      }
+      await votar(valor)
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setErroVoto(err.response.data.message)
       } else {
-        setErroVoto(action === 'add' ? 'Voce ja confirmou esta ocorrencia.' : 'Voce ainda nao confirmou esta ocorrencia.')
+        setErroVoto('Nao foi possivel atualizar seu voto.')
       }
     }
   }
@@ -248,8 +239,8 @@ export default function OccurrenceDetailPage() {
           <PostCard
             ocorrencia={ocorrencia}
             autorNome={autorNome}
-            onVote={() => handleVote('add')}
-            onRemoveVote={() => handleVote('remove')}
+            onVote={() => handleVote(1)}
+            onRemoveVote={() => handleVote(-1)}
             isVoting={isVoting}
             erroVoto={erroVoto}
             erroSalvamento={erroSalvamento}
@@ -377,6 +368,7 @@ function PostCard({
         <VoteButton
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
+          voteValue={ocorrencia.votoDoUsuario}
           disabled={isVoting}
           onVote={direction => void (direction === 'up' ? onVote() : onRemoveVote())}
         />
@@ -466,7 +458,7 @@ function TimelineCard({ ocorrencia, comentariosCount }: { ocorrencia: Ocorrencia
       </h2>
       <div className="space-y-0 p-4">
         <TimelineItem tone="emerald" title="Ocorrencia registrada" description="O relato foi publicado com descricao e localizacao para a comunidade." time={formatDateTime(ocorrencia.criadoEm)} />
-        <TimelineItem tone="blue" title={`${ocorrencia.votosCount} moradores confirmaram`} description="Os votos ajudam a priorizar a ocorrencia no bairro." time={comentariosCount > 0 ? `${comentariosCount} comentarios na discussao` : 'Aguardando interacoes'} />
+        <TimelineItem tone="blue" title={`${ocorrencia.votosCount} pontos de prioridade`} description="Os votos ajudam a priorizar a ocorrencia no bairro." time={comentariosCount > 0 ? `${comentariosCount} comentarios na discussao` : 'Aguardando interacoes'} />
         <TimelineItem tone="zinc" title="Discussao aberta" description="Moradores podem comentar com detalhes, fotos e atualizacoes sobre o local." time="Disponivel para a comunidade" last />
       </div>
     </section>
@@ -611,7 +603,7 @@ function AuthorWidget({ autorNome, ocorrencia }: { autorNome: string; ocorrencia
         </div>
       </div>
       <InfoRow label="Posts" value="1+" />
-      <InfoRow label="Confirmacoes" value={String(ocorrencia.votosCount)} />
+      <InfoRow label="Pontuacao" value={String(ocorrencia.votosCount)} />
     </section>
   )
 }

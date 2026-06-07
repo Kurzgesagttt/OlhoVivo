@@ -7,6 +7,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface VotoRepository extends JpaRepository<Voto, UUID> {
-    boolean existsByOcorrenciaIdAndUsuarioId(UUID ocorrenciaId, UUID usuarioId);
     Optional<Voto> findByOcorrenciaIdAndUsuarioId(UUID ocorrenciaId, UUID usuarioId);
 }

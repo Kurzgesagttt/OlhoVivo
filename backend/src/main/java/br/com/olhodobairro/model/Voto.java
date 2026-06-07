@@ -23,6 +23,9 @@ public class Voto {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @Column(nullable = false)
+    private Integer valor = 1;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private OffsetDateTime criadoEm = OffsetDateTime.now();
 
@@ -32,5 +35,7 @@ public class Voto {
     public void setOcorrencia(Ocorrencia ocorrencia) { this.ocorrencia = ocorrencia; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public Integer getValor() { return valor; }
+    public void setValor(Integer valor) { this.valor = valor; }
     public OffsetDateTime getCriadoEm() { return criadoEm; }
 }

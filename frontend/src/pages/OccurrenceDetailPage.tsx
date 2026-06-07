@@ -6,7 +6,7 @@ import { useComments, useCreateComment } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { Button, ButtonLink, Chip, PageShell, VoteButton, getCategoryVariantFromName } from '../components/ui'
+import { BrandMark, Button, ButtonLink, Chip, PageShell, VoteButton, getCategoryVariantFromName } from '../components/ui'
 import type { Comentario } from '../types/comment'
 import type { Ocorrencia } from '../types/occurrence'
 
@@ -205,7 +205,7 @@ export default function OccurrenceDetailPage() {
       <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-line dark:bg-app/95">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
           <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-foreground">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">OB</span>
+            <BrandMark />
             <span className="hidden sm:inline">Olho do Bairro</span>
           </Link>
 

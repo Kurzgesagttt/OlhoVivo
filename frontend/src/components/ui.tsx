@@ -6,6 +6,22 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
+const brandIconSrc = '/building_3355769.png'
+
+const brandMarkSizeClass = {
+  sm: 'h-8 w-8 p-1.5',
+  md: 'h-10 w-10 p-2',
+  lg: 'h-12 w-12 p-2.5',
+}
+
+export function BrandMark({ size = 'sm', className }: { size?: keyof typeof brandMarkSizeClass; className?: string }) {
+  return (
+    <span className={cn('inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-line/50', brandMarkSizeClass[size], className)}>
+      <img src={brandIconSrc} alt="" className="h-full w-full object-contain" />
+    </span>
+  )
+}
+
 export type ButtonVariant =
   | 'primary'
   | 'secondary'
@@ -607,7 +623,7 @@ export function AppHeader({
     <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-line dark:bg-app/95">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-foreground">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">OB</span>
+          <BrandMark />
           <span className="hidden sm:inline">Olho do Bairro</span>
         </Link>
 
@@ -636,7 +652,7 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <Card className="w-full max-w-md p-8">
           <div className="mb-8 text-center">
-            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">OB</span>
+            <BrandMark size="md" className="mx-auto mb-3" />
             <h1 className="text-2xl font-semibold text-zinc-950 dark:text-foreground">{title}</h1>
             <p className="mt-2 text-sm text-zinc-500 dark:text-muted">{subtitle}</p>
           </div>

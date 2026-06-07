@@ -4,7 +4,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AppHeader, Button, ButtonGroup, Card, PageContainer, PageShell, StatusBadge, getStatusLabel } from '../../components/ui'
 import { useOccurrences } from '../../hooks/useOccurrences'
 import { occurrenceService } from '../../services/occurrence.service'
-import type { StatusOcorrencia } from '../../types/occurrence'
+import type { PageResponse } from '../../types/api'
+import type { Ocorrencia, StatusOcorrencia } from '../../types/occurrence'
 
 const STATUS_OPTIONS: StatusOcorrencia[] = ['PENDENTE', 'EM_ANDAMENTO', 'CONCLUIDA', 'ENCERRADA']
 type StatusFilter = 'TODOS' | StatusOcorrencia
@@ -17,10 +18,57 @@ const FILTER_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
   { value: 'ENCERRADA', label: 'Encerradas' },
 ]
 
+function isOccurrence(data: unknown): data is Ocorrencia {
+  return !!data && typeof data === 'object' && 'id' in data && 'status' in data
+}
+
+function isOccurrencePage(data: unknown): data is PageResponse<Ocorrencia> {
+  return !!data && typeof data === 'object' && 'content' in data && Array.isArray((data as PageResponse<Ocorrencia>).content)
+}
+
+function replaceOccurrence(data: unknown, updatedOccurrence: Ocorrencia) {
+  if (isOccurrence(data)) {
+    return data.id === updatedOccurrence.id ? updatedOccurrence : data
+  }
+
+  if (isOccurrencePage(data)) {
+    return {
+      ...data,
+      content: data.content.map(ocorrencia => (
+        ocorrencia.id === updatedOccurrence.id ? updatedOccurrence : ocorrencia
+      )),
+    }
+  }
+
+  return data
+}
+
+function updateOccurrenceStatus(data: unknown, id: string, status: StatusOcorrencia) {
+  const resolvedAt = ['CONCLUIDA', 'ENCERRADA', 'RESOLVIDA'].includes(status)
+    ? new Date().toISOString()
+    : null
+
+  if (isOccurrence(data)) {
+    return data.id === id ? { ...data, status, resolvidoEm: resolvedAt } : data
+  }
+
+  if (isOccurrencePage(data)) {
+    return {
+      ...data,
+      content: data.content.map(ocorrencia => (
+        ocorrencia.id === id ? { ...ocorrencia, status, resolvidoEm: resolvedAt } : ocorrencia
+      )),
+    }
+  }
+
+  return data
+}
+
 export default function ModerationPage() {
   const [page, setPage] = useState(0)
   const [statusFiltro, setStatusFiltro] = useState<StatusFilter>('TODOS')
   const [atualizandoId, setAtualizandoId] = useState<string | null>(null)
+  const [erroStatus, setErroStatus] = useState('')
   const { data, isLoading } = useOccurrences(page)
   const queryClient = useQueryClient()
   const ocorrencias = data?.content ?? []
@@ -36,9 +84,26 @@ export default function ModerationPage() {
 
   async function alterarStatus(id: string, status: StatusOcorrencia) {
     setAtualizandoId(id)
+    setErroStatus('')
+    await queryClient.cancelQueries({ queryKey: ['ocorrencias'] })
+    const previousOccurrences = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
+    queryClient.setQueriesData(
+      { queryKey: ['ocorrencias'] },
+      current => updateOccurrenceStatus(current, id, status),
+    )
+
     try {
-      await occurrenceService.atualizarStatus(id, { status })
-      queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
+      const updatedOccurrence = await occurrenceService.atualizarStatus(id, { status })
+      queryClient.setQueriesData(
+        { queryKey: ['ocorrencias'] },
+        current => replaceOccurrence(current, updatedOccurrence),
+      )
+      queryClient.invalidateQueries({ queryKey: ['ocorrencias'], refetchType: 'inactive' })
+    } catch (error) {
+      previousOccurrences.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data)
+      })
+      setErroStatus('Nao foi possivel atualizar o status. Tente novamente.')
     } finally {
       setAtualizandoId(null)
     }
@@ -60,6 +125,11 @@ export default function ModerationPage() {
         </Card>
 
         {isLoading && <p className="text-sm text-zinc-500 dark:text-muted">Carregando...</p>}
+        {erroStatus && (
+          <Card className="border-status-danger/30 bg-status-danger/10 text-sm text-status-danger">
+            {erroStatus}
+          </Card>
+        )}
 
         <div className="space-y-3">
           {ocorrenciasFiltradas.map(ocorrencia => (

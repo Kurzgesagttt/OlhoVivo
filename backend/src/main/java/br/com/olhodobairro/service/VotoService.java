@@ -44,12 +44,11 @@ public class VotoService {
 
         Voto votoExistente = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId).orElse(null);
         if (votoExistente != null) {
-            int valorAnterior = votoExistente.getValor();
-            if (valorAnterior != valor) {
+            if (votoExistente.getValor() != valor) {
                 votoExistente.setValor(valor);
                 votoRepository.save(votoExistente);
-                atualizarPontuacao(ocorrencia, valor - valorAnterior);
             }
+            atualizarTotalDeVotos(ocorrencia);
             return;
         }
 
@@ -59,7 +58,7 @@ public class VotoService {
         voto.setValor(valor);
         votoRepository.save(voto);
 
-        atualizarPontuacao(ocorrencia, valor);
+        atualizarTotalDeVotos(ocorrencia);
     }
 
     @Transactional
@@ -71,8 +70,7 @@ public class VotoService {
 
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
-        ocorrencia.setVotosCount(ocorrencia.getVotosCount() - voto.getValor());
-        ocorrenciaRepository.save(ocorrencia);
+        atualizarTotalDeVotos(ocorrencia);
     }
 
     private void validarValor(int valor) {
@@ -81,8 +79,8 @@ public class VotoService {
         }
     }
 
-    private void atualizarPontuacao(Ocorrencia ocorrencia, int delta) {
-        ocorrencia.setVotosCount(ocorrencia.getVotosCount() + delta);
+    private void atualizarTotalDeVotos(Ocorrencia ocorrencia) {
+        ocorrencia.setVotosCount((int) votoRepository.countByOcorrenciaId(ocorrencia.getId()));
         ocorrenciaRepository.save(ocorrencia);
     }
 }

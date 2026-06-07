@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface VotoRepository extends JpaRepository<Voto, UUID> {
     Optional<Voto> findByOcorrenciaIdAndUsuarioId(UUID ocorrenciaId, UUID usuarioId);
+    long countByOcorrenciaId(UUID ocorrenciaId);
 }

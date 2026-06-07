@@ -105,11 +105,6 @@ export default function OccurrenceDetailPage() {
       return
     }
 
-    if (ocorrencia.votoDoUsuario === valor) {
-      setErroVoto('Este ja e o seu voto atual.')
-      return
-    }
-
     try {
       await votar(valor)
     } catch (err) {
@@ -458,7 +453,7 @@ function TimelineCard({ ocorrencia, comentariosCount }: { ocorrencia: Ocorrencia
       </h2>
       <div className="space-y-0 p-4">
         <TimelineItem tone="emerald" title="Ocorrencia registrada" description="O relato foi publicado com descricao e localizacao para a comunidade." time={formatDateTime(ocorrencia.criadoEm)} />
-        <TimelineItem tone="blue" title={`${ocorrencia.votosCount} pontos de prioridade`} description="Os votos ajudam a priorizar a ocorrencia no bairro." time={comentariosCount > 0 ? `${comentariosCount} comentarios na discussao` : 'Aguardando interacoes'} />
+        <TimelineItem tone="blue" title={`${ocorrencia.votosCount} moradores votaram`} description="Os votos ajudam a priorizar a ocorrencia no bairro." time={comentariosCount > 0 ? `${comentariosCount} comentarios na discussao` : 'Aguardando interacoes'} />
         <TimelineItem tone="zinc" title="Discussao aberta" description="Moradores podem comentar com detalhes, fotos e atualizacoes sobre o local." time="Disponivel para a comunidade" last />
       </div>
     </section>
@@ -603,7 +598,7 @@ function AuthorWidget({ autorNome, ocorrencia }: { autorNome: string; ocorrencia
         </div>
       </div>
       <InfoRow label="Posts" value="1+" />
-      <InfoRow label="Pontuacao" value={String(ocorrencia.votosCount)} />
+      <InfoRow label="Votos" value={String(ocorrencia.votosCount)} />
     </section>
   )
 }

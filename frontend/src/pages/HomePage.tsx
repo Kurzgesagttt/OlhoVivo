@@ -291,7 +291,7 @@ export default function HomePage() {
               <StatBox label="Pendentes" value={String(totalPendentes)} />
               <StatBox label="Concluidas" value={String(totalConcluidas)} />
               <StatBox label="Encerradas" value={String(totalEncerradas)} />
-              <StatBox label="Pontuacao" value={String(totalVotos)} />
+              <StatBox label="Votos" value={String(totalVotos)} />
             </div>
           </Panel>
 
@@ -305,7 +305,7 @@ export default function HomePage() {
                   <Link key={ocorrencia.id} to={`/ocorrencias/${ocorrencia.id}`} className="block text-sm">
                     <span className="text-xs text-zinc-400">#{index + 1}</span>
                     <span className="ml-2 font-medium text-zinc-800 hover:text-brand dark:text-foreground dark:hover:text-brand-100">{ocorrencia.titulo}</span>
-                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">{ocorrencia.votosCount} pontos</span>
+                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">{ocorrencia.votosCount} votos</span>
                   </Link>
                 ))}
             </div>
@@ -321,7 +321,7 @@ export default function HomePage() {
                 options={[
                   { value: 'hot', label: 'Em alta' },
                   { value: 'recent', label: 'Recentes' },
-                  { value: 'top', label: 'Mais pontuadas' },
+                  { value: 'top', label: 'Mais votadas' },
                   { value: 'closed', label: 'Encerradas' },
                 ]}
               />
@@ -435,11 +435,6 @@ function OccurrencePostCard({
 
     if (!usuarioLogado) {
       navigate('/login')
-      return
-    }
-
-    if (ocorrencia.votoDoUsuario === valor) {
-      setVoteMessage('Este ja e o seu voto atual.')
       return
     }
 

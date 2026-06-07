@@ -519,8 +519,8 @@ function OccurrencePostCard({
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
           disabled={isVoting}
+          orientation="vertical"
           onVote={direction => void handleVote(direction === 'up' ? 'add' : 'remove')}
-          className="scale-90 sm:scale-100"
         />
         {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
       </div>

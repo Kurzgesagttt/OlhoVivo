@@ -198,10 +198,64 @@ export interface VoteButtonProps {
   voted?: boolean
   onVote?: (dir: 'up' | 'down') => void
   disabled?: boolean
+  orientation?: 'horizontal' | 'vertical'
   className?: string
 }
 
-export function VoteButton({ count, voted = false, onVote, disabled = false, className }: VoteButtonProps) {
+export function VoteButton({
+  count,
+  voted = false,
+  onVote,
+  disabled = false,
+  orientation = 'horizontal',
+  className,
+}: VoteButtonProps) {
+  if (orientation === 'vertical') {
+    return (
+      <div
+        className={cn(
+          'inline-flex w-8 flex-col items-center overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950',
+          disabled && 'opacity-70',
+          className
+        )}
+      >
+        <button
+          type="button"
+          onClick={() => onVote?.('up')}
+          disabled={disabled || voted}
+          title={voted ? 'Voce ja confirmou esta ocorrencia' : 'Confirmar ocorrencia'}
+          aria-label="Confirmar ocorrencia"
+          className={cn(
+            'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
+            voted
+              ? 'bg-teal-900 text-teal-100 dark:bg-teal-900 dark:text-teal-100'
+              : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 dark:text-gray-400 dark:hover:bg-teal-950 dark:hover:text-teal-300'
+          )}
+        >
+          <span aria-hidden="true">^</span>
+        </button>
+        <span className="flex min-h-7 w-full items-center justify-center border-y border-gray-200 text-xs font-bold text-gray-900 dark:border-gray-800 dark:text-gray-100">
+          {count}
+        </span>
+        <button
+          type="button"
+          onClick={() => onVote?.('down')}
+          disabled={disabled || !voted}
+          title={voted ? 'Remover confirmacao' : 'Voce ainda nao confirmou esta ocorrencia'}
+          aria-label="Remover confirmacao"
+          className={cn(
+            'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
+            voted
+              ? 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950 dark:hover:text-red-400'
+              : 'text-gray-300 dark:text-gray-700'
+          )}
+        >
+          <span aria-hidden="true">v</span>
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div
       className={cn(

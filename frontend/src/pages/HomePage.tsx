@@ -591,14 +591,12 @@ function OccurrencePostCard({
       </div>
 
       <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-900 sm:flex">
-        {ocorrencia.imagensUrl.length > 0 ? (
+        {ocorrencia.imagensUrl.length > 0 && (
           <img
             src={ocorrencia.imagensUrl[0]}
             alt=""
             className="h-full w-full object-cover"
           />
-        ) : (
-          <span className="text-3xl text-zinc-300 dark:text-zinc-700" aria-hidden="true">o</span>
         )}
       </Link>
     </article>

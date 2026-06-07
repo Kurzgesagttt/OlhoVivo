@@ -20,6 +20,7 @@ public record OcorrenciaResponse(
         String endereco,
         int votosCount,
         boolean votadoPeloUsuario,
+        boolean salvoPeloUsuario,
         List<String> imagensUrl,
         OffsetDateTime criadoEm,
         OffsetDateTime atualizadoEm,

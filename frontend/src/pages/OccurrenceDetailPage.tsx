@@ -5,7 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { useComments, useCreateComment } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
-import { PageShell, VoteButton } from '../components/ui'
+import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
+import { Button, PageShell, VoteButton } from '../components/ui'
 import type { Comentario } from '../types/comment'
 import type { Ocorrencia } from '../types/occurrence'
 
@@ -78,11 +79,13 @@ export default function OccurrenceDetailPage() {
   const { data: comentariosPage } = useComments(id!)
   const { data: ocorrenciasPage } = useOccurrences(0)
   const { votar, removerVoto, isVoting } = useVote(id!)
+  const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
   const deleteOccurrence = useDeleteOccurrence()
   const [novoComentario, setNovoComentario] = useState('')
   const [erroComentario, setErroComentario] = useState('')
   const [erroVoto, setErroVoto] = useState('')
+  const [erroSalvamento, setErroSalvamento] = useState('')
   const [confirmandoDeletar, setConfirmandoDeletar] = useState(false)
 
   const podeAdministrar = usuario?.role === 'ADMIN' || usuario?.role === 'PREFEITURA'
@@ -136,6 +139,31 @@ export default function OccurrenceDetailPage() {
         setErroVoto(err.response.data.message)
       } else {
         setErroVoto(action === 'add' ? 'Voce ja confirmou esta ocorrencia.' : 'Voce ainda nao confirmou esta ocorrencia.')
+      }
+    }
+  }
+
+  async function handleSave() {
+    setErroSalvamento('')
+
+    if (!ocorrencia) return
+
+    if (!usuario) {
+      navigate('/login')
+      return
+    }
+
+    try {
+      if (ocorrencia.salvoPeloUsuario) {
+        await remover()
+      } else {
+        await salvar()
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setErroSalvamento(err.response.data.message)
+      } else {
+        setErroSalvamento('Nao foi possivel atualizar o salvamento.')
       }
     }
   }
@@ -234,6 +262,9 @@ export default function OccurrenceDetailPage() {
             onRemoveVote={() => handleVote('remove')}
             isVoting={isVoting}
             erroVoto={erroVoto}
+            erroSalvamento={erroSalvamento}
+            onSave={handleSave}
+            isSaving={isSaving}
             podeAdministrar={podeAdministrar}
             confirmandoDeletar={confirmandoDeletar}
             deleting={deleteOccurrence.isPending}
@@ -272,6 +303,9 @@ function PostCard({
   onRemoveVote,
   isVoting,
   erroVoto,
+  erroSalvamento,
+  onSave,
+  isSaving,
   podeAdministrar,
   confirmandoDeletar,
   deleting,
@@ -285,6 +319,9 @@ function PostCard({
   onRemoveVote: () => void | Promise<void>
   isVoting: boolean
   erroVoto: string
+  erroSalvamento: string
+  onSave: () => void | Promise<void>
+  isSaving: boolean
   podeAdministrar: boolean
   confirmandoDeletar: boolean
   deleting: boolean
@@ -353,8 +390,22 @@ function PostCard({
           disabled={isVoting}
           onVote={direction => void (direction === 'up' ? onVote() : onRemoveVote())}
         />
-        <button type="button" disabled title="Compartilhamento ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Compartilhar</button>
-        <button type="button" disabled title="Salvar ocorrencia ainda nao implementado" className="rounded-full border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-400 opacity-60 dark:border-zinc-700 dark:text-zinc-500">Salvar</button>
+        <Button type="button" variant="ghost" size="xs" pill onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>
+          Comentarios
+        </Button>
+        <Button type="button" disabled title="Compartilhamento ainda nao implementado" variant="ghost" size="xs" pill iconLeft="->">
+          Compartilhar
+        </Button>
+        <Button
+          type="button"
+          variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
+          size="xs"
+          pill
+          loading={isSaving}
+          onClick={() => void onSave()}
+        >
+          {ocorrencia.salvoPeloUsuario ? 'Salvo' : 'Salvar'}
+        </Button>
 
         {podeAdministrar && (
           <button
@@ -376,6 +427,7 @@ function PostCard({
           </button>
         )}
         {erroVoto && <p className="basis-full text-xs text-red-600 dark:text-red-300">{erroVoto}</p>}
+        {erroSalvamento && <p className="basis-full text-xs text-red-600 dark:text-red-300">{erroSalvamento}</p>}
       </div>
     </article>
   )
@@ -418,7 +470,7 @@ function PhotoPlaceholder({ label, tone }: { label: string; tone: string }) {
 
 function TimelineCard({ ocorrencia, comentariosCount }: { ocorrencia: Ocorrencia; comentariosCount: number }) {
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <section id="comentarios" className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
       <h2 className="border-b border-zinc-200 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
         Atividade da comunidade
       </h2>
@@ -491,9 +543,9 @@ function CommentsCard({
               />
               <div className="mt-1 text-right text-xs text-zinc-400">{novoComentario.length}/{MAX_COMENTARIO}</div>
             </div>
-            <button type="submit" disabled={enviando} className="h-10 shrink-0 rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
+            <Button type="submit" variant="primary" size="sm" pill loading={enviando} className="shrink-0">
               {enviando ? '...' : 'Enviar'}
-            </button>
+            </Button>
           </form>
         ) : (
           <p className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">

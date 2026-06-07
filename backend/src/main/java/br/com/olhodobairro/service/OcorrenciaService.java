@@ -13,6 +13,7 @@ import br.com.olhodobairro.repository.BairroRepository;
 import br.com.olhodobairro.repository.CategoriaRepository;
 import br.com.olhodobairro.repository.ImagemOcorrenciaRepository;
 import br.com.olhodobairro.repository.OcorrenciaRepository;
+import br.com.olhodobairro.repository.OcorrenciaSalvaRepository;
 import br.com.olhodobairro.repository.UsuarioRepository;
 import br.com.olhodobairro.repository.VotoRepository;
 import br.com.olhodobairro.security.SecurityContextHelper;
@@ -40,6 +41,7 @@ public class OcorrenciaService {
     private final BairroRepository bairroRepository;
     private final UsuarioRepository usuarioRepository;
     private final VotoRepository votoRepository;
+    private final OcorrenciaSalvaRepository ocorrenciaSalvaRepository;
     private final ImagemOcorrenciaRepository imagemOcorrenciaRepository;
     private final SecurityContextHelper securityContextHelper;
     private final Path uploadPath;
@@ -49,6 +51,7 @@ public class OcorrenciaService {
                               BairroRepository bairroRepository,
                               UsuarioRepository usuarioRepository,
                               VotoRepository votoRepository,
+                              OcorrenciaSalvaRepository ocorrenciaSalvaRepository,
                               ImagemOcorrenciaRepository imagemOcorrenciaRepository,
                               SecurityContextHelper securityContextHelper,
                               @Value("${app.upload-dir:uploads}") String uploadDir) {
@@ -57,6 +60,7 @@ public class OcorrenciaService {
         this.bairroRepository = bairroRepository;
         this.usuarioRepository = usuarioRepository;
         this.votoRepository = votoRepository;
+        this.ocorrenciaSalvaRepository = ocorrenciaSalvaRepository;
         this.imagemOcorrenciaRepository = imagemOcorrenciaRepository;
         this.securityContextHelper = securityContextHelper;
         this.uploadPath = Path.of(uploadDir).toAbsolutePath().normalize();
@@ -208,6 +212,9 @@ public class OcorrenciaService {
         boolean votadoPeloUsuario = securityContextHelper.getUsuarioIdAutenticadoOptional()
                 .map(usuarioId -> votoRepository.existsByOcorrenciaIdAndUsuarioId(o.getId(), usuarioId))
                 .orElse(false);
+        boolean salvoPeloUsuario = securityContextHelper.getUsuarioIdAutenticadoOptional()
+                .map(usuarioId -> ocorrenciaSalvaRepository.existsByOcorrenciaIdAndUsuarioId(o.getId(), usuarioId))
+                .orElse(false);
         List<String> imagensUrl = imagemOcorrenciaRepository.findByOcorrenciaIdOrderByCriadoEmAsc(o.getId())
                 .stream()
                 .map(ImagemOcorrencia::getUrl)
@@ -226,6 +233,7 @@ public class OcorrenciaService {
                 o.getEndereco(),
                 o.getVotosCount(),
                 votadoPeloUsuario,
+                salvoPeloUsuario,
                 imagensUrl,
                 o.getCriadoEm(),
                 o.getAtualizadoEm(),

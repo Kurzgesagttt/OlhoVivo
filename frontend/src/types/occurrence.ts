@@ -31,6 +31,7 @@ export interface Ocorrencia {
   endereco: string | null
   votosCount: number
   votadoPeloUsuario: boolean
+  salvoPeloUsuario: boolean
   imagensUrl: string[]
   criadoEm: string
   atualizadoEm: string

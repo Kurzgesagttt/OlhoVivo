@@ -5,7 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
-import { ButtonGroup, PageShell, VoteButton } from '../components/ui'
+import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
+import { Button, ButtonGroup, PageShell, VoteButton } from '../components/ui'
 import type { Ocorrencia } from '../types/occurrence'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -479,7 +480,9 @@ function OccurrencePostCard({
 }) {
   const navigate = useNavigate()
   const { votar, removerVoto, isVoting } = useVote(ocorrencia.id)
+  const { salvar, remover, isSaving } = useSavedOccurrence(ocorrencia.id)
   const [voteMessage, setVoteMessage] = useState('')
+  const [saveMessage, setSaveMessage] = useState('')
 
   async function handleVote(action: 'add' | 'remove') {
     setVoteMessage('')
@@ -510,6 +513,25 @@ function OccurrencePostCard({
     }
   }
 
+  async function handleSave() {
+    setSaveMessage('')
+
+    if (!usuarioLogado) {
+      navigate('/login')
+      return
+    }
+
+    try {
+      if (ocorrencia.salvoPeloUsuario) {
+        await remover()
+      } else {
+        await salvar()
+      }
+    } catch {
+      setSaveMessage('Nao foi possivel atualizar o salvamento.')
+    }
+  }
+
   return (
     <article
       className="group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 sm:grid-cols-[44px_minmax(0,1fr)_104px]"
@@ -525,7 +547,8 @@ function OccurrencePostCard({
         {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
       </div>
 
-      <Link to={`/ocorrencias/${ocorrencia.id}`} className="min-w-0 p-4">
+      <div className="min-w-0 p-4">
+        <Link to={`/ocorrencias/${ocorrencia.id}`} className="block">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getCategoryStyle(categoryIndex)}`}>
             {ocorrencia.categoria.nome}
@@ -543,12 +566,32 @@ function OccurrencePostCard({
           {ocorrencia.titulo}
         </h2>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{ocorrencia.descricao}</p>
+        </Link>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-          <span className="rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">Comentarios</span>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            pill
+            onClick={() => navigate(`/ocorrencias/${ocorrencia.id}`)}
+          >
+            Comentarios
+          </Button>
+          <Button
+            type="button"
+            variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
+            size="xs"
+            pill
+            loading={isSaving}
+            onClick={() => void handleSave()}
+          >
+            {ocorrencia.salvoPeloUsuario ? 'Salvo' : 'Salvar'}
+          </Button>
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">{ocorrencia.endereco}</span>}
         </div>
-      </Link>
+        {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}
+      </div>
 
       <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-950 sm:flex">
         {ocorrencia.imagensUrl.length > 0 ? (

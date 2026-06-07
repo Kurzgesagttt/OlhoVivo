@@ -285,16 +285,6 @@ export default function HomePage() {
             </div>
           </Panel>
 
-          <Panel title="Mapa do bairro">
-            <Link
-              to={novaOcorrenciaPath}
-              className="flex h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-zinc-300 bg-zinc-50 text-center text-sm text-zinc-600 hover:border-brand hover:bg-brand/10 dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:border-brand dark:hover:bg-brand-muted"
-            >
-              <span className="text-2xl text-brand" aria-hidden="true">+</span>
-              Informar ponto no mapa
-            </Link>
-          </Panel>
-
           <Panel title="Resumo">
             <div className="grid grid-cols-2 gap-2">
               <StatBox label="Posts" value={String(data?.totalElements ?? ocorrencias.length)} />

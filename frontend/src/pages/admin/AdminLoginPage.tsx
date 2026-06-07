@@ -22,17 +22,19 @@ export default function AdminLoginPage() {
 
     try {
       await authService.login({ email, senha })
+      queryClient.removeQueries({ queryKey: ['me'] })
+      queryClient.removeQueries({ queryKey: ['ocorrencias'] })
+      queryClient.removeQueries({ queryKey: ['ocorrencias-salvas'] })
       const usuario = await authService.perfil()
 
       if (!ADMIN_ROLES.includes(usuario.role)) {
         await authService.logout()
+        queryClient.clear()
         setErro('Esta conta nao tem permissao para acessar o painel administrativo.')
         return
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['me'] })
-      await queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
-      await queryClient.invalidateQueries({ queryKey: ['ocorrencias-salvas'] })
+      queryClient.setQueryData(['me'], usuario)
       navigate('/admin/dashboard')
     } catch {
       setErro('Credenciais invalidas ou usuario sem permissao administrativa.')

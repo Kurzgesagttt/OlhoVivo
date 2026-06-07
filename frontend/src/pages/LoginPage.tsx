@@ -19,9 +19,11 @@ export default function LoginPage() {
 
     try {
       await authService.login({ email, senha })
-      await queryClient.invalidateQueries({ queryKey: ['me'] })
-      await queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
-      await queryClient.invalidateQueries({ queryKey: ['ocorrencias-salvas'] })
+      queryClient.removeQueries({ queryKey: ['me'] })
+      queryClient.removeQueries({ queryKey: ['ocorrencias'] })
+      queryClient.removeQueries({ queryKey: ['ocorrencias-salvas'] })
+      const usuario = await authService.perfil()
+      queryClient.setQueryData(['me'], usuario)
       navigate('/home')
     } catch {
       setErro('Email ou senha invalidos.')

@@ -13,7 +13,13 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => authService.login(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['me'] }),
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: ['me'] })
+      queryClient.removeQueries({ queryKey: ['ocorrencias'] })
+      queryClient.removeQueries({ queryKey: ['ocorrencias-salvas'] })
+      const usuario = await authService.perfil()
+      queryClient.setQueryData(['me'], usuario)
+    },
   })
 
   const cadastroMutation = useMutation({

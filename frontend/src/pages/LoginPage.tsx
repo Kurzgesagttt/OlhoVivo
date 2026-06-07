@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { authService } from '../services/auth.service'
 import { AuthShell, Button, Field, Notice, TextInput } from '../components/ui'
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
@@ -17,6 +19,9 @@ export default function LoginPage() {
 
     try {
       await authService.login({ email, senha })
+      await queryClient.invalidateQueries({ queryKey: ['me'] })
+      await queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
+      await queryClient.invalidateQueries({ queryKey: ['ocorrencias-salvas'] })
       navigate('/home')
     } catch {
       setErro('Email ou senha invalidos.')

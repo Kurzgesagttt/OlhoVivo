@@ -1,27 +1,38 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { occurrenceService } from '../services/occurrence.service'
+import { useAuth } from './useAuth'
 import type { CriarOcorrenciaRequest } from '../types/occurrence'
 
 export function useOccurrences(page = 0) {
+  const { usuario, isLoading } = useAuth()
+  const authScope = usuario?.id ?? 'anon'
+
   return useQuery({
-    queryKey: ['ocorrencias', page],
+    queryKey: ['ocorrencias', authScope, page],
     queryFn: () => occurrenceService.listar(page),
+    enabled: !isLoading,
   })
 }
 
 export function useOccurrence(id: string) {
+  const { usuario, isLoading } = useAuth()
+  const authScope = usuario?.id ?? 'anon'
+
   return useQuery({
-    queryKey: ['ocorrencias', id],
+    queryKey: ['ocorrencias', authScope, id],
     queryFn: () => occurrenceService.buscarPorId(id),
-    enabled: !!id,
+    enabled: !!id && !isLoading,
   })
 }
 
 export function useSavedOccurrences(page = 0, enabled = true) {
+  const { usuario, isLoading } = useAuth()
+  const authScope = usuario?.id ?? 'anon'
+
   return useQuery({
-    queryKey: ['ocorrencias-salvas', page],
+    queryKey: ['ocorrencias-salvas', authScope, page],
     queryFn: () => occurrenceService.listarSalvas(page),
-    enabled,
+    enabled: enabled && !!usuario && !isLoading,
   })
 }
 

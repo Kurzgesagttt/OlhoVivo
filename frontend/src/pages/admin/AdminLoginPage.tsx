@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthShell, Button, Field, Notice, TextInput } from '../../components/ui'
 import { authService } from '../../services/auth.service'
@@ -8,6 +9,7 @@ const ADMIN_ROLES: Role[] = ['ADMIN', 'MODERADOR', 'PREFEITURA']
 
 export default function AdminLoginPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
@@ -28,6 +30,9 @@ export default function AdminLoginPage() {
         return
       }
 
+      await queryClient.invalidateQueries({ queryKey: ['me'] })
+      await queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
+      await queryClient.invalidateQueries({ queryKey: ['ocorrencias-salvas'] })
       navigate('/admin/dashboard')
     } catch {
       setErro('Credenciais invalidas ou usuario sem permissao administrativa.')

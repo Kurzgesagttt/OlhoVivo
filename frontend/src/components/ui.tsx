@@ -284,7 +284,7 @@ export function VoteButton({
           type="button"
           onClick={() => onVote?.('up')}
           disabled={disabled}
-          title={activeVote === 1 ? 'Seu voto atual e positivo' : 'Votar positivo'}
+          title={activeVote === 1 ? 'Remover voto positivo' : 'Votar positivo'}
           aria-label="Votar positivo"
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
@@ -302,7 +302,7 @@ export function VoteButton({
           type="button"
           onClick={() => onVote?.('down')}
           disabled={disabled}
-          title={activeVote === -1 ? 'Seu voto atual e negativo' : 'Votar negativo'}
+          title={activeVote === -1 ? 'Remover voto negativo' : 'Votar negativo'}
           aria-label="Votar negativo"
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
@@ -329,7 +329,7 @@ export function VoteButton({
         type="button"
         onClick={() => onVote?.('up')}
         disabled={disabled}
-        title={activeVote === 1 ? 'Seu voto atual e positivo' : 'Votar positivo'}
+        title={activeVote === 1 ? 'Remover voto positivo' : 'Votar positivo'}
         aria-label="Votar positivo"
         className={cn(
           'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed',
@@ -346,7 +346,7 @@ export function VoteButton({
         type="button"
         onClick={() => onVote?.('down')}
         disabled={disabled}
-        title={activeVote === -1 ? 'Seu voto atual e negativo' : 'Votar negativo'}
+        title={activeVote === -1 ? 'Remover voto negativo' : 'Votar negativo'}
         aria-label="Votar negativo"
         className={cn(
           'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors disabled:cursor-not-allowed',

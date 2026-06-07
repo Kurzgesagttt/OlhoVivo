@@ -1,30 +1,426 @@
 import { Link, useNavigate } from 'react-router-dom'
+import React, { forwardRef } from 'react'
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'ghost'
+  | 'danger'
+  | 'danger-soft'
+  | 'warning-soft'
+  | 'success-soft'
+  | 'info-soft'
+  | 'link'
+  | 'link-danger'
+
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  pill?: boolean
+  loading?: boolean
+  iconLeft?: ReactNode
+  iconRight?: ReactNode
+  fullWidth?: boolean
+}
 
 const buttonVariantClass: Record<ButtonVariant, string> = {
-  primary: 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500',
-  secondary: 'border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800',
-  ghost: 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800',
-  danger: 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-200',
+  primary: 'border border-brand bg-brand text-white hover:bg-brand-dark active:bg-brand-darker',
+  secondary: 'border border-gray-300 bg-transparent text-gray-900 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800',
+  ghost: 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
+  danger: 'border border-red-700 bg-red-700 text-white hover:bg-red-800 active:bg-red-900',
+  'danger-soft': 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
+  'warning-soft': 'border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
+  'success-soft': 'border border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300',
+  'info-soft': 'border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300',
+  link: 'h-auto border-none bg-transparent p-0 text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand',
+  'link-danger': 'h-auto border-none bg-transparent p-0 text-red-700 underline decoration-red-700/30 underline-offset-2 hover:decoration-red-700',
+}
+
+const buttonSizeClass: Record<ButtonSize, string> = {
+  xs: 'h-[26px] gap-1 rounded-md px-[10px] text-[11px]',
+  sm: 'h-[32px] gap-1.5 rounded-lg px-[14px] text-[13px]',
+  md: 'h-[38px] gap-2 rounded-lg px-[18px] text-[14px]',
+  lg: 'h-[44px] gap-2 rounded-lg px-[22px] text-[15px]',
+  xl: 'h-[52px] gap-2.5 rounded-xl px-[28px] text-[16px]',
 }
 
 // Shared action button. Use variant for visual intent and keep domain behavior in page handlers.
-export function Button({ variant = 'secondary', className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = 'secondary',
+    size = 'md',
+    pill = false,
+    loading = false,
+    iconLeft,
+    iconRight,
+    fullWidth = false,
+    disabled,
+    className,
+    children,
+    ...props
+  },
+  ref
+) {
+  const isLink = variant === 'link' || variant === 'link-danger'
+
   return (
     <button
+      ref={ref}
+      disabled={disabled || loading}
       {...props}
       className={cn(
-        'inline-flex min-h-10 items-center justify-center rounded-full px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex items-center justify-center font-medium transition-all duration-100 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
+        !isLink && buttonSizeClass[size],
+        !isLink && pill && 'rounded-full',
         buttonVariantClass[variant],
+        fullWidth && 'w-full',
+        loading && 'relative text-transparent',
         className
       )}
-    />
+    >
+      {loading && (
+        <span
+          className="absolute inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+          aria-hidden="true"
+        />
+      )}
+      {iconLeft && <span aria-hidden="true">{iconLeft}</span>}
+      {children}
+      {iconRight && <span aria-hidden="true">{iconRight}</span>}
+    </button>
+  )
+})
+
+export type IconButtonVariant = 'default' | 'primary' | 'danger'
+
+export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: IconButtonVariant
+  size?: 'xs' | 'sm' | 'md' | 'lg'
+  round?: boolean
+  icon: ReactNode
+  label: string
+}
+
+const iconButtonSizeClass: Record<NonNullable<IconButtonProps['size']>, string> = {
+  xs: 'h-[26px] w-[26px] rounded-md text-[14px]',
+  sm: 'h-[32px] w-[32px] rounded-lg text-[16px]',
+  md: 'h-[38px] w-[38px] rounded-lg text-[18px]',
+  lg: 'h-[44px] w-[44px] rounded-xl text-[20px]',
+}
+
+const iconButtonVariantClass: Record<IconButtonVariant, string> = {
+  default: 'border border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800',
+  primary: 'border border-brand bg-brand text-white hover:bg-brand-dark',
+  danger: 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
+}
+
+export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
+  { variant = 'default', size = 'md', round = false, icon, label, className, ...props },
+  ref
+) {
+  return (
+    <button
+      ref={ref}
+      aria-label={label}
+      className={cn(
+        'inline-flex items-center justify-center transition-all duration-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-40',
+        iconButtonSizeClass[size],
+        iconButtonVariantClass[variant],
+        round && 'rounded-full',
+        className
+      )}
+      {...props}
+    >
+      <span aria-hidden="true">{icon}</span>
+    </button>
+  )
+})
+
+export interface FabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  size?: 'sm' | 'md' | 'lg'
+  icon: ReactNode
+  label: string
+  expanded?: string
+}
+
+const fabSizeClass: Record<NonNullable<FabProps['size']>, string> = {
+  sm: 'h-[38px] w-[38px] text-[18px]',
+  md: 'h-[48px] w-[48px] text-[22px]',
+  lg: 'h-[58px] w-[58px] text-[26px]',
+}
+
+export const Fab = forwardRef<HTMLButtonElement, FabProps>(function Fab(
+  { size = 'md', icon, label, expanded, className, ...props },
+  ref
+) {
+  if (expanded) {
+    return (
+      <button
+        ref={ref}
+        aria-label={label}
+        className={cn(
+          'inline-flex h-[48px] items-center gap-3 rounded-full bg-brand px-5 text-[15px] font-medium text-white transition-all duration-100 hover:bg-brand-dark active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+          className
+        )}
+        {...props}
+      >
+        <span aria-hidden="true" className="text-[22px]">{icon}</span>
+        {expanded}
+      </button>
+    )
+  }
+
+  return (
+    <button
+      ref={ref}
+      aria-label={label}
+      className={cn(
+        'inline-flex items-center justify-center rounded-full bg-brand text-white transition-all duration-100 hover:bg-brand-dark active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+        fabSizeClass[size],
+        className
+      )}
+      {...props}
+    >
+      <span aria-hidden="true">{icon}</span>
+    </button>
+  )
+})
+
+export interface VoteButtonProps {
+  count: number
+  voted?: 'up' | 'down' | null
+  onVote?: (dir: 'up' | 'down') => void
+}
+
+export function VoteButton({ count, voted, onVote }: VoteButtonProps) {
+  const displayedCount = voted === 'up' ? count + 1 : voted === 'down' ? count - 1 : count
+
+  return (
+    <div className="inline-flex overflow-hidden rounded-full border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+      <button
+        type="button"
+        onClick={() => onVote?.('up')}
+        aria-label="Confirmar ocorrencia"
+        className={cn(
+          'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-medium transition-colors',
+          voted === 'up'
+            ? 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300'
+            : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 dark:text-gray-400 dark:hover:bg-teal-950'
+        )}
+      >
+        <span aria-hidden="true">^</span>
+        <span>{displayedCount}</span>
+      </button>
+      <div className="h-5 w-px self-center bg-gray-200 dark:bg-gray-700" />
+      <button
+        type="button"
+        onClick={() => onVote?.('down')}
+        aria-label="Remover confirmacao"
+        className={cn(
+          'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors',
+          voted === 'down'
+            ? 'bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400'
+            : 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950'
+        )}
+      >
+        <span aria-hidden="true">v</span>
+      </button>
+    </div>
+  )
+}
+
+export interface SplitButtonProps {
+  label: string
+  onClick?: () => void
+  onDropdown?: () => void
+  size?: ButtonSize
+  loading?: boolean
+  disabled?: boolean
+}
+
+export function SplitButton({ label, onClick, onDropdown, size = 'md', loading = false, disabled = false }: SplitButtonProps) {
+  return (
+    <div className="inline-flex">
+      <Button
+        variant="primary"
+        size={size}
+        loading={loading}
+        disabled={disabled}
+        onClick={onClick}
+        className="rounded-r-none border-r-0"
+      >
+        {label}
+      </Button>
+      <button
+        type="button"
+        onClick={onDropdown}
+        disabled={disabled}
+        aria-label="Mais opcoes"
+        className={cn(
+          'inline-flex items-center border-l border-white/25 bg-brand px-2.5 text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-40',
+          size === 'xl' ? 'h-[52px]' : size === 'lg' ? 'h-[44px]' : size === 'sm' ? 'h-[32px]' : size === 'xs' ? 'h-[26px]' : 'h-[38px]',
+          'rounded-r-lg'
+        )}
+      >
+        <span aria-hidden="true">v</span>
+      </button>
+    </div>
+  )
+}
+
+export interface ButtonGroupOption {
+  label: string
+  value: string
+  icon?: ReactNode
+}
+
+export interface ButtonGroupProps {
+  options: ButtonGroupOption[]
+  value: string
+  onChange: (value: string) => void
+  size?: ButtonSize
+}
+
+export function ButtonGroup({ options, value, onChange, size = 'md' }: ButtonGroupProps) {
+  return (
+    <div className="inline-flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+      {options.map((option, index) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onChange(option.value)}
+          className={cn(
+            'inline-flex items-center font-medium transition-all',
+            buttonSizeClass[size],
+            'rounded-none',
+            index < options.length - 1 && 'border-r border-gray-200 dark:border-gray-700',
+            value === option.value
+              ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
+              : 'bg-white text-gray-500 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800'
+          )}
+        >
+          {option.icon && <span aria-hidden="true">{option.icon}</span>}
+          {option.label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+export type ChipVariant =
+  | 'default'
+  | 'active'
+  | 'ocorrencia'
+  | 'alerta'
+  | 'evento'
+  | 'noticia'
+  | 'servico'
+  | 'infraestrutura'
+
+export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
+  variant?: ChipVariant
+  icon?: ReactNode
+  removable?: boolean
+  onRemove?: () => void
+  children: ReactNode
+}
+
+const chipVariantClass: Record<ChipVariant, string> = {
+  default: 'border-gray-200 bg-gray-100 text-gray-600 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
+  active: 'border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300',
+  ocorrencia: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
+  alerta: 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
+  evento: 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300',
+  noticia: 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300',
+  servico: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
+  infraestrutura: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
+}
+
+export function Chip({ variant = 'default', icon, removable = false, onRemove, className, children, ...props }: ChipProps) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[12px] font-medium transition-colors duration-100',
+        chipVariantClass[variant],
+        className
+      )}
+      {...props}
+    >
+      {icon && <span className="text-[11px]" aria-hidden="true">{icon}</span>}
+      {children}
+      {removable && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            onRemove?.()
+          }}
+          aria-label="Remover"
+          className="ml-0.5 rounded-full p-0.5 transition-colors hover:bg-black/10"
+        >
+          x
+        </button>
+      )}
+    </span>
+  )
+}
+
+export type OcorrenciaCategoria = 'ocorrencia' | 'alerta' | 'evento' | 'noticia' | 'servico' | 'infraestrutura'
+
+const categoryChipConfig: Record<OcorrenciaCategoria, { label: string; icon: string; variant: ChipVariant }> = {
+  ocorrencia: { label: 'Ocorrencia', icon: '!', variant: 'ocorrencia' },
+  alerta: { label: 'Alerta', icon: 'A', variant: 'alerta' },
+  evento: { label: 'Evento', icon: '#', variant: 'evento' },
+  noticia: { label: 'Noticia', icon: 'N', variant: 'noticia' },
+  servico: { label: 'Servico publico', icon: 'S', variant: 'servico' },
+  infraestrutura: { label: 'Infraestrutura', icon: '-', variant: 'infraestrutura' },
+}
+
+export interface CategoryChipProps {
+  categoria: OcorrenciaCategoria
+  className?: string
+}
+
+export function CategoryChip({ categoria, className }: CategoryChipProps) {
+  const config = categoryChipConfig[categoria]
+  return (
+    <Chip variant={config.variant} icon={config.icon} className={className}>
+      {config.label}
+    </Chip>
+  )
+}
+
+export interface TagFilterGroupProps {
+  tags: string[]
+  selected: string[]
+  onChange: (selected: string[]) => void
+}
+
+export function TagFilterGroup({ tags, selected, onChange }: TagFilterGroupProps) {
+  function toggle(tag: string) {
+    onChange(selected.includes(tag) ? selected.filter((item) => item !== tag) : [...selected, tag])
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {tags.map((tag) => (
+        <button
+          key={tag}
+          type="button"
+          onClick={() => toggle(tag)}
+          className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
+        >
+          <Chip variant={selected.includes(tag) ? 'active' : 'default'}>{tag}</Chip>
+        </button>
+      ))}
+    </div>
   )
 }
 

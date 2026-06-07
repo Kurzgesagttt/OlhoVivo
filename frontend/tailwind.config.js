@@ -6,7 +6,21 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: '#1D9E75',
+          dark: '#0F6E56',
+          darker: '#085041',
+          50: '#E1F5EE',
+          100: '#9FE1CB',
+          200: '#5DCAA5',
+        },
+      },
+      borderRadius: {
+        pill: '999px',
+      },
+    },
   },
   plugins: [],
 }

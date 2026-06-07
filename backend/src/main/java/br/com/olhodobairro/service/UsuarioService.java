@@ -77,28 +77,6 @@ public class UsuarioService {
         return toResponse(usuarioRepository.save(usuario));
     }
 
-    public Object exportarDados() {
-        Usuario usuario = getUsuarioAtual();
-        return java.util.Map.of(
-                "id", usuario.getId(),
-                "nome", usuario.getNome(),
-                "bio", usuario.getBio() == null ? "" : usuario.getBio(),
-                "fotoPerfilUrl", usuario.getFotoPerfilUrl() == null ? "" : usuario.getFotoPerfilUrl(),
-                "role", usuario.getRole(),
-                "ativo", usuario.getAtivo(),
-                "criadoEm", usuario.getCriadoEm()
-        );
-    }
-
-    public void anonimizarConta() {
-        Usuario usuario = getUsuarioAtual();
-        usuario.setNome("Usuario Removido");
-        usuario.setBio(null);
-        usuario.setFotoPerfilUrl(null);
-        usuario.setAtivo(false);
-        usuarioRepository.save(usuario);
-    }
-
     private Usuario getUsuarioAtual() {
         UUID id = securityContextHelper.getUsuarioIdAutenticado();
         return usuarioRepository.findById(id)

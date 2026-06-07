@@ -153,24 +153,6 @@ export default function ProfilePage() {
                     </span>
                   </button>
                   <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
-                  <div className="flex gap-2 pb-1">
-                    <button
-                      type="button"
-                      disabled
-                      title="Seguidores ainda nao implementados"
-                      className="min-h-10 rounded-full bg-surface-muted px-4 text-sm font-semibold text-subtle disabled:cursor-not-allowed"
-                    >
-                      Seguir
-                    </button>
-                    <button
-                      type="button"
-                      disabled
-                      title="Mensagens ainda nao implementadas"
-                      className="min-h-10 rounded-full border border-line px-4 text-sm font-semibold text-subtle disabled:cursor-not-allowed"
-                    >
-                      Mensagem
-                    </button>
-                  </div>
                 </div>
 
                 <div className="mt-4">

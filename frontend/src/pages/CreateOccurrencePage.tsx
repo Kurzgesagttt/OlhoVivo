@@ -490,14 +490,6 @@ export default function CreateOccurrencePage() {
                 <Button type="submit" variant="primary" disabled={createOccurrence.isPending} className="w-full">
                   {createOccurrence.isPending ? 'Publicando...' : 'Publicar ocorrencia'}
                 </Button>
-                <button
-                  type="button"
-                  disabled
-                  title="Rascunhos ainda nao implementados"
-                  className="min-h-10 w-full rounded-full border border-zinc-200 text-sm font-semibold text-zinc-400 disabled:cursor-not-allowed dark:border-line dark:text-subtle"
-                >
-                  Salvar rascunho
-                </button>
               </Card>
 
               <Card>

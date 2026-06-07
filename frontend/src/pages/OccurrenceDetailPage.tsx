@@ -378,9 +378,6 @@ function PostCard({
         <Button type="button" variant="info-soft" size="sm" pill onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>
           Comentarios
         </Button>
-        <Button type="button" disabled title="Compartilhamento ainda nao implementado" variant="secondary" size="sm" pill>
-          Compartilhar
-        </Button>
         <Button
           type="button"
           variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
@@ -439,7 +436,6 @@ function PhotoStrip({ ocorrencia }: { ocorrencia: Ocorrencia }) {
           <PhotoPlaceholder label="Local" tone="bg-status-danger/10 text-status-danger" />
         </>
       )}
-      <div className="flex h-24 w-28 shrink-0 items-center justify-center rounded-md border border-dashed border-zinc-300 text-2xl text-zinc-400 dark:border-line dark:text-subtle">+</div>
     </div>
   )
 }
@@ -566,10 +562,6 @@ function CommentItem({ comentario, official }: { comentario: Comentario; officia
         <span className="ml-auto text-xs text-zinc-400 dark:text-subtle">{formatDateTime(comentario.criadoEm)}</span>
       </div>
       <p className="text-sm leading-6 text-zinc-600 whitespace-pre-wrap dark:text-muted">{comentario.conteudo}</p>
-      <div className="mt-2 flex gap-3 text-xs font-medium text-zinc-500 dark:text-muted">
-        <button type="button" disabled title="Apoio em comentarios ainda nao implementado" className="opacity-50">^ Apoiar</button>
-        <button type="button" disabled title="Respostas ainda nao implementadas" className="opacity-50">Responder</button>
-      </div>
     </div>
   )
 }

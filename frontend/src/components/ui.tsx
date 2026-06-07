@@ -1,6 +1,6 @@
 import { Link, useNavigate, type LinkProps } from 'react-router-dom'
-import React, { forwardRef } from 'react'
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
+import { forwardRef } from 'react'
+import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
@@ -155,101 +155,6 @@ export function ButtonLink({
   )
 }
 
-export type IconButtonVariant = 'default' | 'primary' | 'danger'
-
-export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: IconButtonVariant
-  size?: 'xs' | 'sm' | 'md' | 'lg'
-  round?: boolean
-  icon: ReactNode
-  label: string
-}
-
-const iconButtonSizeClass: Record<NonNullable<IconButtonProps['size']>, string> = {
-  xs: 'h-[26px] w-[26px] rounded-md text-[14px]',
-  sm: 'h-[32px] w-[32px] rounded-lg text-[16px]',
-  md: 'h-[38px] w-[38px] rounded-lg text-[18px]',
-  lg: 'h-[44px] w-[44px] rounded-xl text-[20px]',
-}
-
-const iconButtonVariantClass: Record<IconButtonVariant, string> = {
-  default: 'border border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-100 dark:border-line dark:bg-surface dark:text-muted dark:hover:bg-surface-elevated',
-  primary: 'border border-brand bg-brand text-white hover:bg-brand-hover',
-  danger: 'border border-status-danger/30 bg-status-danger/10 text-status-danger hover:bg-status-danger/20',
-}
-
-export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { variant = 'default', size = 'md', round = false, icon, label, className, ...props },
-  ref
-) {
-  return (
-    <button
-      ref={ref}
-      aria-label={label}
-      className={cn(
-        'inline-flex items-center justify-center transition-all duration-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-40',
-        iconButtonSizeClass[size],
-        iconButtonVariantClass[variant],
-        round && 'rounded-full',
-        className
-      )}
-      {...props}
-    >
-      <span aria-hidden="true">{icon}</span>
-    </button>
-  )
-})
-
-export interface FabProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  size?: 'sm' | 'md' | 'lg'
-  icon: ReactNode
-  label: string
-  expanded?: string
-}
-
-const fabSizeClass: Record<NonNullable<FabProps['size']>, string> = {
-  sm: 'h-[38px] w-[38px] text-[18px]',
-  md: 'h-[48px] w-[48px] text-[22px]',
-  lg: 'h-[58px] w-[58px] text-[26px]',
-}
-
-export const Fab = forwardRef<HTMLButtonElement, FabProps>(function Fab(
-  { size = 'md', icon, label, expanded, className, ...props },
-  ref
-) {
-  if (expanded) {
-    return (
-      <button
-        ref={ref}
-        aria-label={label}
-        className={cn(
-          'inline-flex h-[48px] items-center gap-3 rounded-full bg-brand px-5 text-[15px] font-medium text-white transition-all duration-100 hover:bg-brand-dark active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
-          className
-        )}
-        {...props}
-      >
-        <span aria-hidden="true" className="text-[22px]">{icon}</span>
-        {expanded}
-      </button>
-    )
-  }
-
-  return (
-    <button
-      ref={ref}
-      aria-label={label}
-      className={cn(
-        'inline-flex items-center justify-center rounded-full bg-brand text-white transition-all duration-100 hover:bg-brand-dark active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
-        fabSizeClass[size],
-        className
-      )}
-      {...props}
-    >
-      <span aria-hidden="true">{icon}</span>
-    </button>
-  )
-})
-
 export interface VoteButtonProps {
   count: number
   voted?: boolean
@@ -361,45 +266,6 @@ export function VoteButton({
   )
 }
 
-export interface SplitButtonProps {
-  label: string
-  onClick?: () => void
-  onDropdown?: () => void
-  size?: ButtonSize
-  loading?: boolean
-  disabled?: boolean
-}
-
-export function SplitButton({ label, onClick, onDropdown, size = 'md', loading = false, disabled = false }: SplitButtonProps) {
-  return (
-    <div className="inline-flex">
-      <Button
-        variant="primary"
-        size={size}
-        loading={loading}
-        disabled={disabled}
-        onClick={onClick}
-        className="rounded-r-none border-r-0"
-      >
-        {label}
-      </Button>
-      <button
-        type="button"
-        onClick={onDropdown}
-        disabled={disabled}
-        aria-label="Mais opcoes"
-        className={cn(
-          'inline-flex items-center border-l border-white/25 bg-brand px-2.5 text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-40',
-          size === 'xl' ? 'h-[52px]' : size === 'lg' ? 'h-[44px]' : size === 'sm' ? 'h-[32px]' : size === 'xs' ? 'h-[26px]' : 'h-[38px]',
-          'rounded-r-lg'
-        )}
-      >
-        <span aria-hidden="true">v</span>
-      </button>
-    </div>
-  )
-}
-
 export interface ButtonGroupOption {
   label: string
   value: string
@@ -449,7 +315,7 @@ export type ChipVariant =
   | 'servico'
   | 'infraestrutura'
 
-export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface ChipProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: ChipVariant
   icon?: ReactNode
   removable?: boolean
@@ -497,7 +363,7 @@ export function Chip({ variant = 'default', icon, removable = false, onRemove, c
   )
 }
 
-export const occurrenceStatusLabel: Record<string, string> = {
+const occurrenceStatusLabel: Record<string, string> = {
   PENDENTE: 'Pendente',
   EM_ANDAMENTO: 'Em andamento',
   CONCLUIDA: 'Concluida',
@@ -517,7 +383,7 @@ export function getStatusLabel(status: string) {
   return occurrenceStatusLabel[status] ?? status
 }
 
-export function getStatusBadgeClass(status: string) {
+function getStatusBadgeClass(status: string) {
   return occurrenceStatusClass[status] ?? occurrenceStatusClass.PENDENTE
 }
 
@@ -527,17 +393,6 @@ export function StatusBadge({ status, className }: { status: string; className?:
       {getStatusLabel(status)}
     </span>
   )
-}
-
-export type OcorrenciaCategoria = 'ocorrencia' | 'alerta' | 'evento' | 'noticia' | 'servico' | 'infraestrutura'
-
-const categoryChipConfig: Record<OcorrenciaCategoria, { label: string; icon: string; variant: ChipVariant }> = {
-  ocorrencia: { label: 'Ocorrencia', icon: '', variant: 'ocorrencia' },
-  alerta: { label: 'Alerta', icon: '', variant: 'alerta' },
-  evento: { label: 'Evento', icon: '', variant: 'evento' },
-  noticia: { label: 'Noticia', icon: '', variant: 'noticia' },
-  servico: { label: 'Servico publico', icon: '', variant: 'servico' },
-  infraestrutura: { label: 'Infraestrutura', icon: '', variant: 'infraestrutura' },
 }
 
 export function getCategoryVariantFromName(name: string | undefined, icon?: string | null): ChipVariant {
@@ -550,47 +405,6 @@ export function getCategoryVariantFromName(name: string | undefined, icon?: stri
   if (key.includes('infra')) return 'infraestrutura'
 
   return 'ocorrencia'
-}
-
-export interface CategoryChipProps {
-  categoria: OcorrenciaCategoria
-  className?: string
-}
-
-export function CategoryChip({ categoria, className }: CategoryChipProps) {
-  const config = categoryChipConfig[categoria]
-  return (
-    <Chip variant={config.variant} icon={config.icon} className={className}>
-      {config.label}
-    </Chip>
-  )
-}
-
-export interface TagFilterGroupProps {
-  tags: string[]
-  selected: string[]
-  onChange: (selected: string[]) => void
-}
-
-export function TagFilterGroup({ tags, selected, onChange }: TagFilterGroupProps) {
-  function toggle(tag: string) {
-    onChange(selected.includes(tag) ? selected.filter((item) => item !== tag) : [...selected, tag])
-  }
-
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {tags.map((tag) => (
-        <button
-          key={tag}
-          type="button"
-          onClick={() => toggle(tag)}
-          className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
-        >
-          <Chip variant={selected.includes(tag) ? 'active' : 'default'}>{tag}</Chip>
-        </button>
-      ))}
-    </div>
-  )
 }
 
 // Shared card surface. Use padded=false for cards that manage their own internal spacing.
@@ -680,7 +494,7 @@ export function Field({ label, hint, error, children }: { label: string; hint?: 
   )
 }
 
-export const inputClassName = 'w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-line dark:bg-surface-muted dark:text-foreground dark:focus:ring-brand/20'
+const inputClassName = 'w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-line dark:bg-surface-muted dark:text-foreground dark:focus:ring-brand/20'
 
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClassName, props.className)} />

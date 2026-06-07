@@ -8,11 +8,3 @@ export interface PageResponse<T> {
   first: boolean
   last: boolean
 }
-
-export interface ErroResponse {
-  timestamp: string
-  status: number
-  error: string
-  message: string
-  path: string
-}

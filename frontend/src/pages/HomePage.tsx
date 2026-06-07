@@ -531,16 +531,6 @@ function OccurrencePostCard({
           >
             {ocorrencia.salvoPeloUsuario ? 'Salvo' : 'Salvar'}
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            pill
-            disabled
-            title="Compartilhamento ainda nao implementado"
-          >
-            Compartilhar
-          </Button>
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-surface-elevated">{ocorrencia.endereco}</span>}
         </div>
         {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}

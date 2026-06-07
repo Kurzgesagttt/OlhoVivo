@@ -50,16 +50,4 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.atualizarFotoPerfil(foto));
     }
 
-    @GetMapping("/data")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Object> exportarDados() {
-        return ResponseEntity.ok(usuarioService.exportarDados());
-    }
-
-    @DeleteMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> anonimizar() {
-        usuarioService.anonimizarConta();
-        return ResponseEntity.noContent().build();
-    }
 }

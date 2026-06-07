@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { voteService } from '../services/vote.service'
 import type { PageResponse } from '../types/api'
@@ -49,8 +50,26 @@ function updateOccurrenceVotes(data: unknown, ocorrenciaId: string, nextVote: Va
   return data
 }
 
+function replaceOccurrence(data: unknown, updatedOccurrence: Ocorrencia) {
+  if (isOccurrence(data)) {
+    return data.id === updatedOccurrence.id ? updatedOccurrence : data
+  }
+
+  if (isOccurrencePage(data)) {
+    return {
+      ...data,
+      content: data.content.map(ocorrencia => (
+        ocorrencia.id === updatedOccurrence.id ? updatedOccurrence : ocorrencia
+      )),
+    }
+  }
+
+  return data
+}
+
 export function useVote(ocorrenciaId: string) {
   const queryClient = useQueryClient()
+  const inFlightRef = useRef(false)
 
   async function applyOptimisticVote(nextVote: ValorVoto | null): Promise<VoteContext> {
     await queryClient.cancelQueries({ queryKey: ['ocorrencias'] })
@@ -75,6 +94,12 @@ export function useVote(ocorrenciaId: string) {
     mutationFn: (valor: ValorVoto) => voteService.votar(ocorrenciaId, valor),
     onMutate: (valor) => applyOptimisticVote(valor),
     onError: (_error, _variables, context) => rollbackVote(context),
+    onSuccess: (updatedOccurrence) => {
+      queryClient.setQueriesData(
+        { queryKey: ['ocorrencias'] },
+        current => replaceOccurrence(current, updatedOccurrence),
+      )
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })
 
@@ -82,12 +107,29 @@ export function useVote(ocorrenciaId: string) {
     mutationFn: () => voteService.removerVoto(ocorrenciaId),
     onMutate: () => applyOptimisticVote(null),
     onError: (_error, _variables, context) => rollbackVote(context),
+    onSuccess: (updatedOccurrence) => {
+      queryClient.setQueriesData(
+        { queryKey: ['ocorrencias'] },
+        current => replaceOccurrence(current, updatedOccurrence),
+      )
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })
 
+  async function runOnce<T>(action: () => Promise<T>): Promise<T | undefined> {
+    if (inFlightRef.current) return undefined
+
+    inFlightRef.current = true
+    try {
+      return await action()
+    } finally {
+      inFlightRef.current = false
+    }
+  }
+
   return {
-    votar: votar.mutateAsync,
-    removerVoto: removerVoto.mutateAsync,
+    votar: (valor: ValorVoto) => runOnce(() => votar.mutateAsync(valor)),
+    removerVoto: () => runOnce(() => removerVoto.mutateAsync()),
     isVoting: votar.isPending || removerVoto.isPending,
     voteError: votar.error ?? removerVoto.error,
   }

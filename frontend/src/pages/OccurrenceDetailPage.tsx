@@ -58,6 +58,10 @@ function getMapUrl(ocorrencia: Ocorrencia) {
   return address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : null
 }
 
+function getCurrentVote(ocorrencia: Ocorrencia): ValorVoto | null {
+  return ocorrencia.votoDoUsuario ?? (ocorrencia.votadoPeloUsuario ? 1 : null)
+}
+
 export default function OccurrenceDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -65,7 +69,7 @@ export default function OccurrenceDetailPage() {
   const { data: ocorrencia, isLoading, isError } = useOccurrence(id!)
   const { data: comentariosPage } = useComments(id!)
   const { data: ocorrenciasPage } = useOccurrences(0)
-  const { votar, isVoting } = useVote(id!)
+  const { votar, removerVoto, isVoting } = useVote(id!)
   const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
   const deleteOccurrence = useDeleteOccurrence()
@@ -106,7 +110,11 @@ export default function OccurrenceDetailPage() {
     }
 
     try {
-      await votar(valor)
+      if (getCurrentVote(ocorrencia) === valor) {
+        await removerVoto()
+      } else {
+        await votar(valor)
+      }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setErroVoto(err.response.data.message)

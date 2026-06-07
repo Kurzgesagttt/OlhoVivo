@@ -1,12 +1,14 @@
 import api from './api'
-import type { ValorVoto } from '../types/occurrence'
+import type { Ocorrencia, ValorVoto } from '../types/occurrence'
 
 export const voteService = {
-  async votar(ocorrenciaId: string, valor: ValorVoto): Promise<void> {
-    await api.post(`/ocorrencias/${ocorrenciaId}/votos`, { valor })
+  async votar(ocorrenciaId: string, valor: ValorVoto): Promise<Ocorrencia> {
+    const response = await api.post<Ocorrencia>(`/ocorrencias/${ocorrenciaId}/votos`, { valor })
+    return response.data
   },
 
-  async removerVoto(ocorrenciaId: string): Promise<void> {
-    await api.delete(`/ocorrencias/${ocorrenciaId}/votos`)
+  async removerVoto(ocorrenciaId: string): Promise<Ocorrencia> {
+    const response = await api.delete<Ocorrencia>(`/ocorrencias/${ocorrenciaId}/votos`)
+    return response.data
   },
 }

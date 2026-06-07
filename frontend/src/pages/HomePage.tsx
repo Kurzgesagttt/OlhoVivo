@@ -52,6 +52,10 @@ function getInitials(name: string | undefined) {
     .toUpperCase()
 }
 
+function getCurrentVote(ocorrencia: Ocorrencia): ValorVoto | null {
+  return ocorrencia.votoDoUsuario ?? (ocorrencia.votadoPeloUsuario ? 1 : null)
+}
+
 export default function HomePage() {
   const navigate = useNavigate()
   const { usuario, logout } = useAuth()
@@ -424,7 +428,7 @@ function OccurrencePostCard({
   usuarioLogado: boolean
 }) {
   const navigate = useNavigate()
-  const { votar, isVoting } = useVote(ocorrencia.id)
+  const { votar, removerVoto, isVoting } = useVote(ocorrencia.id)
   const { salvar, remover, isSaving } = useSavedOccurrence(ocorrencia.id)
   const [voteMessage, setVoteMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
@@ -439,7 +443,11 @@ function OccurrencePostCard({
     }
 
     try {
-      await votar(valor)
+      if (getCurrentVote(ocorrencia) === valor) {
+        await removerVoto()
+      } else {
+        await votar(valor)
+      }
     } catch {
       setVoteMessage('Nao foi possivel atualizar seu voto.')
     }

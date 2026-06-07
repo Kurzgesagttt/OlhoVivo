@@ -17,17 +17,6 @@ type SelectedImage = {
 
 const TAGS = ['infraestrutura', 'eletrica', 'urgente', 'prefeitura', 'transito', 'seguranca']
 
-function getCategoryIcon(categoria: Categoria) {
-  const key = `${categoria.icone ?? ''} ${categoria.nome}`.toLowerCase()
-
-  if (key.includes('alert')) return '!'
-  if (key.includes('evento') || key.includes('calendar')) return '#'
-  if (key.includes('noticia') || key.includes('news')) return 'N'
-  if (key.includes('servico') || key.includes('tools')) return 'S'
-
-  return 'O'
-}
-
 function getCategoryVariant(categoria: Categoria): ChipVariant {
   const key = `${categoria.icone ?? ''} ${categoria.nome}`.toLowerCase()
 
@@ -274,7 +263,6 @@ export default function CreateOccurrencePage() {
                       >
                         <Chip
                           variant={selected ? 'active' : getCategoryVariant(categoria)}
-                          icon={getCategoryIcon(categoria)}
                           className="px-4 py-2 text-sm"
                         >
                           {categoria.nome}

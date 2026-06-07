@@ -45,17 +45,6 @@ function formatRelativeDate(value: string) {
   return `${days}d`
 }
 
-function getCategoryIcon(name: string | undefined) {
-  const key = (name ?? '').toLowerCase()
-
-  if (key.includes('alert')) return '!'
-  if (key.includes('evento')) return '#'
-  if (key.includes('noticia')) return 'N'
-  if (key.includes('servico')) return 'S'
-
-  return 'O'
-}
-
 function getCategoryVariant(name: string | undefined): ChipVariant {
   const key = (name ?? '').toLowerCase()
 
@@ -347,7 +336,7 @@ function ProfileOccurrence({ ocorrencia, saved = false }: { ocorrencia: Ocorrenc
       </div>
       <div className="min-w-0">
         <div className="mb-1 flex flex-wrap gap-2">
-          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)} icon={getCategoryIcon(ocorrencia.categoria.nome)}>
+          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)}>
             {ocorrencia.categoria.nome}
           </Chip>
           {saved && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Salva</span>}

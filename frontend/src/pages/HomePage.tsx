@@ -80,18 +80,6 @@ function getCategoryVariant(icon: string | null | undefined, name: string | unde
   return 'ocorrencia'
 }
 
-function getCategoryIcon(icon: string | null, name: string) {
-  const key = (icon ?? name).toLowerCase()
-
-  if (key.includes('alert')) return '!'
-  if (key.includes('calendar') || key.includes('evento')) return '#'
-  if (key.includes('news') || key.includes('noticia')) return 'N'
-  if (key.includes('bell') || key.includes('alerta')) return 'A'
-  if (key.includes('tools') || key.includes('servico')) return 'S'
-
-  return '-'
-}
-
 export default function HomePage() {
   const navigate = useNavigate()
   const { usuario, logout } = useAuth()
@@ -318,7 +306,6 @@ export default function HomePage() {
                 >
                   <Chip
                     variant={categoriaSelecionada === categoria.nome ? 'active' : getCategoryVariant(categoria.icone, categoria.nome)}
-                    icon={getCategoryIcon(categoria.icone, categoria.nome)}
                     className="px-3 py-1"
                   >
                     {categoria.nome}
@@ -550,7 +537,6 @@ function OccurrencePostCard({
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Chip
             variant={getCategoryVariant(ocorrencia.categoria.icone, ocorrencia.categoria.nome)}
-            icon={getCategoryIcon(ocorrencia.categoria.icone, ocorrencia.categoria.nome)}
           >
             {ocorrencia.categoria.nome}
           </Chip>

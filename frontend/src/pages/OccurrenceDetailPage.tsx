@@ -334,7 +334,7 @@ function PostCard({
     <article className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
       <div className="p-4 pb-0">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)} icon={getCategoryIcon(ocorrencia.categoria.nome)}>
+          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)}>
             {ocorrencia.categoria.nome}
           </Chip>
           {ocorrencia.bairro && (

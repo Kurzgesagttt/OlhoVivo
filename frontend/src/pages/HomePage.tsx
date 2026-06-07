@@ -468,6 +468,7 @@ function OccurrencePostCard({
   const { salvar, remover, isSaving } = useSavedOccurrence(ocorrencia.id)
   const [voteMessage, setVoteMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
+  const hasImage = ocorrencia.imagensUrl.length > 0
 
   async function handleVote(action: 'add' | 'remove') {
     setVoteMessage('')
@@ -519,7 +520,9 @@ function OccurrencePostCard({
 
   return (
     <article
-      className="group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 sm:grid-cols-[44px_minmax(0,1fr)_104px]"
+      className={`group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 ${
+        hasImage ? 'sm:grid-cols-[44px_minmax(0,1fr)_104px]' : ''
+      }`}
     >
       <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-zinc-900">
         <VoteButton
@@ -590,15 +593,15 @@ function OccurrencePostCard({
         {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}
       </div>
 
-      <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-900 sm:flex">
-        {ocorrencia.imagensUrl.length > 0 && (
+      {hasImage && (
+        <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-900 sm:flex">
           <img
             src={ocorrencia.imagensUrl[0]}
             alt=""
             className="h-full w-full object-cover"
           />
-        )}
-      </Link>
+        </Link>
+      )}
     </article>
   )
 }

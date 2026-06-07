@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { useAuth } from '../hooks/useAuth'
-import { useComments, useCreateComment, useToggleCommentLike } from '../hooks/useComments'
+import { useComments, useCreateComment, useCreateCommentReply, useToggleCommentLike } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
@@ -72,10 +72,14 @@ export default function OccurrenceDetailPage() {
   const { votar, removerVoto, isVoting } = useVote(id!)
   const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
+  const createCommentReply = useCreateCommentReply(id!)
   const toggleCommentLike = useToggleCommentLike(id!)
   const deleteOccurrence = useDeleteOccurrence()
   const [novoComentario, setNovoComentario] = useState('')
+  const [comentarioRespondendoId, setComentarioRespondendoId] = useState<string | null>(null)
+  const [novaResposta, setNovaResposta] = useState('')
   const [erroComentario, setErroComentario] = useState('')
+  const [erroResposta, setErroResposta] = useState('')
   const [erroVoto, setErroVoto] = useState('')
   const [erroCurtidaComentario, setErroCurtidaComentario] = useState('')
   const [erroSalvamento, setErroSalvamento] = useState('')
@@ -171,6 +175,36 @@ export default function OccurrenceDetailPage() {
         setErroComentario(err.response.data.message)
       } else {
         setErroComentario('Erro ao enviar comentario.')
+      }
+    }
+  }
+
+  async function enviarResposta(event: FormEvent) {
+    event.preventDefault()
+    setErroResposta('')
+
+    if (!comentarioRespondendoId) return
+
+    const conteudo = novaResposta.trim()
+    if (!conteudo) return
+
+    if (conteudo.length < 3) {
+      setErroResposta('Resposta deve ter pelo menos 3 caracteres.')
+      return
+    }
+
+    try {
+      await createCommentReply.mutateAsync({
+        comentarioId: comentarioRespondendoId,
+        data: { conteudo },
+      })
+      setNovaResposta('')
+      setComentarioRespondendoId(null)
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.message) {
+        setErroResposta(err.response.data.message)
+      } else {
+        setErroResposta('Erro ao enviar resposta.')
       }
     }
   }
@@ -288,14 +322,30 @@ export default function OccurrenceDetailPage() {
             total={comentariosPage?.totalElements ?? 0}
             usuarioLogado={!!usuario}
             novoComentario={novoComentario}
+            novaResposta={novaResposta}
+            comentarioRespondendoId={comentarioRespondendoId}
             erroComentario={erroComentario}
+            erroResposta={erroResposta}
             erroCurtidaComentario={erroCurtidaComentario}
             enviando={createComment.isPending}
+            enviandoResposta={createCommentReply.isPending}
             curtindoComentarioId={toggleCommentLike.isPending ? toggleCommentLike.variables?.comentarioId : null}
             usuarioId={usuario?.id ?? null}
             onChangeComentario={value => setNovoComentario(value.slice(0, MAX_COMENTARIO))}
+            onChangeResposta={value => setNovaResposta(value.slice(0, MAX_COMENTARIO))}
             onSubmit={enviarComentario}
+            onSubmitResposta={enviarResposta}
             onLikeComentario={handleCommentLike}
+            onStartReply={(comentarioId) => {
+              setErroResposta('')
+              setNovaResposta('')
+              setComentarioRespondendoId(comentarioId)
+            }}
+            onCancelReply={() => {
+              setErroResposta('')
+              setNovaResposta('')
+              setComentarioRespondendoId(null)
+            }}
           />
         </section>
 
@@ -500,28 +550,54 @@ function CommentsCard({
   total,
   usuarioLogado,
   novoComentario,
+  novaResposta,
+  comentarioRespondendoId,
   erroComentario,
+  erroResposta,
   erroCurtidaComentario,
   enviando,
+  enviandoResposta,
   curtindoComentarioId,
   usuarioId,
   onChangeComentario,
+  onChangeResposta,
   onSubmit,
+  onSubmitResposta,
   onLikeComentario,
+  onStartReply,
+  onCancelReply,
 }: {
   comentarios: Comentario[]
   total: number
   usuarioLogado: boolean
   novoComentario: string
+  novaResposta: string
+  comentarioRespondendoId: string | null
   erroComentario: string
+  erroResposta: string
   erroCurtidaComentario: string
   enviando: boolean
+  enviandoResposta: boolean
   curtindoComentarioId: string | null | undefined
   usuarioId: string | null
   onChangeComentario: (value: string) => void
+  onChangeResposta: (value: string) => void
   onSubmit: (event: FormEvent) => void
+  onSubmitResposta: (event: FormEvent) => void
   onLikeComentario: (comentario: Comentario) => void | Promise<void>
+  onStartReply: (comentarioId: string) => void
+  onCancelReply: () => void
 }) {
+  const respostasPorComentario = useMemo(() => {
+    return comentarios.reduce<Record<string, Comentario[]>>((acc, comentario) => {
+      if (!comentario.comentarioPaiId) return acc
+      acc[comentario.comentarioPaiId] = [...(acc[comentario.comentarioPaiId] ?? []), comentario]
+      return acc
+    }, {})
+  }, [comentarios])
+
+  const comentariosPrincipais = comentarios.filter(comentario => !comentario.comentarioPaiId)
+
   return (
     <section className="rounded-lg border border-zinc-200 bg-white dark:border-line dark:bg-surface">
       <h2 className="border-b border-zinc-200 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-line dark:text-muted">
@@ -556,18 +632,63 @@ function CommentsCard({
         {erroComentario && <p className="rounded-md border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-xs text-status-danger">{erroComentario}</p>}
         {erroCurtidaComentario && <p className="rounded-md border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-xs text-status-danger">{erroCurtidaComentario}</p>}
 
-        {comentarios.map((comentario, index) => (
-          <CommentItem
-            key={comentario.id}
-            comentario={comentario}
-            official={index === 0 && !!comentario.nomeUsuario?.toLowerCase().includes('prefeitura')}
-            isOwn={comentario.usuarioId === usuarioId}
-            isLiking={curtindoComentarioId === comentario.id}
-            onLike={() => void onLikeComentario(comentario)}
-          />
+        {comentariosPrincipais.map((comentario, index) => (
+          <div key={comentario.id} className="space-y-2">
+            <CommentItem
+              comentario={comentario}
+              official={index === 0 && !!comentario.nomeUsuario?.toLowerCase().includes('prefeitura')}
+              isOwn={comentario.usuarioId === usuarioId}
+              isLiking={curtindoComentarioId === comentario.id}
+              canReply={usuarioLogado}
+              onLike={() => void onLikeComentario(comentario)}
+              onReply={() => onStartReply(comentario.id)}
+            />
+
+            {comentarioRespondendoId === comentario.id && (
+              <form onSubmit={onSubmitResposta} className="ml-6 rounded-md border border-zinc-200 bg-white p-3 dark:border-line dark:bg-surface">
+                <input
+                  value={novaResposta}
+                  onChange={event => onChangeResposta(event.target.value)}
+                  placeholder={`Responder u/${comentario.nomeUsuario ?? 'anonimo'}...`}
+                  required
+                  maxLength={MAX_COMENTARIO}
+                  className="min-h-10 w-full rounded-full border border-zinc-200 bg-zinc-50 px-4 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 dark:border-line dark:bg-surface-muted dark:text-foreground"
+                />
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <span className="text-xs text-zinc-400 dark:text-subtle">{novaResposta.length}/{MAX_COMENTARIO}</span>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="ghost" size="sm" pill onClick={onCancelReply}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit" variant="primary" size="sm" pill loading={enviandoResposta}>
+                      Responder
+                    </Button>
+                  </div>
+                </div>
+                {erroResposta && <p className="mt-2 text-xs text-status-danger">{erroResposta}</p>}
+              </form>
+            )}
+
+            {(respostasPorComentario[comentario.id] ?? []).length > 0 && (
+              <div className="ml-6 space-y-2 border-l border-zinc-200 pl-3 dark:border-line">
+                {(respostasPorComentario[comentario.id] ?? []).map((resposta) => (
+                  <CommentItem
+                    key={resposta.id}
+                    comentario={resposta}
+                    official={!!resposta.nomeUsuario?.toLowerCase().includes('prefeitura')}
+                    isOwn={resposta.usuarioId === usuarioId}
+                    isLiking={curtindoComentarioId === resposta.id}
+                    isReply
+                    canReply={false}
+                    onLike={() => void onLikeComentario(resposta)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         ))}
 
-        {comentarios.length === 0 && (
+        {comentariosPrincipais.length === 0 && (
           <p className="rounded-md bg-zinc-50 p-4 text-sm text-zinc-500 dark:bg-surface-muted dark:text-muted">Nenhum comentario ainda.</p>
         )}
       </div>
@@ -580,19 +701,26 @@ function CommentItem({
   official,
   isOwn,
   isLiking,
+  isReply = false,
+  canReply,
   onLike,
+  onReply,
 }: {
   comentario: Comentario
   official: boolean
   isOwn: boolean
   isLiking: boolean
+  isReply?: boolean
+  canReply: boolean
   onLike: () => void
+  onReply?: () => void
 }) {
   return (
     <div className={`rounded-md border p-3 ${official ? 'border-brand/30 bg-brand/10 dark:bg-brand-muted' : 'border-zinc-200 bg-zinc-50 dark:border-line dark:bg-surface-muted'}`}>
       <div className="mb-2 flex items-center gap-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-status-progress text-xs font-semibold text-white">{getInitials(comentario.nomeUsuario)}</span>
         <span className="text-sm font-semibold text-zinc-900 dark:text-foreground">u/{comentario.nomeUsuario ?? 'anonimo'}</span>
+        {isReply && <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-semibold text-zinc-500 dark:bg-surface dark:text-muted">Resposta</span>}
         {official && <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-semibold text-white">Oficial</span>}
         <span className="ml-auto text-xs text-zinc-400 dark:text-subtle">{formatDateTime(comentario.criadoEm)}</span>
       </div>
@@ -612,6 +740,20 @@ function CommentItem({
           <span>{comentario.curtidoPeloUsuario ? 'Curtido' : 'Curtir'}</span>
           <span>{comentario.curtidasCount}</span>
         </button>
+        {canReply && (
+          <button
+            type="button"
+            onClick={onReply}
+            className="inline-flex h-8 items-center rounded-full bg-zinc-100 px-3 text-xs font-semibold text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-800 dark:bg-surface dark:text-muted dark:hover:bg-surface-elevated dark:hover:text-foreground"
+          >
+            Responder
+          </button>
+        )}
+        {!isReply && comentario.respostasCount > 0 && (
+          <span className="text-xs text-zinc-400 dark:text-subtle">
+            {comentario.respostasCount} {comentario.respostasCount === 1 ? 'resposta' : 'respostas'}
+          </span>
+        )}
       </div>
     </div>
   )

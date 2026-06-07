@@ -65,6 +65,25 @@ public class ComentarioService {
     }
 
     @Transactional
+    public ComentarioResponse responder(UUID ocorrenciaId, UUID comentarioId, CriarComentarioRequest request) {
+        Comentario comentarioPai = buscarComentarioAtivoDaOcorrencia(ocorrenciaId, comentarioId);
+        if (comentarioPai.getComentarioPai() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Responda ao comentario principal da conversa");
+        }
+
+        Usuario usuario = usuarioRepository.findById(securityContextHelper.getUsuarioIdAutenticado())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario nao encontrado"));
+
+        Comentario resposta = new Comentario();
+        resposta.setOcorrencia(comentarioPai.getOcorrencia());
+        resposta.setUsuario(usuario);
+        resposta.setComentarioPai(comentarioPai);
+        resposta.setConteudo(request.conteudo());
+
+        return toResponse(comentarioRepository.save(resposta));
+    }
+
+    @Transactional
     public void deletar(UUID ocorrenciaId, UUID comentarioId) {
         Comentario comentario = buscarComentarioAtivoDaOcorrencia(ocorrenciaId, comentarioId);
         comentario.setDeletadoEm(OffsetDateTime.now());
@@ -121,11 +140,13 @@ public class ComentarioService {
                 comentario.getId(),
                 comentario.getOcorrencia().getId(),
                 comentario.getUsuario() != null ? comentario.getUsuario().getId() : null,
+                comentario.getComentarioPai() != null ? comentario.getComentarioPai().getId() : null,
                 comentario.getUsuario() != null ? comentario.getUsuario().getNome() : "Anonimo",
                 comentario.getConteudo(),
                 comentario.getCriadoEm(),
                 comentarioCurtidaRepository.countByComentarioId(comentario.getId()),
-                usuarioId != null && comentarioCurtidaRepository.existsByComentarioIdAndUsuarioId(comentario.getId(), usuarioId)
+                usuarioId != null && comentarioCurtidaRepository.existsByComentarioIdAndUsuarioId(comentario.getId(), usuarioId),
+                comentarioRepository.countRespostasAtivas(comentario.getId())
         );
     }
 }

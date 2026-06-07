@@ -5,10 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.UUID;
 
 public interface ComentarioRepository extends JpaRepository<Comentario, UUID> {
     @Query("SELECT c FROM Comentario c WHERE c.ocorrencia.id = :ocorrenciaId AND c.deletadoEm IS NULL ORDER BY c.criadoEm ASC")
     Page<Comentario> findAtivosporOcorrencia(UUID ocorrenciaId, Pageable pageable);
+
+    @Query("SELECT COUNT(c) FROM Comentario c WHERE c.comentarioPai.id = :comentarioId AND c.deletadoEm IS NULL")
+    int countRespostasAtivas(@Param("comentarioId") UUID comentarioId);
 }

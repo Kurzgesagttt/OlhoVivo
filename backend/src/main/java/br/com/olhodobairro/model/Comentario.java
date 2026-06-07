@@ -23,6 +23,10 @@ public class Comentario {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "comentario_pai_id")
+    private Comentario comentarioPai;
+
     @Column(nullable = false, length = 500)
     private String conteudo;
 
@@ -50,6 +54,8 @@ public class Comentario {
     public void setOcorrencia(Ocorrencia ocorrencia) { this.ocorrencia = ocorrencia; }
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public Comentario getComentarioPai() { return comentarioPai; }
+    public void setComentarioPai(Comentario comentarioPai) { this.comentarioPai = comentarioPai; }
     public String getConteudo() { return conteudo; }
     public void setConteudo(String conteudo) { this.conteudo = conteudo; }
     public OffsetDateTime getDeletadoEm() { return deletadoEm; }

@@ -19,6 +19,15 @@ export function useCreateComment(ocorrenciaId: string) {
   })
 }
 
+export function useCreateCommentReply(ocorrenciaId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ comentarioId, data }: { comentarioId: string; data: CriarComentarioRequest }) =>
+      commentService.responder(ocorrenciaId, comentarioId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['comentarios', ocorrenciaId] }),
+  })
+}
+
 export function useToggleCommentLike(ocorrenciaId: string) {
   const queryClient = useQueryClient()
   const queryKey = ['comentarios', ocorrenciaId]

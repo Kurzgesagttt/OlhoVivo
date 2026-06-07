@@ -7,9 +7,11 @@ public record ComentarioResponse(
         UUID id,
         UUID ocorrenciaId,
         UUID usuarioId,
+        UUID comentarioPaiId,
         String nomeUsuario,
         String conteudo,
         OffsetDateTime criadoEm,
         int curtidasCount,
-        boolean curtidoPeloUsuario
+        boolean curtidoPeloUsuario,
+        int respostasCount
 ) {}

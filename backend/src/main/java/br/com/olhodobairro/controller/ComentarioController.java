@@ -34,6 +34,15 @@ public class ComentarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(comentarioService.criar(ocorrenciaId, request));
     }
 
+    @PostMapping("/{id}/respostas")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ComentarioResponse> responder(
+            @PathVariable UUID ocorrenciaId,
+            @PathVariable UUID id,
+            @Valid @RequestBody CriarComentarioRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(comentarioService.responder(ocorrenciaId, id, request));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deletar(@PathVariable UUID ocorrenciaId, @PathVariable UUID id) {

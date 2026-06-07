@@ -220,6 +220,19 @@ export default function HomePage() {
         <aside className="hidden flex-col gap-3 lg:flex">
           <Panel title="Bairros">
             <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => setBairroSelecionado('Todos')}
+                className={`flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
+                  bairroSelecionado === 'Todos'
+                    ? 'bg-brand/10 font-medium text-brand dark:bg-brand-muted dark:text-brand-100'
+                    : 'text-zinc-700 hover:bg-zinc-100 dark:text-muted dark:hover:bg-surface-elevated'
+                }`}
+              >
+                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-brand" />
+                Todos
+              </button>
+
               {bairrosVisiveis.map((bairro, index) => (
                 <button
                   key={bairro}

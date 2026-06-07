@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { AppHeader, Button, Card, PageContainer, PageShell } from '../../components/ui'
+import { AppHeader, Button, ButtonGroup, Card, PageContainer, PageShell } from '../../components/ui'
 import { useOccurrences } from '../../hooks/useOccurrences'
 import { occurrenceService } from '../../services/occurrence.service'
 import type { StatusOcorrencia } from '../../types/occurrence'
@@ -64,22 +64,15 @@ export default function ModerationPage() {
     <PageShell>
       <AppHeader title="Moderacao" subtitle="Gerencie status de ocorrencias" backTo="/admin/dashboard" />
       <PageContainer className="space-y-4">
-        <Card className="flex flex-wrap items-center gap-2">
-          {FILTER_OPTIONS.map(option => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setStatusFiltro(option.value)}
-              className={`min-h-10 rounded-full px-4 text-sm font-semibold transition ${
-                statusFiltro === option.value
-                  ? 'bg-emerald-600 text-white'
-                  : 'border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {option.label}
-              <span className="ml-2 opacity-70">{counts[option.value] ?? 0}</span>
-            </button>
-          ))}
+        <Card className="overflow-x-auto">
+          <ButtonGroup
+            value={statusFiltro}
+            onChange={value => setStatusFiltro(value as StatusFilter)}
+            options={FILTER_OPTIONS.map(option => ({
+              value: option.value,
+              label: `${option.label} ${counts[option.value] ?? 0}`,
+            }))}
+          />
         </Card>
 
         {isLoading && <p className="text-sm text-zinc-500 dark:text-zinc-400">Carregando...</p>}

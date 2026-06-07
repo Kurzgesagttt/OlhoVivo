@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
-import { PageShell } from '../components/ui'
+import { ButtonGroup, PageShell } from '../components/ui'
 import type { Ocorrencia } from '../types/occurrence'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -369,24 +369,16 @@ export default function HomePage() {
         <section className="min-w-0">
           <div className="mb-3 rounded-lg border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex flex-wrap items-center gap-2">
-              {([
-                ['hot', 'Em alta'],
-                ['recent', 'Recentes'],
-                ['top', 'Mais votadas'],
-                ['closed', 'Encerradas'],
-              ] as const).map(([mode, label]) => (
-                <button
-                  key={mode}
-                  onClick={() => setSortMode(mode)}
-                  className={`min-h-10 rounded-full px-4 text-sm font-medium ${
-                    sortMode === mode
-                      ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950'
-                      : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+              <ButtonGroup
+                value={sortMode}
+                onChange={value => setSortMode(value as SortMode)}
+                options={[
+                  { value: 'hot', label: 'Em alta' },
+                  { value: 'recent', label: 'Recentes' },
+                  { value: 'top', label: 'Mais votadas' },
+                  { value: 'closed', label: 'Encerradas' },
+                ]}
+              />
               <Link
                 to={novaOcorrenciaPath}
                 className="ml-auto hidden min-h-10 items-center rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 sm:flex"

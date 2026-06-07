@@ -6,7 +6,7 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(' ')
 }
 
-const brandIconSrc = '/building_3355769.png'
+const brandIconSrc = '/app-icon.png'
 
 const brandMarkSizeClass = {
   sm: 'h-8 w-8 p-1.5',

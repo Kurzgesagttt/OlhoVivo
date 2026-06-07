@@ -72,6 +72,13 @@ public class OcorrenciaService {
     }
 
     @Transactional
+    public Page<OcorrenciaResponse> listarSalvasDoUsuario(Pageable pageable) {
+        UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
+        return ocorrenciaSalvaRepository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId, pageable)
+                .map(salva -> toResponse(salva.getOcorrencia()));
+    }
+
+    @Transactional
     public OcorrenciaResponse buscarPorId(UUID id) {
         return toResponse(ocorrenciaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrência não encontrada")));

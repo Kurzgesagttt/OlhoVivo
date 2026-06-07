@@ -59,14 +59,20 @@ export function useSavedOccurrence(ocorrenciaId: string) {
     mutationFn: () => savedOccurrenceService.salvar(ocorrenciaId),
     onMutate: () => applyOptimisticSave(true),
     onError: (_error, _variables, context) => rollbackSave(context),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
+      queryClient.invalidateQueries({ queryKey: ['ocorrencias-salvas'] })
+    },
   })
 
   const remover = useMutation({
     mutationFn: () => savedOccurrenceService.remover(ocorrenciaId),
     onMutate: () => applyOptimisticSave(false),
     onError: (_error, _variables, context) => rollbackSave(context),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['ocorrencias'] })
+      queryClient.invalidateQueries({ queryKey: ['ocorrencias-salvas'] })
+    },
   })
 
   return {

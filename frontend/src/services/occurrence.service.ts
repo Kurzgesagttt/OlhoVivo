@@ -10,6 +10,13 @@ export const occurrenceService = {
     return response.data
   },
 
+  async listarSalvas(page = 0, size = 10): Promise<PageResponse<Ocorrencia>> {
+    const response = await api.get<PageResponse<Ocorrencia>>('/me/ocorrencias-salvas', {
+      params: { page, size },
+    })
+    return response.data
+  },
+
   async buscarPorId(id: string): Promise<Ocorrencia> {
     const response = await api.get<Ocorrencia>(`/ocorrencias/${id}`)
     return response.data

@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'r
 import { Link, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import axios from 'axios'
-import { AppHeader, Button, Card, PageContainer, PageShell } from '../components/ui'
+import { AppHeader, Button, ButtonLink, Card, Chip, PageContainer, PageShell, type ChipVariant } from '../components/ui'
 import { useAuth } from '../hooks/useAuth'
-import { useOccurrences } from '../hooks/useOccurrences'
+import { useOccurrences, useSavedOccurrences } from '../hooks/useOccurrences'
 import { authService } from '../services/auth.service'
 import type { Ocorrencia } from '../types/occurrence'
 
@@ -45,11 +45,34 @@ function formatRelativeDate(value: string) {
   return `${days}d`
 }
 
+function getCategoryIcon(name: string | undefined) {
+  const key = (name ?? '').toLowerCase()
+
+  if (key.includes('alert')) return '!'
+  if (key.includes('evento')) return '#'
+  if (key.includes('noticia')) return 'N'
+  if (key.includes('servico')) return 'S'
+
+  return 'O'
+}
+
+function getCategoryVariant(name: string | undefined): ChipVariant {
+  const key = (name ?? '').toLowerCase()
+
+  if (key.includes('alerta')) return 'alerta'
+  if (key.includes('evento')) return 'evento'
+  if (key.includes('noticia')) return 'noticia'
+  if (key.includes('servico')) return 'servico'
+
+  return 'ocorrencia'
+}
+
 export default function ProfilePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { usuario, isLoading, logout } = useAuth()
   const { data: ocorrenciasPage } = useOccurrences(0)
+  const { data: ocorrenciasSalvasPage, isLoading: isLoadingSalvas } = useSavedOccurrences(0, !!usuario)
   const [bio, setBio] = useState('')
   const [savingBio, setSavingBio] = useState(false)
   const [savingPhoto, setSavingPhoto] = useState(false)
@@ -72,6 +95,7 @@ export default function ProfilePage() {
 
   const ocorrencias = ocorrenciasPage?.content ?? []
   const minhasOcorrencias = ocorrencias.filter(ocorrencia => ocorrencia.usuarioId === usuario.id)
+  const ocorrenciasSalvas = ocorrenciasSalvasPage?.content ?? []
   const totalVotos = minhasOcorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const resolvidas = minhasOcorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
   const bairroPrincipal = minhasOcorrencias.find(ocorrencia => ocorrencia.bairro)?.bairro?.nome ?? 'Lins'
@@ -130,7 +154,7 @@ export default function ProfilePage() {
       <PageContainer>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
           <main className="min-w-0 space-y-4">
-            <section className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900">
+            <section className="overflow-hidden rounded-lg border border-zinc-700 bg-zinc-800">
               <div className="relative h-28 bg-gradient-to-br from-emerald-600 to-emerald-950">
                 <div className="absolute inset-0 opacity-20 [background-image:radial-gradient(circle,#fff_1px,transparent_1px)] [background-size:18px_18px]" />
               </div>
@@ -141,10 +165,10 @@ export default function ProfilePage() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={savingPhoto}
                     title="Alterar foto de perfil"
-                    className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-900 bg-emerald-600 text-2xl font-semibold text-white disabled:cursor-wait"
+                    className="group relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-zinc-800 bg-emerald-600 text-2xl font-semibold text-white disabled:cursor-wait"
                   >
                     {usuario.fotoPerfilUrl ? (
-                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full bg-zinc-950 object-contain p-1" />
+                      <img src={usuario.fotoPerfilUrl} alt="Foto de perfil" className="h-full w-full bg-zinc-900 object-contain p-1" />
                     ) : (
                       getInitials(usuario.nome)
                     )}
@@ -191,10 +215,11 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-zinc-800 pt-5">
+                <div className="mt-5 grid grid-cols-2 gap-3 border-t border-zinc-700 pt-5 sm:grid-cols-4">
                   <StatBox label="Posts" value={String(minhasOcorrencias.length)} />
                   <StatBox label="Resolvidos" value={String(resolvidas)} tone="green" />
                   <StatBox label="Votos" value={String(totalVotos)} />
+                  <StatBox label="Salvas" value={String(ocorrenciasSalvas.length)} />
                 </div>
               </div>
             </section>
@@ -209,7 +234,7 @@ export default function ProfilePage() {
                     onChange={event => setBio(event.target.value.slice(0, 500))}
                     rows={4}
                     placeholder="Conte um pouco sobre voce e sua relacao com o bairro."
-                    className="mt-1 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-950"
+                    className="mt-1 w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-950"
                   />
                   <p className="mt-1 text-right text-xs text-zinc-500">{bio.length} / 500</p>
                 </div>
@@ -229,13 +254,31 @@ export default function ProfilePage() {
               {minhasOcorrencias.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-zinc-800 p-6 text-center">
                   <p className="text-sm font-medium text-zinc-300">Nenhuma ocorrencia publicada ainda.</p>
-                  <Link to="/ocorrencias/nova" className="mt-3 inline-flex rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                  <ButtonLink to="/ocorrencias/nova" variant="primary" size="sm" pill className="mt-3">
                     Criar primeira ocorrencia
-                  </Link>
+                  </ButtonLink>
                 </div>
               ) : (
                 <div className="divide-y divide-zinc-800">
                   {minhasOcorrencias.map(ocorrencia => <ProfileOccurrence key={ocorrencia.id} ocorrencia={ocorrencia} />)}
+                </div>
+              )}
+            </Card>
+
+            <Card className="space-y-3">
+              <SectionTitle title="Ocorrencias salvas" />
+              {isLoadingSalvas ? (
+                <p className="rounded-lg border border-dashed border-zinc-700 p-4 text-sm text-zinc-400">Carregando ocorrencias salvas...</p>
+              ) : ocorrenciasSalvas.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-zinc-700 p-6 text-center">
+                  <p className="text-sm font-medium text-zinc-300">Nenhuma ocorrencia salva ainda.</p>
+                  <p className="mt-1 text-sm text-zinc-500">Use o botao Salvar em uma ocorrencia para guardar aqui.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-zinc-700">
+                  {ocorrenciasSalvas.map(ocorrencia => (
+                    <ProfileOccurrence key={ocorrencia.id} ocorrencia={ocorrencia} saved />
+                  ))}
                 </div>
               )}
             </Card>
@@ -253,12 +296,15 @@ export default function ProfilePage() {
             <Card className="space-y-3">
               <SectionTitle title="Conta" />
               {podeAcessarSupervisao && (
-                <Link
+                <ButtonLink
                   to="/admin/dashboard"
-                  className="flex min-h-10 w-full items-center justify-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  variant="primary"
+                  size="md"
+                  pill
+                  fullWidth
                 >
                   Acessar painel de supervisao
-                </Link>
+                </ButtonLink>
               )}
               <Button
                 type="button"
@@ -292,16 +338,19 @@ function StatBox({ label, value, tone }: { label: string; value: string; tone?: 
   )
 }
 
-function ProfileOccurrence({ ocorrencia }: { ocorrencia: Ocorrencia }) {
+function ProfileOccurrence({ ocorrencia, saved = false }: { ocorrencia: Ocorrencia; saved?: boolean }) {
   return (
-    <Link to={`/ocorrencias/${ocorrencia.id}`} className="grid grid-cols-[44px_minmax(0,1fr)] gap-3 py-3 hover:bg-zinc-950">
+    <Link to={`/ocorrencias/${ocorrencia.id}`} className="grid grid-cols-[44px_minmax(0,1fr)] gap-3 py-3 hover:bg-zinc-900">
       <div className="flex flex-col items-center text-zinc-500">
         <span>^</span>
         <span className="text-xs font-semibold text-zinc-300">{ocorrencia.votosCount}</span>
       </div>
       <div className="min-w-0">
         <div className="mb-1 flex flex-wrap gap-2">
-          <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-zinc-300">{ocorrencia.categoria.nome}</span>
+          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)} icon={getCategoryIcon(ocorrencia.categoria.nome)}>
+            {ocorrencia.categoria.nome}
+          </Chip>
+          {saved && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Salva</span>}
           {(ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA') && <span className="rounded-full bg-emerald-950 px-2 py-0.5 text-xs font-semibold text-emerald-300">Concluida</span>}
           {ocorrencia.status === 'EM_ANDAMENTO' && <span className="rounded-full bg-sky-950 px-2 py-0.5 text-xs font-semibold text-sky-300">Em andamento</span>}
           {ocorrencia.status === 'ENCERRADA' && <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-zinc-300">Encerrada</span>}

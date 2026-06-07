@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, type LinkProps } from 'react-router-dom'
 import React, { forwardRef } from 'react'
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
@@ -97,6 +97,47 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     </button>
   )
 })
+
+export interface ButtonLinkProps extends LinkProps {
+  variant?: ButtonVariant
+  size?: ButtonSize
+  pill?: boolean
+  iconLeft?: ReactNode
+  iconRight?: ReactNode
+  fullWidth?: boolean
+}
+
+export function ButtonLink({
+  variant = 'secondary',
+  size = 'md',
+  pill = false,
+  iconLeft,
+  iconRight,
+  fullWidth = false,
+  className,
+  children,
+  ...props
+}: ButtonLinkProps) {
+  const isLink = variant === 'link' || variant === 'link-danger'
+
+  return (
+    <Link
+      {...props}
+      className={cn(
+        'inline-flex items-center justify-center font-medium transition-all duration-100 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+        !isLink && buttonSizeClass[size],
+        !isLink && pill && 'rounded-full',
+        buttonVariantClass[variant],
+        fullWidth && 'w-full',
+        className
+      )}
+    >
+      {iconLeft && <span aria-hidden="true">{iconLeft}</span>}
+      {children}
+      {iconRight && <span aria-hidden="true">{iconRight}</span>}
+    </Link>
+  )
+}
 
 export type IconButtonVariant = 'default' | 'primary' | 'danger'
 
@@ -491,14 +532,14 @@ export function TagFilterGroup({ tags, selected, onChange }: TagFilterGroupProps
 // Shared card surface. Use padded=false for cards that manage their own internal spacing.
 export function Card({ children, className, padded = true }: { children: ReactNode; className?: string; padded?: boolean }) {
   return (
-    <section className={cn('rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900', padded && 'p-4', className)}>
+    <section className={cn('rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800', padded && 'p-4', className)}>
       {children}
     </section>
   )
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
-  return <div className="min-h-screen bg-zinc-100 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-100">{children}</div>
+  return <div className="min-h-screen bg-zinc-100 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-100">{children}</div>
 }
 
 export function PageContainer({ children, className }: { children: ReactNode; className?: string }) {
@@ -519,7 +560,7 @@ export function AppHeader({
   const navigate = useNavigate()
 
   return (
-    <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+    <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
         <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">OB</span>

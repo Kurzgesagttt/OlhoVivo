@@ -6,19 +6,11 @@ import { useComments, useCreateComment } from '../hooks/useComments'
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { Button, PageShell, VoteButton } from '../components/ui'
+import { Button, ButtonLink, Chip, PageShell, VoteButton, type ChipVariant } from '../components/ui'
 import type { Comentario } from '../types/comment'
 import type { Ocorrencia } from '../types/occurrence'
 
 const MAX_COMENTARIO = 500
-
-const CATEGORY_STYLE = [
-  'bg-red-50 text-red-700 ring-red-100 dark:bg-red-950 dark:text-red-200 dark:ring-red-800',
-  'bg-sky-50 text-sky-700 ring-sky-100 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800',
-  'bg-lime-50 text-lime-700 ring-lime-100 dark:bg-lime-950 dark:text-lime-200 dark:ring-lime-800',
-  'bg-orange-50 text-orange-700 ring-orange-100 dark:bg-orange-950 dark:text-orange-200 dark:ring-orange-800',
-  'bg-violet-50 text-violet-700 ring-violet-100 dark:bg-violet-950 dark:text-violet-200 dark:ring-violet-800',
-]
 
 const NEARBY_ICON_STYLE = [
   'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-200',
@@ -46,11 +38,6 @@ function getInitials(name: string | null | undefined) {
     .toUpperCase()
 }
 
-function getCategoryStyle(id: string | undefined) {
-  const index = id ? id.charCodeAt(0) : 0
-  return CATEGORY_STYLE[index % CATEGORY_STYLE.length]
-}
-
 function getCategoryIcon(name: string | undefined) {
   const key = (name ?? '').toLowerCase()
 
@@ -60,6 +47,17 @@ function getCategoryIcon(name: string | undefined) {
   if (key.includes('servico')) return 'S'
 
   return 'O'
+}
+
+function getCategoryVariant(name: string | undefined): ChipVariant {
+  const key = (name ?? '').toLowerCase()
+
+  if (key.includes('alerta')) return 'alerta'
+  if (key.includes('evento')) return 'evento'
+  if (key.includes('noticia')) return 'noticia'
+  if (key.includes('servico')) return 'servico'
+
+  return 'ocorrencia'
 }
 
 function getMapUrl(ocorrencia: Ocorrencia) {
@@ -194,7 +192,7 @@ export default function OccurrenceDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-100 text-sm text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-100 text-sm text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
         Carregando ocorrencia...
       </div>
     )
@@ -202,7 +200,7 @@ export default function OccurrenceDetailPage() {
 
   if (isError || !ocorrencia) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-100 text-sm text-red-600 dark:bg-zinc-950 dark:text-red-300">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-100 text-sm text-red-600 dark:bg-zinc-900 dark:text-red-300">
         Ocorrencia nao encontrada.
       </div>
     )
@@ -215,7 +213,7 @@ export default function OccurrenceDetailPage() {
 
   return (
     <PageShell>
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
           <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">OB</span>
@@ -243,12 +241,15 @@ export default function OccurrenceDetailPage() {
             >
               Voltar
             </button>
-            <Link
+            <ButtonLink
               to={novaOcorrenciaPath}
-              className="hidden min-h-10 items-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 sm:flex"
+              variant="primary"
+              size="md"
+              pill
+              className="hidden sm:inline-flex"
             >
-              Criar
-            </Link>
+              Nova ocorrencia
+            </ButtonLink>
           </div>
         </div>
       </header>
@@ -330,12 +331,12 @@ function PostCard({
   onCancelDelete: () => void
 }) {
   return (
-    <article className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <article className="overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
       <div className="p-4 pb-0">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getCategoryStyle(ocorrencia.categoria.id)}`}>
-            {getCategoryIcon(ocorrencia.categoria.nome)} {ocorrencia.categoria.nome}
-          </span>
+          <Chip variant={getCategoryVariant(ocorrencia.categoria.nome)} icon={getCategoryIcon(ocorrencia.categoria.nome)}>
+            {ocorrencia.categoria.nome}
+          </Chip>
           {ocorrencia.bairro && (
             <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
               {ocorrencia.bairro.nome}
@@ -361,7 +362,7 @@ function PostCard({
 
       <p className="px-4 pb-4 text-sm leading-7 text-zinc-600 whitespace-pre-wrap dark:text-zinc-300">{ocorrencia.descricao}</p>
 
-      <div className="mx-4 mb-4 flex h-36 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-zinc-300 bg-zinc-50 text-center dark:border-zinc-700 dark:bg-zinc-950">
+      <div className="mx-4 mb-4 flex h-36 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-zinc-300 bg-zinc-50 text-center dark:border-zinc-700 dark:bg-zinc-900">
         <span className="text-3xl text-emerald-700 dark:text-emerald-400" aria-hidden="true">+</span>
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
           {ocorrencia.endereco || (ocorrencia.bairro ? `${ocorrencia.bairro.nome}, ${ocorrencia.bairro.cidade}` : 'Localizacao nao informada')}
@@ -390,16 +391,16 @@ function PostCard({
           disabled={isVoting}
           onVote={direction => void (direction === 'up' ? onVote() : onRemoveVote())}
         />
-        <Button type="button" variant="ghost" size="xs" pill onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>
+        <Button type="button" variant="info-soft" size="sm" pill onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>
           Comentarios
         </Button>
-        <Button type="button" disabled title="Compartilhamento ainda nao implementado" variant="ghost" size="xs" pill iconLeft="->">
+        <Button type="button" disabled title="Compartilhamento ainda nao implementado" variant="secondary" size="sm" pill>
           Compartilhar
         </Button>
         <Button
           type="button"
           variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
-          size="xs"
+          size="sm"
           pill
           loading={isSaving}
           onClick={() => void onSave()}
@@ -470,7 +471,7 @@ function PhotoPlaceholder({ label, tone }: { label: string; tone: string }) {
 
 function TimelineCard({ ocorrencia, comentariosCount }: { ocorrencia: Ocorrencia; comentariosCount: number }) {
   return (
-    <section id="comentarios" className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <section id="comentarios" className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800">
       <h2 className="border-b border-zinc-200 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
         Atividade da comunidade
       </h2>
@@ -530,7 +531,7 @@ function CommentsCard({
 
       <div className="space-y-3 p-4">
         {usuarioLogado ? (
-          <form onSubmit={onSubmit} className="flex gap-3 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-950">
+          <form onSubmit={onSubmit} className="flex gap-3 rounded-md border border-dashed border-zinc-300 bg-zinc-50 p-3 dark:border-zinc-700 dark:bg-zinc-900">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-semibold text-white">?</div>
             <div className="min-w-0 flex-1">
               <input
@@ -548,7 +549,7 @@ function CommentsCard({
             </Button>
           </form>
         ) : (
-          <p className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">
+          <p className="rounded-md bg-zinc-50 p-3 text-sm text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">
             <Link to="/login" className="font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400">Faca login</Link> para comentar.
           </p>
         )}
@@ -564,7 +565,7 @@ function CommentsCard({
         ))}
 
         {comentarios.length === 0 && (
-          <p className="rounded-md bg-zinc-50 p-4 text-sm text-zinc-500 dark:bg-zinc-950 dark:text-zinc-400">Nenhum comentario ainda.</p>
+          <p className="rounded-md bg-zinc-50 p-4 text-sm text-zinc-500 dark:bg-zinc-900 dark:text-zinc-400">Nenhum comentario ainda.</p>
         )}
       </div>
     </section>
@@ -573,7 +574,7 @@ function CommentsCard({
 
 function CommentItem({ comentario, official }: { comentario: Comentario; official: boolean }) {
   return (
-    <div className={`rounded-md border p-3 ${official ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950'}`}>
+    <div className={`rounded-md border p-3 ${official ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950' : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900'}`}>
       <div className="mb-2 flex items-center gap-2">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-sky-600 text-xs font-semibold text-white">{getInitials(comentario.nomeUsuario)}</span>
         <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">u/{comentario.nomeUsuario ?? 'anonimo'}</span>

@@ -6,7 +6,7 @@ import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { Button, ButtonGroup, PageShell, VoteButton } from '../components/ui'
+import { Button, ButtonGroup, ButtonLink, Chip, PageShell, VoteButton, type ChipVariant } from '../components/ui'
 import type { Ocorrencia } from '../types/occurrence'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -24,14 +24,6 @@ const STATUS_STYLE: Record<string, string> = {
   ENCERRADA: 'bg-zinc-100 text-zinc-700 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700',
   RESOLVIDA: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:ring-emerald-800',
 }
-
-const CATEGORY_STYLE = [
-  'bg-red-50 text-red-700 ring-red-100 dark:bg-red-950 dark:text-red-200 dark:ring-red-800',
-  'bg-sky-50 text-sky-700 ring-sky-100 dark:bg-sky-950 dark:text-sky-200 dark:ring-sky-800',
-  'bg-lime-50 text-lime-700 ring-lime-100 dark:bg-lime-950 dark:text-lime-200 dark:ring-lime-800',
-  'bg-orange-50 text-orange-700 ring-orange-100 dark:bg-orange-950 dark:text-orange-200 dark:ring-orange-800',
-  'bg-violet-50 text-violet-700 ring-violet-100 dark:bg-violet-950 dark:text-violet-200 dark:ring-violet-800',
-]
 
 const NEIGHBORHOOD_DOT_COLORS = [
   'bg-blue-500',
@@ -76,8 +68,16 @@ function getInitials(name: string | undefined) {
     .toUpperCase()
 }
 
-function getCategoryStyle(index: number) {
-  return CATEGORY_STYLE[index % CATEGORY_STYLE.length]
+function getCategoryVariant(icon: string | null | undefined, name: string | undefined): ChipVariant {
+  const key = `${icon ?? ''} ${name ?? ''}`.toLowerCase()
+
+  if (key.includes('alerta') || key.includes('bell')) return 'alerta'
+  if (key.includes('evento') || key.includes('calendar')) return 'evento'
+  if (key.includes('noticia') || key.includes('news')) return 'noticia'
+  if (key.includes('servico') || key.includes('tools')) return 'servico'
+  if (key.includes('infra')) return 'infraestrutura'
+
+  return 'ocorrencia'
 }
 
 function getCategoryIcon(icon: string | null, name: string) {
@@ -167,7 +167,7 @@ export default function HomePage() {
 
   return (
     <PageShell>
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
           <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">
@@ -176,7 +176,7 @@ export default function HomePage() {
             <span className="hidden sm:inline">Olho do Bairro</span>
           </Link>
 
-          <label className="flex min-h-11 flex-1 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-100 px-4 text-sm text-zinc-500 focus-within:border-emerald-500 focus-within:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 dark:focus-within:bg-zinc-900">
+          <label className="flex min-h-11 flex-1 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-100 px-4 text-sm text-zinc-500 focus-within:border-emerald-500 focus-within:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400 dark:focus-within:bg-zinc-800">
             <span aria-hidden="true" className="text-base">/</span>
             <span className="sr-only">Buscar ocorrencias</span>
             <input
@@ -204,7 +204,7 @@ export default function HomePage() {
                 <Link
                   to="/perfil"
                   title="Abrir perfil"
-                  className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 sm:flex"
+                  className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 transition hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 sm:flex"
                 >
                   <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-emerald-600 text-xs font-semibold text-white">
                     {usuario.fotoPerfilUrl ? (
@@ -241,12 +241,15 @@ export default function HomePage() {
                 </Link>
               </>
             )}
-            <Link
+            <ButtonLink
               to={novaOcorrenciaPath}
-              className="flex min-h-11 items-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700"
+              variant="primary"
+              size="lg"
+              pill
+              className="hidden sm:inline-flex"
             >
-              Criar
-            </Link>
+              Nova ocorrencia
+            </ButtonLink>
           </div>
         </div>
       </header>
@@ -291,40 +294,35 @@ export default function HomePage() {
           </Panel>
 
           <Panel title="Categorias">
-            <div className="space-y-1">
+            <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() => setCategoriaSelecionada('Todas')}
-                className={`flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
-                  categoriaSelecionada === 'Todas'
-                    ? 'bg-zinc-900 font-medium text-white dark:bg-zinc-100 dark:text-zinc-950'
-                    : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                }`}
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
               >
-                <span aria-hidden="true" className="w-5 text-center text-sm">-</span>
-                Todas
+                <Chip variant={categoriaSelecionada === 'Todas' ? 'active' : 'default'} className="px-3 py-1">
+                  Todas
+                </Chip>
               </button>
 
               {isLoadingCategorias && (
-                <div className="px-2 py-2 text-sm text-zinc-500 dark:text-zinc-400">Carregando...</div>
+                <div className="w-full px-2 py-2 text-sm text-zinc-500 dark:text-zinc-400">Carregando...</div>
               )}
 
-              {categorias.map((categoria, index) => (
+              {categorias.map(categoria => (
                 <button
                   key={categoria.id}
+                  type="button"
                   onClick={() => setCategoriaSelecionada(categoria.nome)}
-                  className={`flex min-h-10 w-full items-center gap-2 rounded-md px-2 text-left text-sm ${
-                    categoriaSelecionada === categoria.nome
-                      ? 'bg-zinc-900 font-medium text-white dark:bg-zinc-100 dark:text-zinc-950'
-                      : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                  }`}
+                  className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
                 >
-                  <span
-                    aria-hidden="true"
-                    className={`flex h-5 w-5 items-center justify-center rounded-sm text-xs ring-1 ${getCategoryStyle(index)}`}
+                  <Chip
+                    variant={categoriaSelecionada === categoria.nome ? 'active' : getCategoryVariant(categoria.icone, categoria.nome)}
+                    icon={getCategoryIcon(categoria.icone, categoria.nome)}
+                    className="px-3 py-1"
                   >
-                    {getCategoryIcon(categoria.icone, categoria.nome)}
-                  </span>
-                  {categoria.nome}
+                    {categoria.nome}
+                  </Chip>
                 </button>
               ))}
             </div>
@@ -368,7 +366,7 @@ export default function HomePage() {
         </aside>
 
         <section className="min-w-0">
-          <div className="mb-3 rounded-lg border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="mb-3 rounded-lg border border-zinc-200 bg-white p-2 dark:border-zinc-700 dark:bg-zinc-800">
             <div className="flex flex-wrap items-center gap-2">
               <ButtonGroup
                 value={sortMode}
@@ -380,12 +378,15 @@ export default function HomePage() {
                   { value: 'closed', label: 'Encerradas' },
                 ]}
               />
-              <Link
+              <ButtonLink
                 to={novaOcorrenciaPath}
-                className="ml-auto hidden min-h-10 items-center rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800 sm:flex"
+                variant="primary"
+                size="md"
+                pill
+                className="ml-auto"
               >
                 Nova ocorrencia
-              </Link>
+              </ButtonLink>
             </div>
           </div>
 
@@ -415,7 +416,7 @@ export default function HomePage() {
           </div>
 
           {isLoading && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+            <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
               Carregando ocorrencias...
             </div>
           )}
@@ -427,18 +428,17 @@ export default function HomePage() {
           )}
 
           <div className="space-y-3">
-            {ocorrenciasFiltradas.map((ocorrencia, index) => (
+            {ocorrenciasFiltradas.map(ocorrencia => (
               <OccurrencePostCard
                 key={ocorrencia.id}
                 ocorrencia={ocorrencia}
-                categoryIndex={index}
                 usuarioLogado={!!usuario}
               />
             ))}
           </div>
 
           {!isLoading && ocorrenciasFiltradas.length === 0 && (
-            <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-800">
               <p className="text-sm font-medium text-zinc-800 dark:text-zinc-100">Nenhuma ocorrencia encontrada.</p>
               <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Ajuste os filtros ou publique um novo relato.</p>
             </div>
@@ -471,11 +471,9 @@ export default function HomePage() {
 
 function OccurrencePostCard({
   ocorrencia,
-  categoryIndex,
   usuarioLogado,
 }: {
   ocorrencia: Ocorrencia
-  categoryIndex: number
   usuarioLogado: boolean
 }) {
   const navigate = useNavigate()
@@ -534,9 +532,9 @@ function OccurrencePostCard({
 
   return (
     <article
-      className="group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 sm:grid-cols-[44px_minmax(0,1fr)_104px]"
+      className="group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 sm:grid-cols-[44px_minmax(0,1fr)_104px]"
     >
-      <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-zinc-950">
+      <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-zinc-900">
         <VoteButton
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
@@ -550,9 +548,12 @@ function OccurrencePostCard({
       <div className="min-w-0 p-4">
         <Link to={`/ocorrencias/${ocorrencia.id}`} className="block">
         <div className="mb-2 flex flex-wrap items-center gap-2">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getCategoryStyle(categoryIndex)}`}>
+          <Chip
+            variant={getCategoryVariant(ocorrencia.categoria.icone, ocorrencia.categoria.nome)}
+            icon={getCategoryIcon(ocorrencia.categoria.icone, ocorrencia.categoria.nome)}
+          >
             {ocorrencia.categoria.nome}
-          </span>
+          </Chip>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">
             {ocorrencia.bairro?.nome ? `em ${ocorrencia.bairro.nome}` : 'sem bairro'}
           </span>
@@ -571,8 +572,8 @@ function OccurrencePostCard({
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button
             type="button"
-            variant="ghost"
-            size="xs"
+            variant="info-soft"
+            size="sm"
             pill
             onClick={() => navigate(`/ocorrencias/${ocorrencia.id}`)}
           >
@@ -581,19 +582,29 @@ function OccurrencePostCard({
           <Button
             type="button"
             variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
-            size="xs"
+            size="sm"
             pill
             loading={isSaving}
             onClick={() => void handleSave()}
           >
             {ocorrencia.salvoPeloUsuario ? 'Salvo' : 'Salvar'}
           </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            pill
+            disabled
+            title="Compartilhamento ainda nao implementado"
+          >
+            Compartilhar
+          </Button>
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800">{ocorrencia.endereco}</span>}
         </div>
         {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}
       </div>
 
-      <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-950 sm:flex">
+      <Link to={`/ocorrencias/${ocorrencia.id}`} className="hidden items-center justify-center bg-zinc-50 dark:bg-zinc-900 sm:flex">
         {ocorrencia.imagensUrl.length > 0 ? (
           <img
             src={ocorrencia.imagensUrl[0]}
@@ -610,7 +621,7 @@ function OccurrencePostCard({
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
       <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{title}</h2>
       {children}
     </section>
@@ -619,7 +630,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-zinc-100 p-3 dark:bg-zinc-950">
+    <div className="rounded-md bg-zinc-100 p-3 dark:bg-zinc-900">
       <div className="text-lg font-semibold text-zinc-950 dark:text-zinc-100">{value}</div>
       <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
     </div>

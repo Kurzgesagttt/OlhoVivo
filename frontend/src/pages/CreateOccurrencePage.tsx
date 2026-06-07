@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { AppHeader, Button, Card, Notice, PageContainer, PageShell } from '../components/ui'
+import { AppHeader, Button, Card, Chip, Notice, PageContainer, PageShell, type ChipVariant } from '../components/ui'
 import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useCreateOccurrence } from '../hooks/useOccurrences'
@@ -17,14 +17,6 @@ type SelectedImage = {
 
 const TAGS = ['infraestrutura', 'eletrica', 'urgente', 'prefeitura', 'transito', 'seguranca']
 
-const CATEGORY_COLORS = [
-  'border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-200',
-  'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200',
-  'border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-200',
-  'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200',
-  'border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-900 dark:bg-violet-950 dark:text-violet-200',
-]
-
 function getCategoryIcon(categoria: Categoria) {
   const key = `${categoria.icone ?? ''} ${categoria.nome}`.toLowerCase()
 
@@ -36,8 +28,16 @@ function getCategoryIcon(categoria: Categoria) {
   return 'O'
 }
 
-function getCategoryColor(index: number) {
-  return CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+function getCategoryVariant(categoria: Categoria): ChipVariant {
+  const key = `${categoria.icone ?? ''} ${categoria.nome}`.toLowerCase()
+
+  if (key.includes('alerta') || key.includes('bell')) return 'alerta'
+  if (key.includes('evento') || key.includes('calendar')) return 'evento'
+  if (key.includes('noticia') || key.includes('news')) return 'noticia'
+  if (key.includes('servico') || key.includes('tools')) return 'servico'
+  if (key.includes('infra')) return 'infraestrutura'
+
+  return 'ocorrencia'
 }
 
 export default function CreateOccurrencePage() {
@@ -259,27 +259,26 @@ export default function CreateOccurrencePage() {
               <Card className="space-y-3">
                 <SectionTitle icon="*" title="Tipo de ocorrencia" required />
                 {isErroCategorias && <Notice tone="danger">Nao foi possivel carregar as categorias.</Notice>}
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <div className="flex flex-wrap gap-2">
                   {isLoadingCategorias && (
-                    <p className="col-span-full text-sm text-zinc-500 dark:text-zinc-400">Carregando categorias...</p>
+                    <p className="w-full text-sm text-zinc-500 dark:text-zinc-400">Carregando categorias...</p>
                   )}
-                  {categorias.map((categoria, index) => {
+                  {categorias.map(categoria => {
                     const selected = form.categoriaId === categoria.id
                     return (
                       <button
                         key={categoria.id}
                         type="button"
                         onClick={() => set('categoriaId', categoria.id)}
-                        className={`min-h-24 rounded-lg border p-3 text-center transition ${
-                          selected
-                            ? getCategoryColor(index)
-                            : 'border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                        }`}
+                        className="rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
                       >
-                        <span className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-base font-bold dark:bg-zinc-950/40">
-                          {getCategoryIcon(categoria)}
-                        </span>
-                        <span className="block text-xs font-semibold leading-snug">{categoria.nome}</span>
+                        <Chip
+                          variant={selected ? 'active' : getCategoryVariant(categoria)}
+                          icon={getCategoryIcon(categoria)}
+                          className="px-4 py-2 text-sm"
+                        >
+                          {categoria.nome}
+                        </Chip>
                       </button>
                     )
                   })}
@@ -324,7 +323,7 @@ export default function CreateOccurrencePage() {
                           className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                             selected
                               ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
-                              : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                              : 'border-zinc-200 bg-zinc-50 text-zinc-500 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800'
                           }`}
                         >
                           {tag}
@@ -349,7 +348,7 @@ export default function CreateOccurrencePage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={images.length >= 5}
-                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
+                  className="flex min-h-32 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-center transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
                 >
                   <span className="text-3xl text-zinc-400">+</span>
                   <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
@@ -360,7 +359,7 @@ export default function CreateOccurrencePage() {
                 {images.length > 0 && (
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
                     {images.map((image, index) => (
-                      <div key={image.previewUrl} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-950">
+                      <div key={image.previewUrl} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900">
                         <img src={image.previewUrl} alt={`Preview ${index + 1}`} className="h-full w-full object-cover" />
                         <button
                           type="button"
@@ -396,7 +395,7 @@ export default function CreateOccurrencePage() {
                     type="button"
                     onClick={useCurrentLocation}
                     disabled={isGettingLocation}
-                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm font-medium text-zinc-600 transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
+                    className="flex min-h-24 flex-col items-center justify-center rounded-lg border border-dashed border-zinc-300 bg-zinc-50 text-sm font-medium text-zinc-600 transition hover:border-emerald-500 hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-60 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-950"
                   >
                     <span className="text-2xl text-emerald-600">+</span>
                     {isGettingLocation ? 'Obtendo GPS...' : 'Usar minha localizacao'}
@@ -485,7 +484,7 @@ export default function CreateOccurrencePage() {
                 <button
                   type="button"
                   onClick={() => setAnonymous(current => !current)}
-                  className="flex w-full items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left dark:border-zinc-800 dark:bg-zinc-950"
+                  className="flex w-full items-center gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left dark:border-zinc-700 dark:bg-zinc-900"
                 >
                   <span className={`relative h-6 w-11 rounded-full transition ${anonymous ? 'bg-emerald-600' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
                     <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition ${anonymous ? 'left-6' : 'left-1'}`} />
@@ -540,7 +539,7 @@ export default function CreateOccurrencePage() {
   )
 }
 
-const inputClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:focus:ring-emerald-950'
+const inputClass = 'mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-emerald-950'
 
 function SectionTitle({ icon, title, required }: { icon: string; title: string; required?: boolean }) {
   return (

@@ -17,6 +17,14 @@ export function useOccurrence(id: string) {
   })
 }
 
+export function useSavedOccurrences(page = 0, enabled = true) {
+  return useQuery({
+    queryKey: ['ocorrencias-salvas', page],
+    queryFn: () => occurrenceService.listarSalvas(page),
+    enabled,
+  })
+}
+
 export function useCreateOccurrence() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -31,16 +31,16 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const buttonVariantClass: Record<ButtonVariant, string> = {
-  primary: 'border border-brand bg-brand text-white hover:bg-brand-dark active:bg-brand-darker',
-  secondary: 'border border-gray-300 bg-transparent text-gray-900 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-800',
-  ghost: 'border border-transparent bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100',
-  danger: 'border border-red-700 bg-red-700 text-white hover:bg-red-800 active:bg-red-900',
-  'danger-soft': 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
-  'warning-soft': 'border border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  'success-soft': 'border border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300',
-  'info-soft': 'border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300',
+  primary: 'border border-brand bg-brand text-white hover:bg-brand-hover active:bg-brand-dark',
+  secondary: 'border border-zinc-300 bg-transparent text-zinc-900 hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated',
+  ghost: 'border border-transparent bg-transparent text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-muted dark:hover:bg-surface-elevated dark:hover:text-foreground',
+  danger: 'border border-status-danger bg-status-danger text-white hover:bg-status-danger/90 active:bg-status-danger/80',
+  'danger-soft': 'border border-status-danger/30 bg-status-danger/10 text-status-danger hover:bg-status-danger/20',
+  'warning-soft': 'border border-status-pending/30 bg-status-pending/10 text-status-pending hover:bg-status-pending/20',
+  'success-soft': 'border border-status-done/30 bg-status-done/10 text-status-done hover:bg-status-done/20',
+  'info-soft': 'border border-status-progress/30 bg-status-progress/10 text-status-progress hover:bg-status-progress/20',
   link: 'h-auto border-none bg-transparent p-0 text-brand underline decoration-brand/30 underline-offset-2 hover:decoration-brand',
-  'link-danger': 'h-auto border-none bg-transparent p-0 text-red-700 underline decoration-red-700/30 underline-offset-2 hover:decoration-red-700',
+  'link-danger': 'h-auto border-none bg-transparent p-0 text-status-danger underline decoration-status-danger/30 underline-offset-2 hover:decoration-status-danger',
 }
 
 const buttonSizeClass: Record<ButtonSize, string> = {
@@ -157,9 +157,9 @@ const iconButtonSizeClass: Record<NonNullable<IconButtonProps['size']>, string> 
 }
 
 const iconButtonVariantClass: Record<IconButtonVariant, string> = {
-  default: 'border border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800',
-  primary: 'border border-brand bg-brand text-white hover:bg-brand-dark',
-  danger: 'border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
+  default: 'border border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300 hover:bg-zinc-100 dark:border-line dark:bg-surface dark:text-muted dark:hover:bg-surface-elevated',
+  primary: 'border border-brand bg-brand text-white hover:bg-brand-hover',
+  danger: 'border border-status-danger/30 bg-status-danger/10 text-status-danger hover:bg-status-danger/20',
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
@@ -255,7 +255,7 @@ export function VoteButton({
     return (
       <div
         className={cn(
-          'inline-flex w-8 flex-col items-center overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950',
+          'inline-flex w-8 flex-col items-center overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm dark:border-line dark:bg-surface-muted',
           disabled && 'opacity-70',
           className
         )}
@@ -269,13 +269,13 @@ export function VoteButton({
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
             voted
-              ? 'bg-teal-900 text-teal-100 dark:bg-teal-900 dark:text-teal-100'
-              : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 dark:text-gray-400 dark:hover:bg-teal-950 dark:hover:text-teal-300'
+              ? 'bg-brand-muted text-brand-100'
+              : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100'
           )}
         >
           <span aria-hidden="true">^</span>
         </button>
-        <span className="flex min-h-7 w-full items-center justify-center border-y border-gray-200 text-xs font-bold text-gray-900 dark:border-gray-800 dark:text-gray-100">
+        <span className="flex min-h-7 w-full items-center justify-center border-y border-zinc-200 text-xs font-bold text-zinc-900 dark:border-line dark:text-foreground">
           {count}
         </span>
         <button
@@ -287,8 +287,8 @@ export function VoteButton({
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
             voted
-              ? 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950 dark:hover:text-red-400'
-              : 'text-gray-300 dark:text-gray-700'
+              ? 'text-muted hover:bg-status-danger/10 hover:text-status-danger'
+              : 'text-zinc-300 dark:text-subtle'
           )}
         >
           <span aria-hidden="true">v</span>
@@ -300,7 +300,7 @@ export function VoteButton({
   return (
     <div
       className={cn(
-        'inline-flex overflow-hidden rounded-full border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900',
+        'inline-flex overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm dark:border-line dark:bg-surface',
         disabled && 'opacity-70',
         className
       )}
@@ -314,14 +314,14 @@ export function VoteButton({
         className={cn(
           'inline-flex h-8 items-center gap-1 px-3 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed',
           voted
-            ? 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-teal-300'
-            : 'text-gray-500 hover:bg-teal-50 hover:text-teal-700 dark:text-gray-400 dark:hover:bg-teal-950'
+            ? 'bg-brand/10 text-brand'
+            : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted'
         )}
       >
         <span aria-hidden="true">^</span>
         <span>{count}</span>
       </button>
-      <div className="h-5 w-px self-center bg-gray-200 dark:bg-gray-700" />
+      <div className="h-5 w-px self-center bg-zinc-200 dark:bg-line" />
       <button
         type="button"
         onClick={() => onVote?.('down')}
@@ -331,8 +331,8 @@ export function VoteButton({
         className={cn(
           'inline-flex h-8 items-center px-2.5 text-[16px] transition-colors disabled:cursor-not-allowed',
           voted
-            ? 'text-gray-500 hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-950'
-            : 'text-gray-300 dark:text-gray-700'
+            ? 'text-muted hover:bg-status-danger/10 hover:text-status-danger'
+            : 'text-zinc-300 dark:text-subtle'
         )}
       >
         <span aria-hidden="true">v</span>
@@ -395,7 +395,7 @@ export interface ButtonGroupProps {
 
 export function ButtonGroup({ options, value, onChange, size = 'md' }: ButtonGroupProps) {
   return (
-    <div className="inline-flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+    <div className="inline-flex overflow-hidden rounded-lg border border-zinc-200 dark:border-line">
       {options.map((option, index) => (
         <button
           key={option.value}
@@ -405,10 +405,10 @@ export function ButtonGroup({ options, value, onChange, size = 'md' }: ButtonGro
             'inline-flex items-center font-medium transition-all',
             buttonSizeClass[size],
             'rounded-none',
-            index < options.length - 1 && 'border-r border-gray-200 dark:border-gray-700',
+            index < options.length - 1 && 'border-r border-zinc-200 dark:border-line',
             value === option.value
-              ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-gray-100'
-              : 'bg-white text-gray-500 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800'
+              ? 'bg-zinc-100 text-zinc-950 dark:bg-surface-elevated dark:text-foreground'
+              : 'bg-white text-zinc-500 hover:bg-zinc-50 dark:bg-surface dark:text-muted dark:hover:bg-surface-elevated'
           )}
         >
           {option.icon && <span aria-hidden="true">{option.icon}</span>}
@@ -438,14 +438,14 @@ export interface ChipProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const chipVariantClass: Record<ChipVariant, string> = {
-  default: 'border-gray-200 bg-gray-100 text-gray-600 hover:border-gray-300 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400',
-  active: 'border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-300',
-  ocorrencia: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  alerta: 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300',
-  evento: 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300',
-  noticia: 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300',
-  servico: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
-  infraestrutura: 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300',
+  default: 'border-zinc-200 bg-zinc-100 text-zinc-600 hover:border-zinc-300 hover:text-zinc-950 dark:border-line dark:bg-surface-elevated dark:text-muted',
+  active: 'border-brand/40 bg-brand/15 text-brand-100 dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100',
+  ocorrencia: 'border-category-occurrence/40 bg-category-occurrence/10 text-category-occurrence',
+  alerta: 'border-category-alert/40 bg-category-alert/10 text-category-alert',
+  evento: 'border-category-event/40 bg-category-event/10 text-category-event',
+  noticia: 'border-category-news/40 bg-category-news/10 text-category-news',
+  servico: 'border-category-service/40 bg-category-service/10 text-category-service',
+  infraestrutura: 'border-category-occurrence/40 bg-category-occurrence/10 text-category-occurrence',
 }
 
 export function Chip({ variant = 'default', icon, removable = false, onRemove, className, children, ...props }: ChipProps) {
@@ -480,12 +480,12 @@ export function Chip({ variant = 'default', icon, removable = false, onRemove, c
 export type OcorrenciaCategoria = 'ocorrencia' | 'alerta' | 'evento' | 'noticia' | 'servico' | 'infraestrutura'
 
 const categoryChipConfig: Record<OcorrenciaCategoria, { label: string; icon: string; variant: ChipVariant }> = {
-  ocorrencia: { label: 'Ocorrencia', icon: '!', variant: 'ocorrencia' },
-  alerta: { label: 'Alerta', icon: 'A', variant: 'alerta' },
-  evento: { label: 'Evento', icon: '#', variant: 'evento' },
-  noticia: { label: 'Noticia', icon: 'N', variant: 'noticia' },
-  servico: { label: 'Servico publico', icon: 'S', variant: 'servico' },
-  infraestrutura: { label: 'Infraestrutura', icon: '-', variant: 'infraestrutura' },
+  ocorrencia: { label: 'Ocorrencia', icon: '', variant: 'ocorrencia' },
+  alerta: { label: 'Alerta', icon: '', variant: 'alerta' },
+  evento: { label: 'Evento', icon: '', variant: 'evento' },
+  noticia: { label: 'Noticia', icon: '', variant: 'noticia' },
+  servico: { label: 'Servico publico', icon: '', variant: 'servico' },
+  infraestrutura: { label: 'Infraestrutura', icon: '', variant: 'infraestrutura' },
 }
 
 export interface CategoryChipProps {
@@ -532,14 +532,14 @@ export function TagFilterGroup({ tags, selected, onChange }: TagFilterGroupProps
 // Shared card surface. Use padded=false for cards that manage their own internal spacing.
 export function Card({ children, className, padded = true }: { children: ReactNode; className?: string; padded?: boolean }) {
   return (
-    <section className={cn('rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800', padded && 'p-4', className)}>
+    <section className={cn('rounded-lg border border-zinc-200 bg-white dark:border-line dark:bg-surface', padded && 'p-4', className)}>
       {children}
     </section>
   )
 }
 
 export function PageShell({ children }: { children: ReactNode }) {
-  return <div className="min-h-screen bg-zinc-100 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-100">{children}</div>
+  return <div className="min-h-screen bg-zinc-100 text-zinc-950 dark:bg-app dark:text-foreground">{children}</div>
 }
 
 export function PageContainer({ children, className }: { children: ReactNode; className?: string }) {
@@ -560,10 +560,10 @@ export function AppHeader({
   const navigate = useNavigate()
 
   return (
-    <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95">
+    <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur dark:border-line dark:bg-app/95">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-        <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-zinc-100">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">OB</span>
+        <Link to="/home" className="flex shrink-0 items-center gap-2 text-sm font-semibold text-zinc-950 dark:text-foreground">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">OB</span>
           <span className="hidden sm:inline">Olho do Bairro</span>
         </Link>
 
@@ -575,8 +575,8 @@ export function AppHeader({
 
         {(title || subtitle) && (
           <div className="min-w-0">
-            {title && <h1 className="truncate text-base font-semibold text-zinc-950 dark:text-zinc-100">{title}</h1>}
-            {subtitle && <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{subtitle}</p>}
+            {title && <h1 className="truncate text-base font-semibold text-zinc-950 dark:text-foreground">{title}</h1>}
+            {subtitle && <p className="truncate text-xs text-zinc-500 dark:text-muted">{subtitle}</p>}
           </div>
         )}
 
@@ -592,9 +592,9 @@ export function AuthShell({ title, subtitle, children }: { title: string; subtit
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
         <Card className="w-full max-w-md p-8">
           <div className="mb-8 text-center">
-            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">OB</span>
-            <h1 className="text-2xl font-semibold text-zinc-950 dark:text-zinc-100">{title}</h1>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{subtitle}</p>
+            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">OB</span>
+            <h1 className="text-2xl font-semibold text-zinc-950 dark:text-foreground">{title}</h1>
+            <p className="mt-2 text-sm text-zinc-500 dark:text-muted">{subtitle}</p>
           </div>
           {children}
         </Card>
@@ -607,16 +607,16 @@ export function Field({ label, hint, error, children }: { label: string; hint?: 
   return (
     <div>
       <div className="mb-1 flex items-center justify-between gap-3">
-        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200">{label}</label>
-        {hint && <span className="text-xs text-zinc-400 dark:text-zinc-500">{hint}</span>}
+        <label className="block text-sm font-medium text-zinc-700 dark:text-foreground">{label}</label>
+        {hint && <span className="text-xs text-zinc-400 dark:text-subtle">{hint}</span>}
       </div>
       {children}
-      {error && <p className="mt-1 text-xs text-red-600 dark:text-red-300">{error}</p>}
+      {error && <p className="mt-1 text-xs text-status-danger">{error}</p>}
     </div>
   )
 }
 
-export const inputClassName = 'w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:ring-emerald-950'
+export const inputClassName = 'w-full rounded-lg border border-zinc-300 bg-white px-4 py-2.5 text-sm text-zinc-900 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-line dark:bg-surface-muted dark:text-foreground dark:focus:ring-brand/20'
 
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputClassName, props.className)} />
@@ -627,8 +627,8 @@ export function Notice({ tone = 'neutral', children }: { tone?: 'neutral' | 'dan
     <p className={cn(
       'rounded-lg border px-4 py-2 text-sm',
       tone === 'danger'
-        ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-200'
-        : 'border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300'
+        ? 'border-status-danger/30 bg-status-danger/10 text-status-danger'
+        : 'border-zinc-200 bg-zinc-50 text-zinc-600 dark:border-line dark:bg-surface-muted dark:text-muted'
     )}>
       {children}
     </p>

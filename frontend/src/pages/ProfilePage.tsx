@@ -74,7 +74,7 @@ export default function ProfilePage() {
   const ocorrencias = ocorrenciasPage?.content ?? []
   const minhasOcorrencias = ocorrencias.filter(ocorrencia => ocorrencia.usuarioId === usuario.id)
   const ocorrenciasSalvas = ocorrenciasSalvasPage?.content ?? []
-  const totalVotos = minhasOcorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
+  const totalScore = minhasOcorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const resolvidas = minhasOcorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
   const bairroPrincipal = minhasOcorrencias.find(ocorrencia => ocorrencia.bairro)?.bairro?.nome ?? 'Lins'
   const podeAcessarSupervisao = SUPERVISION_ROLES.includes(usuario.role)
@@ -194,7 +194,7 @@ export default function ProfilePage() {
                 <div className="mt-5 grid grid-cols-2 gap-3 border-t border-line pt-5 sm:grid-cols-4">
                   <StatBox label="Posts" value={String(minhasOcorrencias.length)} />
                   <StatBox label="Resolvidos" value={String(resolvidas)} tone="green" />
-                  <StatBox label="Votos" value={String(totalVotos)} />
+                  <StatBox label="Score" value={String(totalScore)} />
                   <StatBox label="Salvas" value={String(ocorrenciasSalvas.length)} />
                 </div>
               </div>

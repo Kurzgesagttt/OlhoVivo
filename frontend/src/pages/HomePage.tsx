@@ -122,7 +122,7 @@ export default function HomePage() {
   const totalPendentes = ocorrencias.filter(ocorrencia => ocorrencia.status === 'PENDENTE').length
   const totalConcluidas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'CONCLUIDA' || ocorrencia.status === 'RESOLVIDA').length
   const totalEncerradas = ocorrencias.filter(ocorrencia => ocorrencia.status === 'ENCERRADA').length
-  const totalVotos = ocorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
+  const totalScore = ocorrencias.reduce((total, ocorrencia) => total + ocorrencia.votosCount, 0)
   const novaOcorrenciaPath = usuario ? '/ocorrencias/nova' : '/login'
 
   return (
@@ -291,7 +291,7 @@ export default function HomePage() {
               <StatBox label="Pendentes" value={String(totalPendentes)} />
               <StatBox label="Concluidas" value={String(totalConcluidas)} />
               <StatBox label="Encerradas" value={String(totalEncerradas)} />
-              <StatBox label="Votos" value={String(totalVotos)} />
+              <StatBox label="Score" value={String(totalScore)} />
             </div>
           </Panel>
 
@@ -305,7 +305,7 @@ export default function HomePage() {
                   <Link key={ocorrencia.id} to={`/ocorrencias/${ocorrencia.id}`} className="block text-sm">
                     <span className="text-xs text-zinc-400">#{index + 1}</span>
                     <span className="ml-2 font-medium text-zinc-800 hover:text-brand dark:text-foreground dark:hover:text-brand-100">{ocorrencia.titulo}</span>
-                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">{ocorrencia.votosCount} votos</span>
+                    <span className="mt-0.5 block text-xs text-zinc-500 dark:text-subtle">score {ocorrencia.votosCount}</span>
                   </Link>
                 ))}
             </div>
@@ -321,7 +321,7 @@ export default function HomePage() {
                 options={[
                   { value: 'hot', label: 'Em alta' },
                   { value: 'recent', label: 'Recentes' },
-                  { value: 'top', label: 'Mais votadas' },
+                  { value: 'top', label: 'Maior score' },
                   { value: 'closed', label: 'Encerradas' },
                 ]}
               />

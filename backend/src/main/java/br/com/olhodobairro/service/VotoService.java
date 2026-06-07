@@ -48,7 +48,7 @@ public class VotoService {
                 votoExistente.setValor(valor);
                 votoRepository.save(votoExistente);
             }
-            atualizarTotalDeVotos(ocorrencia);
+            atualizarScoreDeVotos(ocorrencia);
             return;
         }
 
@@ -58,7 +58,7 @@ public class VotoService {
         voto.setValor(valor);
         votoRepository.save(voto);
 
-        atualizarTotalDeVotos(ocorrencia);
+        atualizarScoreDeVotos(ocorrencia);
     }
 
     @Transactional
@@ -70,7 +70,7 @@ public class VotoService {
 
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
-        atualizarTotalDeVotos(ocorrencia);
+        atualizarScoreDeVotos(ocorrencia);
     }
 
     private void validarValor(int valor) {
@@ -79,8 +79,8 @@ public class VotoService {
         }
     }
 
-    private void atualizarTotalDeVotos(Ocorrencia ocorrencia) {
-        ocorrencia.setVotosCount((int) votoRepository.countByOcorrenciaId(ocorrencia.getId()));
+    private void atualizarScoreDeVotos(Ocorrencia ocorrencia) {
+        ocorrencia.setVotosCount(votoRepository.sumValorByOcorrenciaId(ocorrencia.getId()));
         ocorrenciaRepository.save(ocorrencia);
     }
 }

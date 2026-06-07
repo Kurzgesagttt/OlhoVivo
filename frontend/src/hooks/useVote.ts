@@ -21,16 +21,12 @@ function currentVoteValue(ocorrencia: Ocorrencia): ValorVoto | null {
 
 function applyVoteToOccurrence(ocorrencia: Ocorrencia, nextVote: ValorVoto | null): Ocorrencia {
   const previousVote = currentVoteValue(ocorrencia)
-  const delta =
-    previousVote === null && nextVote !== null
-      ? 1
-      : previousVote !== null && nextVote === null
-        ? -1
-        : 0
+  const previousScore = previousVote ?? 0
+  const nextScore = nextVote ?? 0
 
   return {
     ...ocorrencia,
-    votosCount: Math.max(0, ocorrencia.votosCount + delta),
+    votosCount: ocorrencia.votosCount + nextScore - previousScore,
     votadoPeloUsuario: nextVote !== null,
     votoDoUsuario: nextVote,
   }

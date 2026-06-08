@@ -11,6 +11,7 @@ import br.com.olhodobairro.model.Ocorrencia;
 import br.com.olhodobairro.model.Usuario;
 import br.com.olhodobairro.repository.BairroRepository;
 import br.com.olhodobairro.repository.CategoriaRepository;
+import br.com.olhodobairro.repository.ComentarioRepository;
 import br.com.olhodobairro.repository.ImagemOcorrenciaRepository;
 import br.com.olhodobairro.repository.OcorrenciaRepository;
 import br.com.olhodobairro.repository.OcorrenciaSalvaRepository;
@@ -41,6 +42,7 @@ public class OcorrenciaService {
     private final BairroRepository bairroRepository;
     private final UsuarioRepository usuarioRepository;
     private final VotoRepository votoRepository;
+    private final ComentarioRepository comentarioRepository;
     private final OcorrenciaSalvaRepository ocorrenciaSalvaRepository;
     private final ImagemOcorrenciaRepository imagemOcorrenciaRepository;
     private final SecurityContextHelper securityContextHelper;
@@ -51,6 +53,7 @@ public class OcorrenciaService {
                               BairroRepository bairroRepository,
                               UsuarioRepository usuarioRepository,
                               VotoRepository votoRepository,
+                              ComentarioRepository comentarioRepository,
                               OcorrenciaSalvaRepository ocorrenciaSalvaRepository,
                               ImagemOcorrenciaRepository imagemOcorrenciaRepository,
                               SecurityContextHelper securityContextHelper,
@@ -60,6 +63,7 @@ public class OcorrenciaService {
         this.bairroRepository = bairroRepository;
         this.usuarioRepository = usuarioRepository;
         this.votoRepository = votoRepository;
+        this.comentarioRepository = comentarioRepository;
         this.ocorrenciaSalvaRepository = ocorrenciaSalvaRepository;
         this.imagemOcorrenciaRepository = imagemOcorrenciaRepository;
         this.securityContextHelper = securityContextHelper;
@@ -241,6 +245,7 @@ public class OcorrenciaService {
                 o.getLongitude(),
                 o.getEndereco(),
                 o.getVotosCount(),
+                comentarioRepository.countAtivosPorOcorrencia(o.getId()),
                 votadoPeloUsuario,
                 votoDoUsuario,
                 salvoPeloUsuario,

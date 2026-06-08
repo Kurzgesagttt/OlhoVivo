@@ -526,8 +526,13 @@ function OccurrencePostCard({
             size="sm"
             pill
             onClick={() => navigate(`/ocorrencias/${ocorrencia.id}`)}
+            className="gap-1.5"
           >
-            Comentarios
+            <span
+              aria-hidden="true"
+              className="relative h-3.5 w-3.5 rounded-full border-2 border-current after:absolute after:-bottom-0.5 after:left-0 after:h-1.5 after:w-1.5 after:border-b-2 after:border-l-2 after:border-current after:content-['']"
+            />
+            {ocorrencia.comentariosCount}
           </Button>
           <Button
             type="button"

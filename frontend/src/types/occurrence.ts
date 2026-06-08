@@ -31,6 +31,7 @@ export interface Ocorrencia {
   longitude: number | null
   endereco: string | null
   votosCount: number
+  comentariosCount: number
   votadoPeloUsuario: boolean
   votoDoUsuario: ValorVoto | null
   salvoPeloUsuario: boolean

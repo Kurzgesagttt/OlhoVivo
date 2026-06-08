@@ -445,8 +445,12 @@ function PostCard({
           voteValue={ocorrencia.votoDoUsuario}
           onVote={direction => void (direction === 'up' ? onVote() : onRemoveVote())}
         />
-        <Button type="button" variant="info-soft" size="sm" pill onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>
-          Comentarios
+        <Button type="button" variant="info-soft" size="sm" pill className="gap-1.5" onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>
+          <span
+            aria-hidden="true"
+            className="relative h-3.5 w-3.5 rounded-full border-2 border-current after:absolute after:-bottom-0.5 after:left-0 after:h-1.5 after:w-1.5 after:border-b-2 after:border-l-2 after:border-current after:content-['']"
+          />
+          {ocorrencia.comentariosCount}
         </Button>
         <Button
           type="button"

@@ -19,6 +19,7 @@ public record OcorrenciaResponse(
         BigDecimal longitude,
         String endereco,
         int votosCount,
+        int comentariosCount,
         boolean votadoPeloUsuario,
         Integer votoDoUsuario,
         boolean salvoPeloUsuario,

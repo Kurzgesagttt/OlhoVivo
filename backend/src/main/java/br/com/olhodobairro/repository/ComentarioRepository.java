@@ -15,4 +15,7 @@ public interface ComentarioRepository extends JpaRepository<Comentario, UUID> {
 
     @Query("SELECT COUNT(c) FROM Comentario c WHERE c.comentarioPai.id = :comentarioId AND c.deletadoEm IS NULL")
     int countRespostasAtivas(@Param("comentarioId") UUID comentarioId);
+
+    @Query("SELECT COUNT(c) FROM Comentario c WHERE c.ocorrencia.id = :ocorrenciaId AND c.deletadoEm IS NULL")
+    int countAtivosPorOcorrencia(@Param("ocorrenciaId") UUID ocorrenciaId);
 }

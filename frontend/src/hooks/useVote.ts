@@ -130,6 +130,8 @@ export function useVote(ocorrenciaId: string) {
   return {
     votar: (valor: ValorVoto) => runOnce(() => votar.mutateAsync(valor)),
     removerVoto: () => runOnce(() => removerVoto.mutateAsync()),
+    alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) =>
+      runOnce(() => votoAtual === proximoVoto ? removerVoto.mutateAsync() : votar.mutateAsync(proximoVoto)),
     isVoting: votar.isPending || removerVoto.isPending,
     voteError: votar.error ?? removerVoto.error,
   }

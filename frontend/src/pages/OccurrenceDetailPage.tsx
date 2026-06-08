@@ -69,7 +69,7 @@ export default function OccurrenceDetailPage() {
   const { data: ocorrencia, isLoading, isError } = useOccurrence(id!)
   const { data: comentariosPage } = useComments(id!)
   const { data: ocorrenciasPage } = useOccurrences(0)
-  const { votar, removerVoto, isVoting } = useVote(id!)
+  const { alternarVoto, isVoting } = useVote(id!)
   const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
   const createCommentReply = useCreateCommentReply(id!)
@@ -116,11 +116,7 @@ export default function OccurrenceDetailPage() {
     }
 
     try {
-      if (getCurrentVote(ocorrencia) === valor) {
-        await removerVoto()
-      } else {
-        await votar(valor)
-      }
+      await alternarVoto(getCurrentVote(ocorrencia), valor)
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data?.message) {
         setErroVoto(err.response.data.message)

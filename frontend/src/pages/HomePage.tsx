@@ -441,7 +441,7 @@ function OccurrencePostCard({
   usuarioLogado: boolean
 }) {
   const navigate = useNavigate()
-  const { votar, removerVoto, isVoting } = useVote(ocorrencia.id)
+  const { alternarVoto, isVoting } = useVote(ocorrencia.id)
   const { salvar, remover, isSaving } = useSavedOccurrence(ocorrencia.id)
   const [voteMessage, setVoteMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
@@ -456,11 +456,7 @@ function OccurrencePostCard({
     }
 
     try {
-      if (getCurrentVote(ocorrencia) === valor) {
-        await removerVoto()
-      } else {
-        await votar(valor)
-      }
+      await alternarVoto(getCurrentVote(ocorrencia), valor)
     } catch {
       setVoteMessage('Nao foi possivel atualizar seu voto.')
     }

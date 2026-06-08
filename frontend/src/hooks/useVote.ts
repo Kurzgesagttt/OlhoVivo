@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { voteService } from '../services/vote.service'
 import type { PageResponse } from '../types/api'
@@ -86,6 +87,18 @@ function findOccurrenceVote(data: unknown, ocorrenciaId: string): ValorVoto | nu
 
 export function useVote(ocorrenciaId: string) {
   const queryClient = useQueryClient()
+  const pendingVoteRef = useRef<ValorVoto | null | undefined>(undefined)
+
+  function getCachedVote(): ValorVoto | null | undefined {
+    const occurrenceQueries = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
+
+    for (const [, data] of occurrenceQueries) {
+      const cachedVote = findOccurrenceVote(data, ocorrenciaId)
+      if (cachedVote !== undefined) return cachedVote
+    }
+
+    return undefined
+  }
 
   async function applyOptimisticVote(nextVote: ValorVoto | null): Promise<VoteContext> {
     await queryClient.cancelQueries({ queryKey: ['ocorrencias'] })
@@ -109,32 +122,30 @@ export function useVote(ocorrenciaId: string) {
   const votar = useMutation({
     mutationFn: ({ valor }: VoteMutation) => voteService.votar(ocorrenciaId, valor),
     onMutate: ({ votoOtimista }) => applyOptimisticVote(votoOtimista),
-    onError: (_error, _variables, context) => rollbackVote(context),
+    onError: (_error, _variables, context) => {
+      pendingVoteRef.current = undefined
+      rollbackVote(context)
+    },
     onSuccess: (updatedOccurrence) => {
+      pendingVoteRef.current = currentVoteValue(updatedOccurrence)
       queryClient.setQueriesData(
         { queryKey: ['ocorrencias'] },
         current => replaceOccurrence(current, updatedOccurrence),
       )
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })
-
-  function getCachedVote(fallback: ValorVoto | null): ValorVoto | null {
-    const occurrenceQueries = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
-
-    for (const [, data] of occurrenceQueries) {
-      const cachedVote = findOccurrenceVote(data, ocorrenciaId)
-      if (cachedVote !== undefined) return cachedVote
-    }
-
-    return fallback
-  }
 
   return {
     votar: (valor: ValorVoto) => votar.mutateAsync({ valor, votoOtimista: valor }),
     alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) => {
-      const votoMaisRecente = getCachedVote(votoAtual)
+      const cachedVote = getCachedVote()
+      const votoMaisRecente = pendingVoteRef.current !== undefined
+        ? pendingVoteRef.current
+        : cachedVote !== undefined
+          ? cachedVote
+          : votoAtual
       const votoOtimista = votoMaisRecente === proximoVoto ? null : proximoVoto
+      pendingVoteRef.current = votoOtimista
 
       return votar.mutateAsync({ valor: proximoVoto, votoOtimista })
     },

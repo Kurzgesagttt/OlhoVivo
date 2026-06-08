@@ -33,35 +33,6 @@ public class VotoService {
     }
 
     @Transactional
-    public void votar(UUID ocorrenciaId, int valor) {
-        validarValor(valor);
-
-        UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
-        Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario nao encontrado"));
-
-        Voto votoExistente = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId).orElse(null);
-        if (votoExistente != null) {
-            if (votoExistente.getValor() != valor) {
-                votoExistente.setValor(valor);
-                votoRepository.save(votoExistente);
-            }
-            atualizarScoreDeVotos(ocorrencia);
-            return;
-        }
-
-        Voto voto = new Voto();
-        voto.setOcorrencia(ocorrencia);
-        voto.setUsuario(usuario);
-        voto.setValor(valor);
-        votoRepository.save(voto);
-
-        atualizarScoreDeVotos(ocorrencia);
-    }
-
-    @Transactional
     public void alternarVoto(UUID ocorrenciaId, int valor) {
         validarValor(valor);
 
@@ -91,19 +62,6 @@ public class VotoService {
 
         atualizarScoreDeVotos(ocorrencia);
     }
-
-    @Transactional
-    public void removerVoto(UUID ocorrenciaId) {
-        UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
-        Voto voto = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voto nao encontrado"));
-        votoRepository.delete(voto);
-
-        Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
-        atualizarScoreDeVotos(ocorrencia);
-    }
-
     private void validarValor(int valor) {
         if (valor != 1 && valor != -1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Voto deve ser 1 ou -1");

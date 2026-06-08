@@ -30,11 +30,4 @@ public class VotoController {
         votoService.alternarVoto(ocorrenciaId, valor);
         return ResponseEntity.ok(ocorrenciaService.buscarPorId(ocorrenciaId));
     }
-
-    @DeleteMapping
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<OcorrenciaResponse> removerVoto(@PathVariable UUID ocorrenciaId) {
-        votoService.removerVoto(ocorrenciaId);
-        return ResponseEntity.ok(ocorrenciaService.buscarPorId(ocorrenciaId));
-    }
 }

@@ -6,9 +6,4 @@ export const voteService = {
     const response = await api.post<Ocorrencia>(`/ocorrencias/${ocorrenciaId}/votos`, { valor })
     return response.data
   },
-
-  async removerVoto(ocorrenciaId: string): Promise<Ocorrencia> {
-    const response = await api.delete<Ocorrencia>(`/ocorrencias/${ocorrenciaId}/votos`)
-    return response.data
-  },
 }

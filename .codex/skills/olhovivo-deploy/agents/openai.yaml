@@ -1,0 +1,3 @@
+interface:
+  display_name: "OlhoVivo Deploy"
+  short_description: "Build e deploy Docker Compose do frontend e backend"

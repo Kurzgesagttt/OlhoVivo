@@ -1,0 +1,3 @@
+interface:
+  display_name: "OlhoVivo Backend"
+  short_description: "Padroes Spring Boot, JPA, Security e Flyway do projeto"

@@ -1,0 +1,3 @@
+interface:
+  display_name: "OlhoVivo Frontend"
+  short_description: "Padroes React, Vite, TypeScript e Tailwind do projeto"

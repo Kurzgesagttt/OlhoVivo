@@ -69,7 +69,7 @@ export default function OccurrenceDetailPage() {
   const { data: ocorrencia, isLoading, isError } = useOccurrence(id!)
   const { data: comentariosPage } = useComments(id!)
   const { data: ocorrenciasPage } = useOccurrences(0)
-  const { alternarVoto, isVoting } = useVote(id!)
+  const { alternarVoto } = useVote(id!)
   const { salvar, remover, isSaving } = useSavedOccurrence(id!)
   const createComment = useCreateComment(id!)
   const createCommentReply = useCreateCommentReply(id!)
@@ -298,7 +298,6 @@ export default function OccurrenceDetailPage() {
             autorNome={autorNome}
             onVote={() => handleVote(1)}
             onRemoveVote={() => handleVote(-1)}
-            isVoting={isVoting}
             erroVoto={erroVoto}
             erroSalvamento={erroSalvamento}
             onSave={handleSave}
@@ -359,7 +358,6 @@ function PostCard({
   autorNome,
   onVote,
   onRemoveVote,
-  isVoting,
   erroVoto,
   erroSalvamento,
   onSave,
@@ -375,7 +373,6 @@ function PostCard({
   autorNome: string
   onVote: () => void | Promise<void>
   onRemoveVote: () => void | Promise<void>
-  isVoting: boolean
   erroVoto: string
   erroSalvamento: string
   onSave: () => void | Promise<void>
@@ -446,7 +443,6 @@ function PostCard({
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
           voteValue={ocorrencia.votoDoUsuario}
-          disabled={isVoting}
           onVote={direction => void (direction === 'up' ? onVote() : onRemoveVote())}
         />
         <Button type="button" variant="info-soft" size="sm" pill onClick={() => document.getElementById('comentarios')?.scrollIntoView({ behavior: 'smooth' })}>

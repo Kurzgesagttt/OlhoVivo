@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { voteService } from '../services/vote.service'
 import type { PageResponse } from '../types/api'
@@ -87,7 +86,6 @@ function findOccurrenceVote(data: unknown, ocorrenciaId: string): ValorVoto | nu
 
 export function useVote(ocorrenciaId: string) {
   const queryClient = useQueryClient()
-  const inFlightRef = useRef(false)
 
   async function applyOptimisticVote(nextVote: ValorVoto | null): Promise<VoteContext> {
     await queryClient.cancelQueries({ queryKey: ['ocorrencias'] })
@@ -121,17 +119,6 @@ export function useVote(ocorrenciaId: string) {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
   })
 
-  async function runOnce<T>(action: () => Promise<T>): Promise<T | undefined> {
-    if (inFlightRef.current) return undefined
-
-    inFlightRef.current = true
-    try {
-      return await action()
-    } finally {
-      inFlightRef.current = false
-    }
-  }
-
   function getCachedVote(fallback: ValorVoto | null): ValorVoto | null {
     const occurrenceQueries = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
 
@@ -144,14 +131,13 @@ export function useVote(ocorrenciaId: string) {
   }
 
   return {
-    votar: (valor: ValorVoto) => runOnce(() => votar.mutateAsync({ valor, votoOtimista: valor })),
-    alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) =>
-      runOnce(() => {
-        const votoMaisRecente = getCachedVote(votoAtual)
-        const votoOtimista = votoMaisRecente === proximoVoto ? null : proximoVoto
+    votar: (valor: ValorVoto) => votar.mutateAsync({ valor, votoOtimista: valor }),
+    alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) => {
+      const votoMaisRecente = getCachedVote(votoAtual)
+      const votoOtimista = votoMaisRecente === proximoVoto ? null : proximoVoto
 
-        return votar.mutateAsync({ valor: proximoVoto, votoOtimista })
-      }),
+      return votar.mutateAsync({ valor: proximoVoto, votoOtimista })
+    },
     isVoting: votar.isPending,
     voteError: votar.error,
   }

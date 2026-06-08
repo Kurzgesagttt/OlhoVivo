@@ -441,7 +441,7 @@ function OccurrencePostCard({
   usuarioLogado: boolean
 }) {
   const navigate = useNavigate()
-  const { alternarVoto, isVoting } = useVote(ocorrencia.id)
+  const { alternarVoto } = useVote(ocorrencia.id)
   const { salvar, remover, isSaving } = useSavedOccurrence(ocorrencia.id)
   const [voteMessage, setVoteMessage] = useState('')
   const [saveMessage, setSaveMessage] = useState('')
@@ -492,7 +492,6 @@ function OccurrencePostCard({
           count={ocorrencia.votosCount}
           voted={ocorrencia.votadoPeloUsuario}
           voteValue={ocorrencia.votoDoUsuario}
-          disabled={isVoting}
           orientation="vertical"
           onVote={direction => void handleVote(direction === 'up' ? 1 : -1)}
         />

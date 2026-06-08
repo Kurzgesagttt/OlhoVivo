@@ -67,6 +67,19 @@ function replaceOccurrence(data: unknown, updatedOccurrence: Ocorrencia) {
   return data
 }
 
+function findOccurrenceVote(data: unknown, ocorrenciaId: string): ValorVoto | null | undefined {
+  if (isOccurrence(data)) {
+    return data.id === ocorrenciaId ? currentVoteValue(data) : undefined
+  }
+
+  if (isOccurrencePage(data)) {
+    const ocorrencia = data.content.find(item => item.id === ocorrenciaId)
+    return ocorrencia ? currentVoteValue(ocorrencia) : undefined
+  }
+
+  return undefined
+}
+
 export function useVote(ocorrenciaId: string) {
   const queryClient = useQueryClient()
   const inFlightRef = useRef(false)
@@ -127,11 +140,25 @@ export function useVote(ocorrenciaId: string) {
     }
   }
 
+  function getCachedVote(fallback: ValorVoto | null): ValorVoto | null {
+    const occurrenceQueries = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
+
+    for (const [, data] of occurrenceQueries) {
+      const cachedVote = findOccurrenceVote(data, ocorrenciaId)
+      if (cachedVote !== undefined) return cachedVote
+    }
+
+    return fallback
+  }
+
   return {
     votar: (valor: ValorVoto) => runOnce(() => votar.mutateAsync(valor)),
     removerVoto: () => runOnce(() => removerVoto.mutateAsync()),
     alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) =>
-      runOnce(() => votoAtual === proximoVoto ? removerVoto.mutateAsync() : votar.mutateAsync(proximoVoto)),
+      runOnce(() => {
+        const votoMaisRecente = getCachedVote(votoAtual)
+        return votoMaisRecente === proximoVoto ? removerVoto.mutateAsync() : votar.mutateAsync(proximoVoto)
+      }),
     isVoting: votar.isPending || removerVoto.isPending,
     voteError: votar.error ?? removerVoto.error,
   }

@@ -62,6 +62,37 @@ public class VotoService {
     }
 
     @Transactional
+    public void alternarVoto(UUID ocorrenciaId, int valor) {
+        validarValor(valor);
+
+        UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
+        Ocorrencia ocorrencia = ocorrenciaRepository.findById(ocorrenciaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ocorrencia nao encontrada"));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario nao encontrado"));
+
+        Voto votoExistente = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId).orElse(null);
+        if (votoExistente == null) {
+            Voto voto = new Voto();
+            voto.setOcorrencia(ocorrencia);
+            voto.setUsuario(usuario);
+            voto.setValor(valor);
+            votoRepository.save(voto);
+            atualizarScoreDeVotos(ocorrencia);
+            return;
+        }
+
+        if (votoExistente.getValor().equals(valor)) {
+            votoRepository.delete(votoExistente);
+        } else {
+            votoExistente.setValor(valor);
+            votoRepository.save(votoExistente);
+        }
+
+        atualizarScoreDeVotos(ocorrencia);
+    }
+
+    @Transactional
     public void removerVoto(UUID ocorrenciaId) {
         UUID usuarioId = securityContextHelper.getUsuarioIdAutenticado();
         Voto voto = votoRepository.findByOcorrenciaIdAndUsuarioId(ocorrenciaId, usuarioId)

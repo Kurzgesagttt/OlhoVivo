@@ -8,6 +8,11 @@ type VoteContext = {
   previousOccurrences: Array<[readonly unknown[], unknown]>
 }
 
+type VoteMutation = {
+  valor: ValorVoto
+  votoOtimista: ValorVoto | null
+}
+
 function isOccurrence(data: unknown): data is Ocorrencia {
   return !!data && typeof data === 'object' && 'id' in data && 'votosCount' in data
 }
@@ -104,21 +109,8 @@ export function useVote(ocorrenciaId: string) {
   }
 
   const votar = useMutation({
-    mutationFn: (valor: ValorVoto) => voteService.votar(ocorrenciaId, valor),
-    onMutate: (valor) => applyOptimisticVote(valor),
-    onError: (_error, _variables, context) => rollbackVote(context),
-    onSuccess: (updatedOccurrence) => {
-      queryClient.setQueriesData(
-        { queryKey: ['ocorrencias'] },
-        current => replaceOccurrence(current, updatedOccurrence),
-      )
-    },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['ocorrencias'] }),
-  })
-
-  const removerVoto = useMutation({
-    mutationFn: () => voteService.removerVoto(ocorrenciaId),
-    onMutate: () => applyOptimisticVote(null),
+    mutationFn: ({ valor }: VoteMutation) => voteService.votar(ocorrenciaId, valor),
+    onMutate: ({ votoOtimista }) => applyOptimisticVote(votoOtimista),
     onError: (_error, _variables, context) => rollbackVote(context),
     onSuccess: (updatedOccurrence) => {
       queryClient.setQueriesData(
@@ -152,14 +144,15 @@ export function useVote(ocorrenciaId: string) {
   }
 
   return {
-    votar: (valor: ValorVoto) => runOnce(() => votar.mutateAsync(valor)),
-    removerVoto: () => runOnce(() => removerVoto.mutateAsync()),
+    votar: (valor: ValorVoto) => runOnce(() => votar.mutateAsync({ valor, votoOtimista: valor })),
     alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) =>
       runOnce(() => {
         const votoMaisRecente = getCachedVote(votoAtual)
-        return votoMaisRecente === proximoVoto ? removerVoto.mutateAsync() : votar.mutateAsync(proximoVoto)
+        const votoOtimista = votoMaisRecente === proximoVoto ? null : proximoVoto
+
+        return votar.mutateAsync({ valor: proximoVoto, votoOtimista })
       }),
-    isVoting: votar.isPending || removerVoto.isPending,
-    voteError: votar.error ?? removerVoto.error,
+    isVoting: votar.isPending,
+    voteError: votar.error,
   }
 }

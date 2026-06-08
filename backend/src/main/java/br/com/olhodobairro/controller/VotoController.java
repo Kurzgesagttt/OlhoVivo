@@ -27,7 +27,7 @@ public class VotoController {
     public ResponseEntity<OcorrenciaResponse> votar(@PathVariable UUID ocorrenciaId,
                                                     @RequestBody(required = false) RegistrarVotoRequest request) {
         int valor = request == null || request.valor() == null ? 1 : request.valor();
-        votoService.votar(ocorrenciaId, valor);
+        votoService.alternarVoto(ocorrenciaId, valor);
         return ResponseEntity.ok(ocorrenciaService.buscarPorId(ocorrenciaId));
     }
 

@@ -175,12 +175,14 @@ export function VoteButton({
   className,
 }: VoteButtonProps) {
   const activeVote = voteValue ?? (voted ? 1 : null)
+  const hasActiveVote = activeVote !== null
 
   if (orientation === 'vertical') {
     return (
       <div
         className={cn(
-          'inline-flex w-8 flex-col items-center overflow-hidden rounded-full border border-zinc-200 bg-white shadow-sm dark:border-line dark:bg-surface-muted',
+          'inline-flex w-8 flex-col items-center overflow-hidden rounded-full border bg-white shadow-sm transition-colors dark:bg-surface-muted',
+          hasActiveVote ? 'border-brand/60 ring-2 ring-brand/20 dark:border-brand/50' : 'border-zinc-200 dark:border-line',
           disabled && 'opacity-70',
           className
         )}
@@ -189,30 +191,40 @@ export function VoteButton({
           type="button"
           onClick={() => onVote?.('up')}
           disabled={disabled}
-          title={activeVote === 1 ? 'Remover voto positivo' : 'Votar positivo'}
+          aria-pressed={activeVote === 1}
+          title={activeVote === 1 ? 'Seu voto positivo. Clique para remover.' : 'Votar positivo'}
           aria-label="Votar positivo"
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
             activeVote === 1
-              ? 'bg-brand-muted text-brand-100'
+              ? 'bg-brand text-white'
               : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100'
           )}
         >
           <span aria-hidden="true">^</span>
         </button>
-        <span className="flex min-h-7 w-full items-center justify-center border-y border-zinc-200 text-xs font-bold text-zinc-900 dark:border-line dark:text-foreground">
+        <span
+          title={hasActiveVote ? 'Voce ja votou nesta ocorrencia' : undefined}
+          className={cn(
+            'flex min-h-7 w-full items-center justify-center border-y text-xs font-bold',
+            hasActiveVote
+              ? 'border-brand/30 bg-brand/10 text-brand dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100'
+              : 'border-zinc-200 text-zinc-900 dark:border-line dark:text-foreground'
+          )}
+        >
           {count}
         </span>
         <button
           type="button"
           onClick={() => onVote?.('down')}
           disabled={disabled}
-          title={activeVote === -1 ? 'Remover voto negativo' : 'Votar negativo'}
+          aria-pressed={activeVote === -1}
+          title={activeVote === -1 ? 'Seu voto negativo. Clique para remover.' : 'Votar negativo'}
           aria-label="Votar negativo"
           className={cn(
             'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
             activeVote === -1
-              ? 'bg-status-danger/10 text-status-danger'
+              ? 'bg-status-danger text-white'
               : 'text-zinc-300 hover:bg-status-danger/10 hover:text-status-danger dark:text-subtle'
           )}
         >
@@ -225,7 +237,10 @@ export function VoteButton({
   return (
     <div
       className={cn(
-        'inline-flex items-center gap-1 rounded-full bg-zinc-100 px-1 py-1 dark:bg-surface-muted',
+        'inline-flex items-center gap-1 rounded-full px-1 py-1 transition-colors',
+        hasActiveVote
+          ? 'bg-brand/10 ring-1 ring-brand/30 dark:bg-brand-muted dark:ring-brand/40'
+          : 'bg-zinc-100 dark:bg-surface-muted',
         disabled && 'opacity-70',
         className
       )}
@@ -234,7 +249,8 @@ export function VoteButton({
         type="button"
         onClick={() => onVote?.('up')}
         disabled={disabled}
-        title={activeVote === 1 ? 'Remover voto positivo' : 'Votar positivo'}
+        aria-pressed={activeVote === 1}
+        title={activeVote === 1 ? 'Seu voto positivo. Clique para remover.' : 'Votar positivo'}
         aria-label="Votar positivo"
         className={cn(
           'inline-flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-bold transition-colors disabled:cursor-not-allowed',
@@ -245,14 +261,26 @@ export function VoteButton({
       >
         <span aria-hidden="true">^</span>
       </button>
-      <span className="min-w-5 text-center text-xs font-bold text-zinc-900 dark:text-foreground">
+      <span
+        title={hasActiveVote ? 'Voce ja votou nesta ocorrencia' : undefined}
+        className={cn(
+          'min-w-5 text-center text-xs font-bold',
+          hasActiveVote ? 'text-brand dark:text-brand-100' : 'text-zinc-900 dark:text-foreground'
+        )}
+      >
         {count}
       </span>
+      {hasActiveVote && (
+        <span className="hidden pr-1 text-[11px] font-semibold text-brand dark:text-brand-100 sm:inline">
+          Seu voto
+        </span>
+      )}
       <button
         type="button"
         onClick={() => onVote?.('down')}
         disabled={disabled}
-        title={activeVote === -1 ? 'Remover voto negativo' : 'Votar negativo'}
+        aria-pressed={activeVote === -1}
+        title={activeVote === -1 ? 'Seu voto negativo. Clique para remover.' : 'Votar negativo'}
         aria-label="Votar negativo"
         className={cn(
           'inline-flex h-7 w-7 items-center justify-center rounded-full text-[15px] font-bold transition-colors disabled:cursor-not-allowed',

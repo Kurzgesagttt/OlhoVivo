@@ -3,6 +3,12 @@ import { occurrenceService } from '../services/occurrence.service'
 import { useAuth } from './useAuth'
 import type { CriarOcorrenciaRequest } from '../types/occurrence'
 
+const OCCURRENCE_QUERY_OPTIONS = {
+  staleTime: 30_000,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+} as const
+
 export function useOccurrences(page = 0) {
   const { usuario, isLoading } = useAuth()
   const authScope = usuario?.id ?? 'anon'
@@ -11,6 +17,7 @@ export function useOccurrences(page = 0) {
     queryKey: ['ocorrencias', authScope, page],
     queryFn: () => occurrenceService.listar(page),
     enabled: !isLoading,
+    ...OCCURRENCE_QUERY_OPTIONS,
   })
 }
 
@@ -22,6 +29,7 @@ export function useOccurrence(id: string) {
     queryKey: ['ocorrencias', authScope, id],
     queryFn: () => occurrenceService.buscarPorId(id),
     enabled: !!id && !isLoading,
+    ...OCCURRENCE_QUERY_OPTIONS,
   })
 }
 

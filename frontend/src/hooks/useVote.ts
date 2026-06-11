@@ -9,6 +9,7 @@ type VoteContext = {
 }
 
 type VoteMutation = {
+  mutationId: number
   valor: ValorVoto
   votoOtimista: ValorVoto | null
 }
@@ -88,6 +89,7 @@ function findOccurrenceVote(data: unknown, ocorrenciaId: string): ValorVoto | nu
 export function useVote(ocorrenciaId: string) {
   const queryClient = useQueryClient()
   const pendingVoteRef = useRef<ValorVoto | null | undefined>(undefined)
+  const latestMutationIdRef = useRef(0)
 
   function getCachedVote(): ValorVoto | null | undefined {
     const occurrenceQueries = queryClient.getQueriesData({ queryKey: ['ocorrencias'] })
@@ -122,11 +124,15 @@ export function useVote(ocorrenciaId: string) {
   const votar = useMutation({
     mutationFn: ({ valor }: VoteMutation) => voteService.votar(ocorrenciaId, valor),
     onMutate: ({ votoOtimista }) => applyOptimisticVote(votoOtimista),
-    onError: (_error, _variables, context) => {
+    onError: (_error, variables, context) => {
+      if (variables.mutationId !== latestMutationIdRef.current) return
+
       pendingVoteRef.current = undefined
       rollbackVote(context)
     },
-    onSuccess: (updatedOccurrence) => {
+    onSuccess: (updatedOccurrence, variables) => {
+      if (variables.mutationId !== latestMutationIdRef.current) return
+
       pendingVoteRef.current = currentVoteValue(updatedOccurrence)
       queryClient.setQueriesData(
         { queryKey: ['ocorrencias'] },
@@ -136,7 +142,13 @@ export function useVote(ocorrenciaId: string) {
   })
 
   return {
-    votar: (valor: ValorVoto) => votar.mutateAsync({ valor, votoOtimista: valor }),
+    votar: (valor: ValorVoto) => {
+      const mutationId = latestMutationIdRef.current + 1
+      latestMutationIdRef.current = mutationId
+      pendingVoteRef.current = valor
+
+      return votar.mutateAsync({ mutationId, valor, votoOtimista: valor })
+    },
     alternarVoto: (votoAtual: ValorVoto | null, proximoVoto: ValorVoto) => {
       const cachedVote = getCachedVote()
       const votoMaisRecente = pendingVoteRef.current !== undefined
@@ -145,9 +157,11 @@ export function useVote(ocorrenciaId: string) {
           ? cachedVote
           : votoAtual
       const votoOtimista = votoMaisRecente === proximoVoto ? null : proximoVoto
+      const mutationId = latestMutationIdRef.current + 1
+      latestMutationIdRef.current = mutationId
       pendingVoteRef.current = votoOtimista
 
-      return votar.mutateAsync({ valor: proximoVoto, votoOtimista })
+      return votar.mutateAsync({ mutationId, valor: proximoVoto, votoOtimista })
     },
     isVoting: votar.isPending,
     voteError: votar.error,

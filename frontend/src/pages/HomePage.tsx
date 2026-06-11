@@ -189,29 +189,26 @@ export default function HomePage() {
               </>
             ) : (
               <>
-                <Link
+                <ButtonLink
                   to="/login"
-                  className="hidden min-h-11 items-center rounded-full border border-zinc-200 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated sm:flex"
+                  variant="secondary"
+                  size="lg"
+                  pill
+                  className="hidden sm:inline-flex"
                 >
                   Entrar
-                </Link>
-                <Link
+                </ButtonLink>
+                <ButtonLink
                   to="/cadastro"
-                  className="hidden min-h-11 items-center rounded-full bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-hover sm:flex"
+                  variant="primary"
+                  size="lg"
+                  pill
+                  className="hidden sm:inline-flex"
                 >
                   Registrar
-                </Link>
+                </ButtonLink>
               </>
             )}
-            <ButtonLink
-              to={novaOcorrenciaPath}
-              variant="primary"
-              size="lg"
-              pill
-              className="hidden sm:inline-flex"
-            >
-              Nova ocorrencia
-            </ButtonLink>
           </div>
         </div>
       </header>
@@ -483,21 +480,10 @@ function OccurrencePostCard({
 
   return (
     <article
-      className={`group grid grid-cols-[44px_minmax(0,1fr)] overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-line dark:bg-surface dark:hover:border-muted ${
-        hasImage ? 'sm:grid-cols-[44px_minmax(0,1fr)_104px]' : ''
+      className={`group grid grid-cols-1 overflow-hidden rounded-lg border border-zinc-200 bg-white transition hover:border-zinc-300 dark:border-line dark:bg-surface dark:hover:border-muted ${
+        hasImage ? 'sm:grid-cols-[minmax(0,1fr)_104px]' : ''
       }`}
     >
-      <div className="flex items-start justify-center bg-zinc-50 px-2 py-3 dark:bg-surface-muted">
-        <VoteButton
-          count={ocorrencia.votosCount}
-          voted={ocorrencia.votadoPeloUsuario}
-          voteValue={ocorrencia.votoDoUsuario}
-          orientation="vertical"
-          onVote={direction => void handleVote(direction === 'up' ? 1 : -1)}
-        />
-        {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
-      </div>
-
       <div className="min-w-0 p-4">
         <Link to={`/ocorrencias/${ocorrencia.id}`} className="block">
         <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -520,6 +506,12 @@ function OccurrencePostCard({
         </Link>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
+          <VoteButton
+            count={ocorrencia.votosCount}
+            voted={ocorrencia.votadoPeloUsuario}
+            voteValue={ocorrencia.votoDoUsuario}
+            onVote={direction => void handleVote(direction === 'up' ? 1 : -1)}
+          />
           <Button
             type="button"
             variant="info-soft"
@@ -541,6 +533,7 @@ function OccurrencePostCard({
           />
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-surface-elevated">{ocorrencia.endereco}</span>}
         </div>
+        {voteMessage && <span className="sr-only" role="status">{voteMessage}</span>}
         {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}
       </div>
 

@@ -96,7 +96,7 @@ cp .env.production.example .env.production
 | Variável | Descrição |
 |---|---|
 | `DB_URL` | URL JDBC/PostgreSQL do banco |
-| `DB_USERNAME` | Usuário do banco |
+| `DB_USER` | Usuário do banco |
 | `DB_PASSWORD` | Senha do banco |
 | `JWT_SECRET` | Chave secreta para assinar tokens JWT |
 | `CORS_ALLOWED_ORIGINS` | Origem permitida do frontend |
@@ -218,11 +218,11 @@ Preencha com os valores de produção:
 # Cole aqui a connection string do Session Pooler do Supabase (formato JDBC)
 DB_URL=jdbc:postgresql://aws-0-[regiao].pooler.supabase.com:5432/postgres?user=postgres.[ref]&password=[senha]
 
-DB_USERNAME=postgres.[ref]
+DB_USER=postgres.[ref]
 DB_PASSWORD=[senha]
 
 # Gere uma chave forte e aleatória (mínimo 32 caracteres)
-JWT_SECRET=sua_chave_secreta_longa_e_aleatoria
+JWT_SECRET=COLE_AQUI_UM_SEGREDO_HEX_COM_64_CARACTERES_OU_MAIS
 
 # IP público da EC2 ou domínio, sem barra no final
 CORS_ALLOWED_ORIGINS=http://<IP-PUBLICO-DA-EC2>

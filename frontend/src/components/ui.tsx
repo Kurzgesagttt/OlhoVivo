@@ -1,5 +1,7 @@
 import { Link, useNavigate, type LinkProps } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { forwardRef } from 'react'
+import { Bookmark, ChevronDown, ChevronUp } from 'lucide-react'
 import type { ButtonHTMLAttributes, HTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 
 function cn(...classes: Array<string | false | null | undefined>) {
@@ -47,10 +49,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const buttonVariantClass: Record<ButtonVariant, string> = {
-  primary: 'border border-brand bg-brand text-white hover:bg-brand-hover active:bg-brand-dark',
-  secondary: 'border border-zinc-300 bg-transparent text-zinc-900 hover:bg-zinc-100 dark:border-line dark:text-foreground dark:hover:bg-surface-elevated',
+  primary: 'border border-brand bg-brand text-white shadow-sm shadow-brand/20 hover:bg-brand-hover active:bg-brand-dark',
+  secondary: 'border border-zinc-300 bg-white text-zinc-900 shadow-sm shadow-black/5 hover:bg-zinc-100 dark:border-line dark:bg-surface-muted dark:text-foreground dark:hover:bg-surface-elevated',
   ghost: 'border border-transparent bg-transparent text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-muted dark:hover:bg-surface-elevated dark:hover:text-foreground',
-  danger: 'border border-status-danger bg-status-danger text-white hover:bg-status-danger/90 active:bg-status-danger/80',
+  danger: 'border border-status-danger bg-status-danger text-white shadow-sm shadow-status-danger/20 hover:bg-status-danger/90 active:bg-status-danger/80',
   'danger-soft': 'border border-status-danger/30 bg-status-danger/10 text-status-danger hover:bg-status-danger/20',
   'warning-soft': 'border border-status-pending/30 bg-status-pending/10 text-status-pending hover:bg-status-pending/20',
   'success-soft': 'border border-status-done/30 bg-status-done/10 text-status-done hover:bg-status-done/20',
@@ -61,9 +63,9 @@ const buttonVariantClass: Record<ButtonVariant, string> = {
 
 const buttonSizeClass: Record<ButtonSize, string> = {
   xs: 'h-[26px] gap-1 rounded-md px-[10px] text-[11px]',
-  sm: 'h-[32px] gap-1.5 rounded-lg px-[14px] text-[13px]',
-  md: 'h-[38px] gap-2 rounded-lg px-[18px] text-[14px]',
-  lg: 'h-[44px] gap-2 rounded-lg px-[22px] text-[15px]',
+  sm: 'h-9 gap-1.5 rounded-md px-3 text-[13px]',
+  md: 'h-10 gap-2 rounded-md px-4 text-[14px]',
+  lg: 'h-11 gap-2 rounded-md px-8 text-[15px]',
   xl: 'h-[52px] gap-2.5 rounded-xl px-[28px] text-[16px]',
 }
 
@@ -177,71 +179,12 @@ export function VoteButton({
   const activeVote = voteValue ?? (voted ? 1 : null)
   const hasActiveVote = activeVote !== null
 
-  if (orientation === 'vertical') {
-    return (
-      <div
-        className={cn(
-          'inline-flex w-8 flex-col items-center overflow-hidden rounded-full border bg-white shadow-sm transition-colors dark:bg-surface-muted',
-          hasActiveVote ? 'border-brand/60 ring-2 ring-brand/20 dark:border-brand/50' : 'border-zinc-200 dark:border-line',
-          disabled && 'opacity-70',
-          className
-        )}
-      >
-        <button
-          type="button"
-          onClick={() => onVote?.('up')}
-          disabled={disabled}
-          aria-pressed={activeVote === 1}
-          title={activeVote === 1 ? 'Seu voto positivo. Clique para remover.' : 'Votar positivo'}
-          aria-label="Votar positivo"
-          className={cn(
-            'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
-            activeVote === 1
-              ? 'bg-brand text-white'
-              : 'text-zinc-500 hover:bg-brand/10 hover:text-brand dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100'
-          )}
-        >
-          <span aria-hidden="true">^</span>
-        </button>
-        <span
-          title={hasActiveVote ? 'Voce ja votou nesta ocorrencia' : undefined}
-          className={cn(
-            'flex min-h-7 w-full items-center justify-center border-y text-xs font-bold',
-            hasActiveVote
-              ? 'border-brand/30 bg-brand/10 text-brand dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100'
-              : 'border-zinc-200 text-zinc-900 dark:border-line dark:text-foreground'
-          )}
-        >
-          {count}
-        </span>
-        <button
-          type="button"
-          onClick={() => onVote?.('down')}
-          disabled={disabled}
-          aria-pressed={activeVote === -1}
-          title={activeVote === -1 ? 'Seu voto negativo. Clique para remover.' : 'Votar negativo'}
-          aria-label="Votar negativo"
-          className={cn(
-            'flex h-8 w-full items-center justify-center text-sm font-bold transition-colors disabled:cursor-not-allowed',
-            activeVote === -1
-              ? 'bg-status-danger text-white'
-              : 'text-zinc-300 hover:bg-status-danger/10 hover:text-status-danger dark:text-subtle'
-          )}
-        >
-          <span aria-hidden="true">v</span>
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div
+      aria-orientation={orientation}
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-1 py-1 transition-colors',
-        hasActiveVote
-          ? 'bg-brand/10 ring-1 ring-brand/30 dark:bg-brand-muted dark:ring-brand/40'
-          : 'bg-zinc-100 dark:bg-surface-muted',
-        disabled && 'opacity-70',
+        'inline-flex -space-x-px rounded-lg shadow-sm shadow-black/5 rtl:space-x-reverse',
+        disabled && 'opacity-60',
         className
       )}
     >
@@ -253,28 +196,24 @@ export function VoteButton({
         title={activeVote === 1 ? 'Seu voto positivo. Clique para remover.' : 'Votar positivo'}
         aria-label="Votar positivo"
         className={cn(
-          'inline-flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-bold transition-colors disabled:cursor-not-allowed',
+          'inline-flex h-9 w-9 items-center justify-center rounded-none rounded-s-lg border border-zinc-200 bg-white text-zinc-500 transition-colors hover:z-10 hover:bg-brand/10 hover:text-brand focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100',
           activeVote === 1
-            ? 'bg-brand text-white'
-            : 'text-zinc-500 hover:bg-white hover:text-brand dark:text-muted dark:hover:bg-surface-elevated dark:hover:text-brand-100'
+            ? 'z-10 border-brand bg-brand text-white hover:bg-brand-hover hover:text-white dark:border-brand dark:bg-brand dark:text-white'
+            : ''
         )}
       >
-        <span aria-hidden="true">^</span>
+        <ChevronUp size={16} strokeWidth={2} aria-hidden="true" />
       </button>
       <span
         title={hasActiveVote ? 'Voce ja votou nesta ocorrencia' : undefined}
         className={cn(
-          'min-w-5 text-center text-xs font-bold',
-          hasActiveVote ? 'text-brand dark:text-brand-100' : 'text-zinc-900 dark:text-foreground'
+          'flex h-9 min-w-11 items-center justify-center border border-zinc-200 bg-white px-3 text-sm font-semibold text-zinc-900 dark:border-line dark:bg-surface-muted dark:text-foreground',
+          activeVote === 1 && 'border-brand/40 bg-brand/10 text-brand dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100',
+          activeVote === -1 && 'border-status-danger/40 bg-status-danger/10 text-status-danger'
         )}
       >
         {count}
       </span>
-      {hasActiveVote && (
-        <span className="hidden pr-1 text-[11px] font-semibold text-brand dark:text-brand-100 sm:inline">
-          Seu voto
-        </span>
-      )}
       <button
         type="button"
         onClick={() => onVote?.('down')}
@@ -283,13 +222,13 @@ export function VoteButton({
         title={activeVote === -1 ? 'Seu voto negativo. Clique para remover.' : 'Votar negativo'}
         aria-label="Votar negativo"
         className={cn(
-          'inline-flex h-7 w-7 items-center justify-center rounded-full text-[15px] font-bold transition-colors disabled:cursor-not-allowed',
+          'inline-flex h-9 w-9 items-center justify-center rounded-none rounded-e-lg border border-zinc-200 bg-white text-zinc-400 transition-colors hover:z-10 hover:bg-status-danger/10 hover:text-status-danger focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed dark:border-line dark:bg-surface-muted dark:text-subtle',
           activeVote === -1
-            ? 'bg-status-danger text-white'
-            : 'text-zinc-400 hover:bg-white hover:text-status-danger dark:text-subtle dark:hover:bg-surface-elevated'
+            ? 'z-10 border-status-danger bg-status-danger text-white hover:bg-status-danger/90 hover:text-white'
+            : ''
         )}
       >
-        <span aria-hidden="true">v</span>
+        <ChevronDown size={16} strokeWidth={2} aria-hidden="true" />
       </button>
     </div>
   )
@@ -299,6 +238,14 @@ export interface BookmarkButtonProps extends ButtonHTMLAttributes<HTMLButtonElem
   saved: boolean
   loading?: boolean
 }
+
+const bookmarkParticles = [
+  { x: 20, y: 0, size: 4 },
+  { x: 8, y: 14, size: 5 },
+  { x: -13, y: 11, size: 4 },
+  { x: -18, y: -6, size: 5 },
+  { x: 5, y: -16, size: 4 },
+]
 
 export function BookmarkButton({
   saved,
@@ -315,36 +262,72 @@ export function BookmarkButton({
       title={saved ? 'Remover dos salvos' : 'Salvar ocorrencia'}
       {...props}
       className={cn(
-        'group relative inline-flex h-8 min-w-8 items-center justify-center overflow-visible rounded-full border px-2.5 text-xs font-semibold transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:opacity-50',
+        'group relative inline-flex h-9 min-w-9 items-center justify-center overflow-visible rounded-full border px-3 text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:opacity-50',
         saved
-          ? 'border-brand/40 bg-brand/15 text-brand ring-1 ring-brand/20 dark:bg-brand-muted dark:text-brand-100'
-          : 'border-zinc-200 bg-zinc-100 text-zinc-500 hover:border-brand/30 hover:bg-brand/10 hover:text-brand dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100',
+          ? 'border-brand/35 bg-brand/10 text-brand shadow-sm shadow-brand/10 ring-1 ring-brand/20 dark:border-brand/40 dark:bg-brand-muted dark:text-brand-100'
+          : 'border-zinc-200 bg-white text-zinc-600 shadow-sm shadow-black/5 hover:border-brand/40 hover:bg-brand/10 hover:text-brand dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100',
         className
       )}
     >
-      {saved && (
+      {loading && (
         <span
+          className="absolute inline-block h-4 w-4 animate-spin rounded-full border-2 border-current/25 border-t-current"
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full bg-brand/20 opacity-0 group-active:opacity-100 group-active:animate-ping"
         />
       )}
-      <span className="relative inline-flex items-center gap-1.5">
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          className={cn(
-            'h-4 w-4 transition-transform duration-150 group-active:-rotate-6 group-active:scale-90',
-            saved && 'scale-110 fill-current'
-          )}
-        >
-          <path
-            d="M7 4.75C7 3.78 7.78 3 8.75 3h6.5C16.22 3 17 3.78 17 4.75v15.1a.75.75 0 0 1-1.2.6L12 17.6l-3.8 2.85a.75.75 0 0 1-1.2-.6V4.75Z"
-            fill={saved ? 'currentColor' : 'none'}
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-        </svg>
+      <span className={cn('relative inline-flex items-center gap-1.5', loading && 'opacity-0')}>
+        <span className="relative flex h-4 w-4 items-center justify-center">
+          <motion.span
+            initial={{ scale: 1 }}
+            animate={{ scale: saved ? 1.1 : 1 }}
+            whileTap={saved ? { scale: 1, rotate: 0 } : { scale: 0.85, rotate: -10 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            className="relative flex items-center justify-center"
+          >
+            <Bookmark className="opacity-60" size={16} aria-hidden="true" />
+            <Bookmark
+              className="absolute inset-0 fill-brand text-brand transition-all duration-300"
+              size={16}
+              aria-hidden="true"
+              style={{ opacity: saved ? 1 : 0 }}
+            />
+            <AnimatePresence>
+              {saved && (
+                <motion.span
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(29,158,117,0.35) 0%, rgba(29,158,117,0) 80%)',
+                  }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [0, 1.4, 1], opacity: [0, 0.4, 0] }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                />
+              )}
+            </AnimatePresence>
+          </motion.span>
+          <AnimatePresence>
+            {saved && (
+              <motion.span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                {bookmarkParticles.map((particle, index) => (
+                  <motion.span
+                    key={index}
+                    className="absolute rounded-full bg-brand"
+                    style={{ width: particle.size, height: particle.size, filter: 'blur(1px)' }}
+                    initial={{ scale: 0, opacity: 0.3, x: 0, y: 0 }}
+                    animate={{
+                      scale: [0, 1, 0],
+                      opacity: [0.3, 0.8, 0],
+                      x: [0, particle.x],
+                      y: [0, particle.y],
+                    }}
+                    transition={{ duration: 0.62, delay: index * 0.04, ease: 'easeOut' }}
+                  />
+                ))}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </span>
         <span className="hidden sm:inline">{saved ? 'Salvo' : 'Salvar'}</span>
       </span>
     </button>

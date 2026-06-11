@@ -6,7 +6,7 @@ import { useCategories } from '../hooks/useCategories'
 import { useNeighborhoods } from '../hooks/useNeighborhoods'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { BrandMark, Button, ButtonGroup, ButtonLink, Chip, PageShell, StatusBadge, VoteButton, getCategoryVariantFromName } from '../components/ui'
+import { BookmarkButton, BrandMark, Button, ButtonGroup, ButtonLink, Chip, PageShell, StatusBadge, VoteButton, getCategoryVariantFromName } from '../components/ui'
 import type { Ocorrencia, ValorVoto } from '../types/occurrence'
 
 const NEIGHBORHOOD_DOT_COLORS = [
@@ -534,16 +534,11 @@ function OccurrencePostCard({
             />
             {ocorrencia.comentariosCount}
           </Button>
-          <Button
-            type="button"
-            variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
-            size="sm"
-            pill
+          <BookmarkButton
+            saved={ocorrencia.salvoPeloUsuario}
             loading={isSaving}
             onClick={() => void handleSave()}
-          >
-            {ocorrencia.salvoPeloUsuario ? 'Salvo' : 'Salvar'}
-          </Button>
+          />
           {ocorrencia.endereco && <span className="truncate rounded-md px-2 py-1 hover:bg-zinc-100 dark:hover:bg-surface-elevated">{ocorrencia.endereco}</span>}
         </div>
         {saveMessage && <span className="sr-only" role="status">{saveMessage}</span>}

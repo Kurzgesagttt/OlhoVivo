@@ -295,6 +295,62 @@ export function VoteButton({
   )
 }
 
+export interface BookmarkButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  saved: boolean
+  loading?: boolean
+}
+
+export function BookmarkButton({
+  saved,
+  loading = false,
+  disabled,
+  className,
+  ...props
+}: BookmarkButtonProps) {
+  return (
+    <button
+      type="button"
+      disabled={disabled || loading}
+      aria-pressed={saved}
+      title={saved ? 'Remover dos salvos' : 'Salvar ocorrencia'}
+      {...props}
+      className={cn(
+        'group relative inline-flex h-8 min-w-8 items-center justify-center overflow-visible rounded-full border px-2.5 text-xs font-semibold transition-all duration-150 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:opacity-50',
+        saved
+          ? 'border-brand/40 bg-brand/15 text-brand ring-1 ring-brand/20 dark:bg-brand-muted dark:text-brand-100'
+          : 'border-zinc-200 bg-zinc-100 text-zinc-500 hover:border-brand/30 hover:bg-brand/10 hover:text-brand dark:border-line dark:bg-surface-muted dark:text-muted dark:hover:bg-brand-muted dark:hover:text-brand-100',
+        className
+      )}
+    >
+      {saved && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-full bg-brand/20 opacity-0 group-active:opacity-100 group-active:animate-ping"
+        />
+      )}
+      <span className="relative inline-flex items-center gap-1.5">
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className={cn(
+            'h-4 w-4 transition-transform duration-150 group-active:-rotate-6 group-active:scale-90',
+            saved && 'scale-110 fill-current'
+          )}
+        >
+          <path
+            d="M7 4.75C7 3.78 7.78 3 8.75 3h6.5C16.22 3 17 3.78 17 4.75v15.1a.75.75 0 0 1-1.2.6L12 17.6l-3.8 2.85a.75.75 0 0 1-1.2-.6V4.75Z"
+            fill={saved ? 'currentColor' : 'none'}
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span className="hidden sm:inline">{saved ? 'Salvo' : 'Salvar'}</span>
+      </span>
+    </button>
+  )
+}
+
 export interface ButtonGroupOption {
   label: string
   value: string

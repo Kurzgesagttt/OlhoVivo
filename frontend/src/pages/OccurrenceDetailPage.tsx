@@ -6,7 +6,7 @@ import { useComments, useCreateComment, useCreateCommentReply, useToggleCommentL
 import { useDeleteOccurrence, useOccurrence, useOccurrences } from '../hooks/useOccurrences'
 import { useVote } from '../hooks/useVote'
 import { useSavedOccurrence } from '../hooks/useSavedOccurrence'
-import { BrandMark, Button, ButtonLink, Chip, PageShell, VoteButton, getCategoryVariantFromName } from '../components/ui'
+import { BookmarkButton, BrandMark, Button, ButtonLink, Chip, PageShell, VoteButton, getCategoryVariantFromName } from '../components/ui'
 import type { Comentario } from '../types/comment'
 import type { Ocorrencia, ValorVoto } from '../types/occurrence'
 
@@ -452,16 +452,7 @@ function PostCard({
           />
           {ocorrencia.comentariosCount}
         </Button>
-        <Button
-          type="button"
-          variant={ocorrencia.salvoPeloUsuario ? 'success-soft' : 'ghost'}
-          size="sm"
-          pill
-          loading={isSaving}
-          onClick={() => void onSave()}
-        >
-          {ocorrencia.salvoPeloUsuario ? 'Salvo' : 'Salvar'}
-        </Button>
+        <BookmarkButton saved={ocorrencia.salvoPeloUsuario} loading={isSaving} onClick={() => void onSave()} />
 
         {podeAdministrar && (
           <button
